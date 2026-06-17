@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { PageHero } from "@/components/site/PageHero";
 import {
   BookOpen,
   ArrowUpRight,
@@ -11,7 +10,6 @@ import {
   X,
 } from "lucide-react";
 import { GradientButton } from "@/components/site/GradientButton";
-import heroSayor from "@/assets/hero-sayor.jpg";
 
 // Cover images live in src/assets so Vite can fingerprint and serve them.
 const COVER_IMAGES = import.meta.glob<{ default: string }>(
@@ -131,16 +129,8 @@ function SayorPage() {
 
   return (
     <>
-      <PageHero
-        title="SAYOR"
-        lede="The flagship annual magazine of PUSAB — six sections, one publication, the voice of Bishwambarpur's brightest."
-        crumbs={[{ label: "Home", to: "/" }, { label: "SAYOR" }]}
-        image={heroSayor}
-        imageAlt="SAYOR magazine on a desk"
-      />
-
       {/* Wordmark */}
-      <section className="pb-10 overflow-hidden">
+      <section className="pt-32 pb-10 overflow-hidden md:pt-40">
         <div className="container-page text-center">
           <h2 className="font-display font-extrabold tracking-tighter gradient-text leading-none text-[clamp(4rem,18vw,16rem)]">
             SAYOR
