@@ -6,13 +6,17 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+// Pin the Nitro target only when NITRO_PRESET is set (Netlify sets it in
+// netlify.toml -> emits .netlify/functions-internal/server). Locally it stays
+// unset, so the build keeps its default output (dist/server/server.js) that
+// `vite dev`/`vite preview` expect — hard-pinning a preset would break preview.
+const nitroPreset = process.env.NITRO_PRESET;
+
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  // Build a Netlify-targeted SSR bundle (Netlify Functions + static client).
-  // The NITRO_PRESET env var still wins, so Netlify CI can override if needed.
-  nitro: { preset: "netlify" },
+  ...(nitroPreset ? { nitro: { preset: nitroPreset } } : {}),
 });

@@ -12,6 +12,8 @@
 [build.environment]
   # Vite 8 / Nitro 3 need a modern Node runtime.
   NODE_VERSION = "22"
+  # Tell Nitro to emit the Netlify SSR target (functions-internal + dist).
+  NITRO_PRESET = "netlify"
 
 # Baseline security headers for every response.
 # (Long-lived caching for /assets/* is emitted by the build into dist/_headers.)
