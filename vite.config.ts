@@ -12,4 +12,7 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Build a Netlify-targeted SSR bundle (Netlify Functions + static client).
+  // The NITRO_PRESET env var still wins, so Netlify CI can override if needed.
+  nitro: { preset: "netlify" },
 });

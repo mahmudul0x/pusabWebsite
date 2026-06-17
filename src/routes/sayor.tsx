@@ -2,14 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { PageHero } from "@/components/site/PageHero";
-import { SAYOR_SECTIONS } from "@/lib/site-content";
 import {
   BookOpen,
-  Globe2,
-  FlaskConical,
-  Landmark,
-  Feather,
-  Users,
   ArrowUpRight,
   ChevronLeft,
   ChevronRight,
@@ -18,39 +12,6 @@ import {
 } from "lucide-react";
 import { GradientButton } from "@/components/site/GradientButton";
 import heroSayor from "@/assets/hero-sayor.jpg";
-
-const SECTION_META = [
-  {
-    icon: BookOpen,
-    tag: "Feature",
-    blurb: "Admissions, careers, mentorship — the academic pulse of every batch.",
-  },
-  {
-    icon: Globe2,
-    tag: "Culture",
-    blurb: "Cultural memory, community stories, and the rhythm of Bishwambarpur.",
-  },
-  {
-    icon: FlaskConical,
-    tag: "Research",
-    blurb: "Student research notes, lab reports, and frontier-tech essays.",
-  },
-  {
-    icon: Landmark,
-    tag: "Heritage",
-    blurb: "Historical deep-dives, archives, and the roots of our upazila.",
-  },
-  {
-    icon: Feather,
-    tag: "Literature",
-    blurb: "Poetry, short fiction, and creative essays from alumni voices.",
-  },
-  {
-    icon: Users,
-    tag: "Directory",
-    blurb: "A complete index of Bishwambarpur's brightest — past and present.",
-  },
-];
 
 // Cover images live in src/assets so Vite can fingerprint and serve them.
 const COVER_IMAGES = import.meta.glob<{ default: string }>(
@@ -73,17 +34,22 @@ const ISSUE_ITEMS = Array.from({ length: 11 }, (_, index) => {
   };
 });
 
-type SayorBlock = { type: "h2" | "h3" | "p"; text: string };
-type SayorDoc = { id: number; blocks: SayorBlock[] };
+type SayorChapter = {
+  title: string;
+  author: string;
+  bio: string;
+  paragraphs: string[];
+};
+type SayorDoc = { id: number; editor: string; chapters: SayorChapter[] };
 
 // Each issue's text is lazily fetched only when its reader is opened, so the
 // page itself stays light.
 const CONTENT_LOADERS = import.meta.glob<{ default: SayorDoc }>("../content/sayor/*.json");
 
-function loadIssueContent(id: number): Promise<SayorBlock[]> {
+function loadIssueContent(id: number): Promise<SayorDoc | null> {
   const loader = CONTENT_LOADERS[`../content/sayor/${id}.json`];
-  if (!loader) return Promise.resolve([]);
-  return loader().then((mod) => mod.default.blocks ?? []);
+  if (!loader) return Promise.resolve(null);
+  return loader().then((mod) => mod.default ?? null);
 }
 
 export const Route = createFileRoute("/sayor")({
@@ -108,11 +74,11 @@ export const Route = createFileRoute("/sayor")({
 });
 
 function SayorPage() {
-  const featured = SECTION_META[0];
-  const FeaturedIcon = featured.icon;
   const [selectedIssue, setSelectedIssue] = useState<number | null>(null);
-  const [content, setContent] = useState<SayorBlock[] | null>(null);
+  const [doc, setDoc] = useState<SayorDoc | null>(null);
   const [loadingContent, setLoadingContent] = useState(false);
+  // null = showing the table of contents; number = reading that chapter.
+  const [openChapter, setOpenChapter] = useState<number | null>(null);
 
   const selectedIndex = ISSUE_ITEMS.findIndex((item) => item.id === selectedIssue);
   const selectedIssueData = selectedIndex >= 0 ? ISSUE_ITEMS[selectedIndex] : null;
@@ -123,19 +89,31 @@ function SayorPage() {
     setSelectedIssue(ISSUE_ITEMS[nextIndex].id);
   };
 
+  const chapters = doc?.chapters ?? [];
+  const activeChapter = openChapter != null ? chapters[openChapter] : null;
+
+  const flipChapter = (direction: 1 | -1) => {
+    if (openChapter == null || chapters.length === 0) return;
+    const next = openChapter + direction;
+    if (next < 0 || next >= chapters.length) return;
+    setOpenChapter(next);
+  };
+
   // Lock background scroll while the reader is open and load the selected issue.
   useEffect(() => {
     if (selectedIssue == null) {
-      setContent(null);
+      setDoc(null);
+      setOpenChapter(null);
       return;
     }
     document.body.style.overflow = "hidden";
     let cancelled = false;
     setLoadingContent(true);
-    setContent(null);
-    loadIssueContent(selectedIssue).then((blocks) => {
+    setDoc(null);
+    setOpenChapter(null);
+    loadIssueContent(selectedIssue).then((loaded) => {
       if (!cancelled) {
-        setContent(blocks);
+        setDoc(loaded);
         setLoadingContent(false);
       }
     });
@@ -144,6 +122,12 @@ function SayorPage() {
       document.body.style.overflow = "";
     };
   }, [selectedIssue]);
+
+  // When jumping into a chapter (or flipping pages), scroll the reader to top.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.getElementById("sayor-reader-scroll")?.scrollTo({ top: 0 });
+  }, [openChapter]);
 
   return (
     <>
@@ -162,115 +146,6 @@ function SayorPage() {
             SAYOR
           </h2>
           <p className="-mt-2 text-label">Annual · Bilingual · Bishwambarpur</p>
-        </div>
-      </section>
-
-      {/* Editorial bento — six sections */}
-      <section className="pb-20">
-        <div className="container-page">
-          <div className="mb-10 flex items-end justify-between gap-6 border-b border-border pb-4">
-            <div>
-              <p className="text-label mb-2">Inside SAYOR</p>
-              <h2 className="font-display text-2xl md:text-4xl font-bold tracking-tight">
-                Six sections, one voice.
-              </h2>
-            </div>
-            <span className="hidden sm:block text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              Vol · 05 / 24
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-[180px] md:auto-rows-[200px]">
-            {/* Featured */}
-            <motion.article
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5 }}
-              className="md:col-span-8 md:row-span-2 group relative overflow-hidden rounded-3xl border border-[color-mix(in_oklab,var(--color-accent-1)_25%,transparent)] bg-[var(--color-surface)] p-8 flex flex-col justify-end transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_55%,transparent)]"
-            >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,color-mix(in_oklab,var(--color-accent-1)_45%,transparent),transparent_55%),radial-gradient(circle_at_80%_80%,color-mix(in_oklab,var(--color-accent-2)_40%,transparent),transparent_55%)]" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-background)] via-transparent to-transparent opacity-80" />
-              <div className="absolute inset-0 [background-image:linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:32px_32px]" />
-              <div className="absolute top-6 right-6 z-20 flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.18em] bg-[var(--color-accent-1)] text-white">
-                  {featured.tag}
-                </span>
-                <span className="px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.18em] border border-white/15 bg-black/30 backdrop-blur text-foreground/80">
-                  01 / 06
-                </span>
-              </div>
-              <div className="absolute top-6 left-6 z-20 grid h-12 w-12 place-items-center rounded-2xl bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-white shadow-lg">
-                <FeaturedIcon size={20} />
-              </div>
-              <div className="relative z-20 space-y-3">
-                <h3 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight leading-[0.95]">
-                  {SAYOR_SECTIONS[0]}
-                </h3>
-                <p className="text-foreground/70 max-w-md">{featured.blurb}</p>
-              </div>
-            </motion.article>
-
-            {/* Sections 2 & 3 */}
-            {SAYOR_SECTIONS.slice(1, 3).map((title, idx) => {
-              const m = SECTION_META[idx + 1];
-              const Icon = m.icon;
-              const accent = idx === 0 ? "var(--color-accent-2)" : "var(--color-accent-1)";
-              return (
-                <motion.div
-                  key={title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.5, delay: 0.08 * (idx + 1) }}
-                  className="md:col-span-4 group relative overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] p-6 hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] transition-colors"
-                >
-                  <div className="flex items-start justify-between">
-                    <Icon size={20} style={{ color: accent }} />
-                    <span
-                      className="text-[10px] font-bold uppercase tracking-[0.18em]"
-                      style={{ color: accent }}
-                    >
-                      {m.tag}
-                    </span>
-                  </div>
-                  <h4 className="mt-6 font-display text-xl font-bold tracking-tight">{title}</h4>
-                  <p className="mt-2 text-sm text-foreground/60 line-clamp-2">{m.blurb}</p>
-                </motion.div>
-              );
-            })}
-
-            {/* Sections 4, 5, 6 */}
-            {SAYOR_SECTIONS.slice(3, 6).map((title, idx) => {
-              const m = SECTION_META[idx + 3];
-              const Icon = m.icon;
-              const isMiddle = idx === 1;
-              return (
-                <motion.div
-                  key={title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.5, delay: 0.08 * (idx + 3) }}
-                  className={
-                    "md:col-span-4 group relative overflow-hidden rounded-3xl border p-6 transition-colors " +
-                    (isMiddle
-                      ? "border-[color-mix(in_oklab,var(--color-accent-2)_30%,transparent)] bg-[color-mix(in_oklab,var(--color-accent-2)_10%,var(--color-surface))] hover:border-[color-mix(in_oklab,var(--color-accent-2)_60%,transparent)]"
-                      : "border-border bg-[var(--color-surface)] hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)]")
-                  }
-                >
-                  <div className="flex items-start justify-between">
-                    <Icon size={20} className="text-[var(--color-accent-3)]" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-foreground/60">
-                      {m.tag}
-                    </span>
-                  </div>
-                  <h4 className="mt-6 font-display text-xl font-bold tracking-tight">{title}</h4>
-                  <p className="mt-2 text-sm text-foreground/60 line-clamp-2">{m.blurb}</p>
-                </motion.div>
-              );
-            })}
-          </div>
         </div>
       </section>
 
@@ -348,38 +223,53 @@ function SayorPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-[100] flex flex-col bg-[var(--color-background)]"
+            className="fixed inset-0 z-[100] flex flex-col bg-[var(--color-background)] pt-[88px] sm:pt-[100px]"
             role="dialog"
             aria-modal="true"
             aria-label={`${selectedIssueData.title} reader`}
           >
             {/* Reader top bar */}
             <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-[var(--color-surface)]/85 px-4 py-3 backdrop-blur-md sm:px-8">
-              <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                  SAYOR · Edition {String(selectedIssueData.id).padStart(2, "0")}
-                </p>
-                <h3 className="truncate font-display text-lg font-semibold sm:text-xl">
-                  {selectedIssueData.title}
-                </h3>
+              <div className="flex min-w-0 items-center gap-3">
+                {activeChapter && (
+                  <button
+                    type="button"
+                    onClick={() => setOpenChapter(null)}
+                    className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)]"
+                  >
+                    <BookOpen size={16} /> <span className="hidden sm:inline">Contents</span>
+                  </button>
+                )}
+                <div className="min-w-0">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    SAYOR · Edition {String(selectedIssueData.id).padStart(2, "0")}
+                  </p>
+                  <h3 className="truncate font-display text-lg font-semibold sm:text-xl">
+                    {activeChapter ? activeChapter.title : selectedIssueData.title}
+                  </h3>
+                </div>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleNavigate(-1)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)]"
-                  aria-label="Previous issue"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleNavigate(1)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)]"
-                  aria-label="Next issue"
-                >
-                  <ChevronRight size={18} />
-                </button>
+                {!activeChapter && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate(-1)}
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)]"
+                      aria-label="Previous issue"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate(1)}
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)]"
+                      aria-label="Next issue"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </>
+                )}
                 <button
                   type="button"
                   onClick={() => setSelectedIssue(null)}
@@ -392,84 +282,142 @@ function SayorPage() {
             </header>
 
             {/* Reader body */}
-            <div className="flex-1 overflow-y-auto">
-              {/* Cover */}
-              <div className="relative border-b border-border bg-[var(--color-surface)] px-4 py-10 sm:py-14">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,color-mix(in_oklab,var(--color-accent-1)_18%,transparent),transparent_60%)]" />
-                <img
-                  src={selectedIssueData.image}
-                  alt={`${selectedIssueData.title} cover`}
-                  className="relative mx-auto max-h-[70vh] w-auto max-w-full rounded-lg border border-black/10 shadow-[0_30px_70px_-25px_rgba(15,23,42,0.6)]"
-                />
-              </div>
+            <div id="sayor-reader-scroll" className="flex-1 overflow-y-auto">
+              {loadingContent && (
+                <div className="flex items-center justify-center gap-3 py-32 text-muted-foreground">
+                  <Loader2 className="animate-spin" size={20} />
+                  <span className="text-sm">Loading the issue…</span>
+                </div>
+              )}
 
-              {/* Article text */}
-              <article className="mx-auto w-full max-w-2xl px-5 py-12 sm:px-6 sm:py-16">
-                {loadingContent && (
-                  <div className="flex items-center justify-center gap-3 py-20 text-muted-foreground">
-                    <Loader2 className="animate-spin" size={20} />
-                    <span className="text-sm">Loading the issue…</span>
-                  </div>
-                )}
-
-                {!loadingContent && content && content.length === 0 && (
-                  <p className="py-16 text-center text-sm text-muted-foreground">
-                    The text for this edition isn't available yet — enjoy the cover above.
-                  </p>
-                )}
-
-                {!loadingContent && content && content.length > 0 && (
-                  <div className="sayor-prose">
-                    {content.map((block, idx) => {
-                      if (block.type === "h2") {
-                        return (
-                          <h2
-                            key={idx}
-                            className="mt-12 mb-4 font-display text-2xl font-bold leading-snug first:mt-0"
-                          >
-                            {block.text}
-                          </h2>
-                        );
-                      }
-                      if (block.type === "h3") {
-                        return (
-                          <h3
-                            key={idx}
-                            className="mt-9 mb-3 font-display text-lg font-semibold text-[var(--color-accent-1)]"
-                          >
-                            {block.text}
-                          </h3>
-                        );
-                      }
-                      return (
-                        <p
-                          key={idx}
-                          className="mb-5 text-[1.075rem] leading-[2] text-foreground/85"
-                        >
-                          {block.text}
+              {/* TABLE OF CONTENTS */}
+              {!loadingContent && !activeChapter && (
+                <div className="container-page py-10 sm:py-14">
+                  <div className="grid gap-10 lg:grid-cols-[300px_minmax(0,1fr)]">
+                    {/* Cover */}
+                    <div className="lg:sticky lg:top-6 lg:self-start">
+                      <img
+                        src={selectedIssueData.image}
+                        alt={`${selectedIssueData.title} cover`}
+                        className="mx-auto w-full max-w-[300px] rounded-lg border border-black/10 shadow-[0_30px_70px_-25px_rgba(15,23,42,0.6)]"
+                      />
+                      {doc?.editor && (
+                        <p className="mt-4 text-center text-sm text-muted-foreground">
+                          সম্পাদক · {doc.editor}
                         </p>
-                      );
-                    })}
+                      )}
+                    </div>
+
+                    {/* Contents list */}
+                    <div>
+                      <p className="text-label mb-1">Contents · সূচিপত্র</p>
+                      <h2 className="font-display text-3xl font-bold tracking-tight">
+                        {chapters.length} {chapters.length === 1 ? "piece" : "pieces"} in this edition
+                      </h2>
+                      <ol className="mt-8 divide-y divide-border border-y border-border">
+                        {chapters.map((c, idx) => (
+                          <li key={idx}>
+                            <button
+                              type="button"
+                              onClick={() => setOpenChapter(idx)}
+                              className="group flex w-full items-baseline gap-4 py-4 text-left transition-colors hover:bg-[var(--color-surface)]"
+                            >
+                              <span className="w-8 shrink-0 font-display text-sm tabular-nums text-muted-foreground">
+                                {String(idx + 1).padStart(2, "0")}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="sayor-prose block text-lg font-semibold leading-snug text-foreground group-hover:text-[var(--color-accent-1)]">
+                                  {c.title}
+                                </span>
+                                {c.author && (
+                                  <span className="sayor-prose mt-0.5 block text-sm text-muted-foreground">
+                                    {c.author}
+                                  </span>
+                                )}
+                              </span>
+                              <ChevronRight
+                                size={18}
+                                className="mt-1 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-[var(--color-accent-1)]"
+                              />
+                            </button>
+                          </li>
+                        ))}
+                      </ol>
+                      {chapters.length === 0 && (
+                        <p className="py-10 text-sm text-muted-foreground">
+                          The text for this edition isn't available yet — enjoy the cover.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SINGLE ARTICLE */}
+              {!loadingContent && activeChapter && (
+                <AnimatePresence mode="wait">
+                  <motion.article
+                    key={openChapter}
+                    initial={{ opacity: 0, x: 24 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -24 }}
+                    transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                    className="mx-auto w-full max-w-2xl px-5 py-12 sm:px-6 sm:py-16"
+                  >
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                      {String((openChapter ?? 0) + 1).padStart(2, "0")} / {String(chapters.length).padStart(2, "0")}
+                    </p>
+                    <h1 className="sayor-prose mt-3 text-3xl font-bold leading-tight sm:text-4xl">
+                      {activeChapter.title}
+                    </h1>
+                    {activeChapter.author && (
+                      <p className="sayor-prose mt-3 text-base text-[var(--color-accent-1)]">
+                        {activeChapter.author}
+                      </p>
+                    )}
+
+                    <div className="sayor-prose mt-10">
+                      {activeChapter.paragraphs.map((p, i) => (
+                        <p key={i} className="mb-5 text-[1.075rem] leading-[2] text-foreground/85">
+                          {p}
+                        </p>
+                      ))}
+                    </div>
+
+                    {activeChapter.bio && (
+                      <p className="sayor-prose mt-8 border-l-2 border-[var(--color-accent-1)] pl-4 text-sm italic text-muted-foreground">
+                        {activeChapter.bio}
+                      </p>
+                    )}
 
                     <div className="mt-16 flex items-center justify-between gap-3 border-t border-border pt-8">
                       <button
                         type="button"
-                        onClick={() => handleNavigate(-1)}
-                        className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)]"
+                        disabled={openChapter === 0}
+                        onClick={() => flipChapter(-1)}
+                        className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)] disabled:cursor-not-allowed disabled:opacity-40"
                       >
-                        <ChevronLeft size={16} /> Previous issue
+                        <ChevronLeft size={16} /> Previous
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleNavigate(1)}
-                        className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)]"
+                        onClick={() => setOpenChapter(null)}
+                        className="text-xs uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
                       >
-                        Next issue <ChevronRight size={16} />
+                        Contents
+                      </button>
+                      <button
+                        type="button"
+                        disabled={openChapter === chapters.length - 1}
+                        onClick={() => flipChapter(1)}
+                        className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)] disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Next <ChevronRight size={16} />
                       </button>
                     </div>
-                  </div>
-                )}
-              </article>
+                  </motion.article>
+                </AnimatePresence>
+              )}
             </div>
           </motion.div>
         )}

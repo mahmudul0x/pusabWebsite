@@ -1,22 +1,23 @@
+# Netlify deploy config for this TanStack Start (SSR) app.
+# The build uses Nitro's `netlify` preset (set in vite.config.ts), which emits:
+#   - static client assets -> dist/        (the publish dir below)
+#   - the SSR handler       -> .netlify/functions-internal/server  (auto-detected by Netlify)
+# The server function self-declares `path = "/*"` with `preferStatic`, so static
+# files are served first and everything else is server-rendered. No SPA redirect.
+
 [build]
   command = "npm run build"
-  publish = "dist/client"
+  publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20"
+  # Vite 8 / Nitro 3 need a modern Node runtime.
+  NODE_VERSION = "22"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
+# Baseline security headers for every response.
+# (Long-lived caching for /assets/* is emitted by the build into dist/_headers.)
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
