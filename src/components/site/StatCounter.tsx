@@ -11,7 +11,9 @@ export function StatCounter({ value, suffix = "", raw = false }: Props) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const mv = useMotionValue(0);
-  const rounded = useTransform(mv, (v) => (raw ? Math.round(v).toString() : Math.round(v).toLocaleString()));
+  const rounded = useTransform(mv, (v) =>
+    raw ? Math.round(v).toString() : Math.round(v).toLocaleString(),
+  );
 
   useEffect(() => {
     if (!inView) return;

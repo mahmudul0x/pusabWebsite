@@ -1,6 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ChevronDown, GraduationCap, HeartHandshake, BookOpen, Award, Stethoscope, Megaphone, Quote, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronDown,
+  GraduationCap,
+  HeartHandshake,
+  BookOpen,
+  Award,
+  Stethoscope,
+  Megaphone,
+  Quote,
+  Sparkles,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { AnimatedHeading } from "@/components/site/AnimatedHeading";
@@ -18,9 +29,17 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "PUSAB — Empowering Students, Transforming Bishwambarpur" },
-      { name: "description", content: "PUSAB is a non-profit, non-political association of 300+ students from public universities, medical & engineering colleges — united for one upazila." },
+      {
+        name: "description",
+        content:
+          "PUSAB is a non-profit, non-political association of 300+ students from public universities, medical & engineering colleges — united for one upazila.",
+      },
       { property: "og:title", content: "PUSAB — Empowering Students, Transforming Bishwambarpur" },
-      { property: "og:description", content: "Non-profit association of 300+ public university students working for Bishwambarpur Upazila." },
+      {
+        property: "og:description",
+        content:
+          "Non-profit association of 300+ public university students working for Bishwambarpur Upazila.",
+      },
       { property: "og:url", content: "/" },
     ],
     links: [{ rel: "canonical", href: "/" }],
@@ -29,12 +48,36 @@ export const Route = createFileRoute("/")({
 });
 
 const ACTIVITIES = [
-  { Icon: HeartHandshake, title: "Student Unity & Cooperation", desc: "Building lifelong bonds between students from across public universities and the region." },
-  { Icon: Award, title: "Achievement Recognition", desc: "Honoring those who carry Bishwambarpur's name to the top of national merit lists." },
-  { Icon: Megaphone, title: "Educational Campaigns", desc: "Awareness drives, study circles and career talks across schools of the upazila." },
-  { Icon: GraduationCap, title: "Admission Support", desc: "Mentoring aspirants through HSC, admission tests and university application." },
-  { Icon: BookOpen, title: "PUSAB Scholarship", desc: "Need-based financial aid to deserving students from underserved families." },
-  { Icon: Stethoscope, title: "Medical Camps & Humanity", desc: "Free health camps, disaster relief and humanitarian aid for the community." },
+  {
+    Icon: HeartHandshake,
+    title: "Student Unity & Cooperation",
+    desc: "Building lifelong bonds between students from across public universities and the region.",
+  },
+  {
+    Icon: Award,
+    title: "Achievement Recognition",
+    desc: "Honoring those who carry Bishwambarpur's name to the top of national merit lists.",
+  },
+  {
+    Icon: Megaphone,
+    title: "Educational Campaigns",
+    desc: "Awareness drives, study circles and career talks across schools of the upazila.",
+  },
+  {
+    Icon: GraduationCap,
+    title: "Admission Support",
+    desc: "Mentoring aspirants through HSC, admission tests and university application.",
+  },
+  {
+    Icon: BookOpen,
+    title: "PUSAB Scholarship",
+    desc: "Need-based financial aid to deserving students from underserved families.",
+  },
+  {
+    Icon: Stethoscope,
+    title: "Medical Camps & Humanity",
+    desc: "Free health camps, disaster relief and humanitarian aid for the community.",
+  },
 ];
 
 function MagazineTilt() {
@@ -65,14 +108,22 @@ function MagazineTilt() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(79,110,247,0.4),transparent_55%),radial-gradient(circle_at_80%_90%,rgba(124,58,237,0.4),transparent_55%)]" />
         <div className="relative h-full flex flex-col justify-between p-7">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-white/70">Vol · Annual</span>
+            <span className="text-[10px] uppercase tracking-[0.25em] text-white/70">
+              Vol · Annual
+            </span>
             <span className="text-[10px] uppercase tracking-[0.25em] text-white/70">PUSAB</span>
           </div>
           <div>
-            <div className="font-display text-6xl font-extrabold tracking-tighter gradient-text">SAYOR</div>
-            <p className="mt-2 text-sm text-white/70 max-w-[14rem]">The annual magazine of PUSAB · Bishwambarpur</p>
+            <div className="font-display text-6xl font-extrabold tracking-tighter gradient-text">
+              SAYOR
+            </div>
+            <p className="mt-2 text-sm text-white/70 max-w-[14rem]">
+              The annual magazine of PUSAB · Bishwambarpur
+            </p>
           </div>
-          <div className="text-[10px] uppercase tracking-[0.2em] text-white/50">Education · Culture · Science · Heritage</div>
+          <div className="text-[10px] uppercase tracking-[0.2em] text-white/50">
+            Education · Culture · Science · Heritage
+          </div>
         </div>
       </motion.div>
     </div>
@@ -80,15 +131,15 @@ function MagazineTilt() {
 }
 
 function Index() {
-  useEffect(() => { document.documentElement.classList.add("dark"); }, []);
+  useEffect(() => {
+    document.documentElement.classList.add("dark");
+  }, []);
   return (
     <>
       {/* HERO */}
       <section className="relative min-h-[100dvh] flex items-center overflow-hidden">
         <HeroSlideshow />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/45 via-slate-900/58 to-background/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.18),transparent_58%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(7,10,18,0.08)_50%,rgba(7,10,18,0.22)_100%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/15 via-slate-900/10 to-background/10" />
         <div className="container-page relative z-10 pt-44 pb-28">
           <motion.div
             initial={{ opacity: 0, y: 14 }}
@@ -122,9 +173,11 @@ function Index() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.7 }}
-className="mt-8 mx-auto max-w-2xl rounded-2xl bg-background/18 px-4 py-3 text-base md:text-lg text-foreground/90 leading-relaxed shadow-sm backdrop-blur-[2px]"
+              className="mt-8 mx-auto max-w-2xl text-base md:text-lg text-foreground/90 leading-relaxed"
             >
-              PUSAB brings together {SITE.members} students from public universities, medical and engineering colleges to support learning, leadership, and community development in Bishwambarpur.
+              PUSAB brings together {SITE.members} students from public universities, medical and
+              engineering colleges to support learning, leadership, and community development in
+              Bishwambarpur.
             </motion.p>
 
             <motion.div
@@ -135,7 +188,8 @@ className="mt-8 mx-auto max-w-2xl rounded-2xl bg-background/18 px-4 py-3 text-ba
             >
               <GradientButton to="/programs">Explore Our Programs</GradientButton>
               <GradientButton to="/about" variant="ghost">
-                About PUSAB <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                About PUSAB{" "}
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </GradientButton>
             </motion.div>
           </div>
@@ -184,8 +238,12 @@ className="mt-8 mx-auto max-w-2xl rounded-2xl bg-background/18 px-4 py-3 text-ba
                 Programs That Create <span className="gradient-text">Real Impact</span>
               </h2>
             </div>
-            <Link to="/programs" className="group inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-              View all programs <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+            <Link
+              to="/programs"
+              className="group inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+            >
+              View all programs{" "}
+              <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 
@@ -216,9 +274,13 @@ className="mt-8 mx-auto max-w-2xl rounded-2xl bg-background/18 px-4 py-3 text-ba
               <span className="gradient-text">SAYOR</span> — voice of a generation.
             </h2>
             <p className="mt-6 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              SAYOR is PUSAB's flagship annual magazine, bringing together voices from education, culture, science, heritage, literature and student life across Bishwambarpur.
+              SAYOR is PUSAB's flagship annual magazine, bringing together voices from education,
+              culture, science, heritage, literature and student life across Bishwambarpur.
             </p>
-            <Link to="/sayor" className="mt-8 inline-flex items-center gap-2 text-[var(--color-accent-1)] font-semibold hover:gap-3 transition-all">
+            <Link
+              to="/sayor"
+              className="mt-8 inline-flex items-center gap-2 text-[var(--color-accent-1)] font-semibold hover:gap-3 transition-all"
+            >
               Read more <ArrowRight size={16} />
             </Link>
           </div>
@@ -229,7 +291,11 @@ className="mt-8 mx-auto max-w-2xl rounded-2xl bg-background/18 px-4 py-3 text-ba
       {/* QUOTE */}
       <section className="py-28 md:py-32 relative bg-[var(--color-surface)]">
         <div className="container-page relative text-center max-w-4xl">
-          <Quote className="absolute -top-6 left-1/2 -translate-x-1/2 text-[var(--color-surface-2)]" size={180} strokeWidth={1} />
+          <Quote
+            className="absolute -top-6 left-1/2 -translate-x-1/2 text-[var(--color-surface-2)]"
+            size={180}
+            strokeWidth={1}
+          />
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -253,11 +319,14 @@ className="mt-8 mx-auto max-w-2xl rounded-2xl bg-background/18 px-4 py-3 text-ba
                 Join the Movement
               </h3>
               <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-                Whether you are a current student, alumnus, or supporter, your involvement helps build a stronger future for Bishwambarpur.
+                Whether you are a current student, alumnus, or supporter, your involvement helps
+                build a stronger future for Bishwambarpur.
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <GradientButton to="/contact">Contact Us</GradientButton>
-                <GradientButton to="/leadership" variant="ghost">Meet the Executive Committee</GradientButton>
+                <GradientButton to="/leadership" variant="ghost">
+                  Meet the Executive Committee
+                </GradientButton>
               </div>
             </div>
           </div>
@@ -283,7 +352,10 @@ function HeroSlideshow() {
           initial={{ opacity: 0, scale: 1.08 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ opacity: { duration: 1.1, ease: "easeOut" }, scale: { duration: 7, ease: "linear" } }}
+          transition={{
+            opacity: { duration: 1.1, ease: "easeOut" },
+            scale: { duration: 7, ease: "linear" },
+          }}
           className="absolute inset-0 w-full h-full object-cover"
         />
       </AnimatePresence>

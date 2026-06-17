@@ -10,9 +10,16 @@ export const Route = createFileRoute("/leadership")({
   head: () => ({
     meta: [
       { title: "Leadership — PUSAB" },
-      { name: "description", content: "Meet the present Executive Committee and explore past ECs and the PUSAB Honor Board." },
+      {
+        name: "description",
+        content:
+          "Meet the present Executive Committee and explore past ECs and the PUSAB Honor Board.",
+      },
       { property: "og:title", content: "Leadership — PUSAB" },
-      { property: "og:description", content: "Present and past Executive Committees and PUSAB Honor Board." },
+      {
+        property: "og:description",
+        content: "Present and past Executive Committees and PUSAB Honor Board.",
+      },
       { property: "og:url", content: "/leadership" },
     ],
     links: [{ rel: "canonical", href: "/leadership" }],
@@ -20,16 +27,39 @@ export const Route = createFileRoute("/leadership")({
   component: LeadershipPage,
 });
 
-type Member = { id: string; name: string; role: string; university: string | null; year: number; is_current: boolean; photo_url: string | null };
+type Member = {
+  id: string;
+  name: string;
+  role: string;
+  university: string | null;
+  year: number;
+  is_current: boolean;
+  photo_url: string | null;
+};
 
 function initials(name: string) {
-  return name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+  return name
+    .split(" ")
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 }
 
-const PLACEHOLDER_ROLES = ["Vice President", "General Secretary", "Treasurer", "Organizing Secretary"];
+const PLACEHOLDER_ROLES = [
+  "Vice President",
+  "General Secretary",
+  "Treasurer",
+  "Organizing Secretary",
+];
 
 function MemberPortrait({ m, size = "md" }: { m: Member; size?: "sm" | "md" | "lg" }) {
-  const dim = size === "lg" ? "h-20 w-20 text-xl" : size === "sm" ? "h-10 w-10 text-xs" : "h-14 w-14 text-base";
+  const dim =
+    size === "lg"
+      ? "h-20 w-20 text-xl"
+      : size === "sm"
+        ? "h-10 w-10 text-xs"
+        : "h-14 w-14 text-base";
   return (
     <div
       className={
@@ -61,25 +91,40 @@ function LeadershipPage() {
   const current = members?.filter((m) => m.is_current) ?? [];
   const past = members?.filter((m) => !m.is_current) ?? [];
   const byYear: Record<number, Member[]> = {};
-  past.forEach((m) => { (byYear[m.year] ||= []).push(m); });
+  past.forEach((m) => {
+    (byYear[m.year] ||= []).push(m);
+  });
   const years = Object.keys(byYear).sort((a, b) => Number(b) - Number(a));
 
-  const featured = current.find((m) => /president/i.test(m.role) && !/vice/i.test(m.role)) ?? current[0];
+  const featured =
+    current.find((m) => /president/i.test(m.role) && !/vice/i.test(m.role)) ?? current[0];
   const rest = current.filter((m) => m !== featured);
 
   return (
     <>
-      <PageHero title="Leadership" lede="Meet the present Executive Committee and look back at the leaders who built PUSAB." crumbs={[{ label: "Home", to: "/" }, { label: "Leadership" }]} image={heroLeadership} imageAlt="PUSAB executive committee" />
+      <PageHero
+        title="Leadership"
+        lede="Meet the present Executive Committee and look back at the leaders who built PUSAB."
+        crumbs={[{ label: "Home", to: "/" }, { label: "Leadership" }]}
+        image={heroLeadership}
+        imageAlt="PUSAB executive committee"
+      />
 
       {/* Current EC — bento */}
       <section className="pb-16">
         <div className="container-page">
           <div className="mb-10 flex items-end justify-between gap-6 border-b border-border pb-4">
             <div>
-              <p className="text-label mb-2" style={{ color: "var(--color-accent-2)" }}>Governance</p>
-              <h2 className="font-display text-2xl md:text-4xl font-bold tracking-tight">Current Executive Committee</h2>
+              <p className="text-label mb-2" style={{ color: "var(--color-accent-2)" }}>
+                Governance
+              </p>
+              <h2 className="font-display text-2xl md:text-4xl font-bold tracking-tight">
+                Current Executive Committee
+              </h2>
             </div>
-            <span className="hidden sm:block text-xs uppercase tracking-[0.2em] text-muted-foreground">Session · {new Date().getFullYear()}</span>
+            <span className="hidden sm:block text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Session · {new Date().getFullYear()}
+            </span>
           </div>
 
           {members === null ? (
@@ -103,7 +148,9 @@ function LeadershipPage() {
                 <div className="absolute inset-0 [background-image:linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:32px_32px]" />
                 <div className="absolute top-6 left-6 z-20 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/30 backdrop-blur px-3 py-1">
                   <Crown size={12} className="text-[var(--color-accent-1)]" />
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/85">{featured ? "President" : "Presidential Office"}</span>
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/85">
+                    {featured ? "President" : "Presidential Office"}
+                  </span>
                 </div>
 
                 {featured ? (
@@ -111,16 +158,27 @@ function LeadershipPage() {
                     <MemberPortrait m={featured} size="lg" />
                     <div className="w-12 h-1 rounded-full bg-[var(--color-accent-1)]" />
                     <div>
-                      <h3 className="font-display text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">{featured.name}</h3>
-                      <p className="mt-1 text-[var(--color-accent-1)] text-sm font-semibold uppercase tracking-[0.18em]">{featured.role}</p>
-                      {featured.university && <p className="mt-2 text-foreground/60 text-sm">{featured.university}</p>}
+                      <h3 className="font-display text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
+                        {featured.name}
+                      </h3>
+                      <p className="mt-1 text-[var(--color-accent-1)] text-sm font-semibold uppercase tracking-[0.18em]">
+                        {featured.role}
+                      </p>
+                      {featured.university && (
+                        <p className="mt-2 text-foreground/60 text-sm">{featured.university}</p>
+                      )}
                     </div>
                   </div>
                 ) : (
                   <div className="relative z-20 space-y-3">
                     <div className="w-12 h-1 rounded-full bg-[var(--color-accent-1)]" />
-                    <h3 className="font-display text-3xl font-bold text-foreground/30">Presidential Office</h3>
-                    <p className="text-foreground/45 italic max-w-md">No current members on record yet. Nominations for the upcoming term will be announced shortly.</p>
+                    <h3 className="font-display text-3xl font-bold text-foreground/30">
+                      Presidential Office
+                    </h3>
+                    <p className="text-foreground/45 italic max-w-md">
+                      No current members on record yet. Nominations for the upcoming term will be
+                      announced shortly.
+                    </p>
                   </div>
                 )}
               </motion.div>
@@ -140,18 +198,26 @@ function LeadershipPage() {
                 >
                   {slot.kind === "member" ? (
                     <>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-accent-1)]">{slot.m.role}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-accent-1)]">
+                        {slot.m.role}
+                      </span>
                       <div className="flex items-center gap-3">
                         <MemberPortrait m={slot.m} size="sm" />
                         <div className="min-w-0">
                           <p className="font-display font-semibold truncate">{slot.m.name}</p>
-                          {slot.m.university && <p className="text-xs text-muted-foreground truncate">{slot.m.university}</p>}
+                          {slot.m.university && (
+                            <p className="text-xs text-muted-foreground truncate">
+                              {slot.m.university}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </>
                   ) : (
                     <>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-accent-1)]">{slot.role}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-accent-1)]">
+                        {slot.role}
+                      </span>
                       <div className="h-4 w-2/3 bg-white/10 rounded animate-pulse" />
                       <div className="h-3 w-1/2 bg-white/5 rounded" />
                     </>
@@ -167,8 +233,12 @@ function LeadershipPage() {
       <section className="py-16">
         <div className="container-page">
           <div className="mb-10">
-            <p className="text-label mb-2" style={{ color: "var(--color-accent-2)" }}>Legacy</p>
-            <h2 className="font-display text-2xl md:text-4xl font-bold tracking-tight">Through the years</h2>
+            <p className="text-label mb-2" style={{ color: "var(--color-accent-2)" }}>
+              Legacy
+            </p>
+            <h2 className="font-display text-2xl md:text-4xl font-bold tracking-tight">
+              Through the years
+            </h2>
           </div>
 
           <div className="relative">
@@ -178,11 +248,14 @@ function LeadershipPage() {
               <div className="relative pl-10">
                 <div className="absolute -left-[1px] top-1.5 w-4 h-4 rounded-full border-4 border-background bg-[var(--color-accent-1)] shadow-[0_0_15px_color-mix(in_oklab,var(--color-accent-1)_45%,transparent)]" />
                 <div className="space-y-4">
-                  <span className="font-display text-xl md:text-2xl font-bold block">Archive being curated</span>
+                  <span className="font-display text-xl md:text-2xl font-bold block">
+                    Archive being curated
+                  </span>
                   <div className="p-6 md:p-8 rounded-2xl bg-[color-mix(in_oklab,var(--color-surface)_60%,transparent)] border border-dashed border-border flex items-center gap-3">
                     <Sparkles size={16} className="text-[var(--color-accent-1)] shrink-0" />
                     <p className="text-sm text-foreground/60">
-                      Past EC archives will appear here as historical records are digitized and verified.
+                      Past EC archives will appear here as historical records are digitized and
+                      verified.
                     </p>
                   </div>
                 </div>
@@ -201,8 +274,12 @@ function LeadershipPage() {
                     <div className="absolute -left-[37px] top-2 w-4 h-4 rounded-full border-4 border-background bg-[var(--color-accent-1)] shadow-[0_0_15px_color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] transition-transform group-hover:scale-125" />
                     <div className="space-y-4">
                       <div className="flex items-baseline gap-3">
-                        <span className="font-display text-2xl md:text-3xl font-extrabold tracking-tight">{year}</span>
-                        <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{byYear[Number(year)].length} members</span>
+                        <span className="font-display text-2xl md:text-3xl font-extrabold tracking-tight">
+                          {year}
+                        </span>
+                        <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                          {byYear[Number(year)].length} members
+                        </span>
                       </div>
                       <div className="rounded-2xl border border-border bg-[var(--color-surface)] p-5">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -211,7 +288,9 @@ function LeadershipPage() {
                               <MemberPortrait m={m} size="sm" />
                               <div className="min-w-0 text-sm">
                                 <div className="font-medium truncate">{m.name}</div>
-                                <div className="text-muted-foreground text-xs truncate">{m.role}</div>
+                                <div className="text-muted-foreground text-xs truncate">
+                                  {m.role}
+                                </div>
                               </div>
                             </div>
                           ))}

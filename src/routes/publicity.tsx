@@ -10,7 +10,10 @@ export const Route = createFileRoute("/publicity")({
   head: () => ({
     meta: [
       { title: "Publicity — News, Press & Events | PUSAB" },
-      { name: "description", content: "Latest news, press releases and upcoming events from PUSAB." },
+      {
+        name: "description",
+        content: "Latest news, press releases and upcoming events from PUSAB.",
+      },
       { property: "og:title", content: "Publicity — PUSAB" },
       { property: "og:description", content: "News, press releases and event updates from PUSAB." },
       { property: "og:url", content: "/publicity" },
@@ -69,17 +72,35 @@ function PublicityPage() {
 
   return (
     <>
-      <PageHero title="Publicity" lede="News, press releases and upcoming events — straight from PUSAB." crumbs={[{ label: "Home", to: "/" }, { label: "Publicity" }]} image={heroPublicity} imageAlt="PUSAB press conference" />
+      <PageHero
+        title="Publicity"
+        lede="News, press releases and upcoming events — straight from PUSAB."
+        crumbs={[{ label: "Home", to: "/" }, { label: "Publicity" }]}
+        image={heroPublicity}
+        imageAlt="PUSAB press conference"
+      />
       <section className="pb-24">
         <div className="container-page">
           <div className="inline-flex glass rounded-full p-1 gap-1 mb-10">
             {TABS.map((t) => (
-              <button key={t.key} onClick={() => setTab(t.key)} className="relative px-4 py-2 text-sm font-medium">
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className="relative px-4 py-2 text-sm font-medium"
+              >
                 {tab === t.key && (
-                  <motion.span layoutId="pub-pill" transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                    className="absolute inset-0 rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))]" />
+                  <motion.span
+                    layoutId="pub-pill"
+                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    className="absolute inset-0 rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))]"
+                  />
                 )}
-                <span className={"relative z-10 inline-flex items-center gap-2 " + (tab === t.key ? "text-white" : "text-foreground/70 hover:text-foreground")}>
+                <span
+                  className={
+                    "relative z-10 inline-flex items-center gap-2 " +
+                    (tab === t.key ? "text-white" : "text-foreground/70 hover:text-foreground")
+                  }
+                >
                   <t.Icon size={14} /> {t.label}
                 </span>
               </button>
@@ -117,15 +138,25 @@ function PublicityPage() {
                 >
                   <div className="aspect-[16/10] overflow-hidden bg-[linear-gradient(135deg,#0F0F1A,#16162A)]">
                     {p.image_url ? (
-                      <img src={p.image_url} alt={p.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      <img
+                        src={p.image_url}
+                        alt={p.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
                     ) : (
                       <div className="h-full w-full bg-[radial-gradient(circle_at_30%_30%,rgba(79,110,247,0.3),transparent_55%),radial-gradient(circle_at_70%_70%,rgba(124,58,237,0.25),transparent_55%)]" />
                     )}
                   </div>
                   <div className="p-6">
                     <span className="text-label">{p.type.toUpperCase()}</span>
-                    <h3 className="mt-3 font-display text-lg font-semibold leading-snug">{p.title}</h3>
-                    {p.date && <p className="mt-2 text-xs text-muted-foreground">{new Date(p.date).toLocaleDateString()}</p>}
+                    <h3 className="mt-3 font-display text-lg font-semibold leading-snug">
+                      {p.title}
+                    </h3>
+                    {p.date && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        {new Date(p.date).toLocaleDateString()}
+                      </p>
+                    )}
                   </div>
                 </motion.article>
               ))}

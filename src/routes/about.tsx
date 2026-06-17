@@ -10,9 +10,17 @@ export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
       { title: "About — PUSAB" },
-      { name: "description", content: "PUSAB is a non-profit, non-political student association from Bishwambarpur Upazila, founded in 2014 at Govt. Digendra Barman College." },
+      {
+        name: "description",
+        content:
+          "PUSAB is a non-profit, non-political student association from Bishwambarpur Upazila, founded in 2014 at Govt. Digendra Barman College.",
+      },
       { property: "og:title", content: "About — PUSAB" },
-      { property: "og:description", content: "Mission, aims and founding story of PUSAB — a 300+ member association of public university students." },
+      {
+        property: "og:description",
+        content:
+          "Mission, aims and founding story of PUSAB — a 300+ member association of public university students.",
+      },
       { property: "og:url", content: "/about" },
     ],
     links: [{ rel: "canonical", href: "/about" }],
@@ -34,7 +42,12 @@ function AboutPage() {
       <section className="py-20 md:py-24">
         <div className="container-page grid lg:grid-cols-2 gap-12 items-center">
           <div className="relative overflow-hidden rounded-3xl border border-border aspect-[4/3] shadow-sm">
-            <img src={aboutMission} alt="PUSAB students studying together" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+            <img
+              src={aboutMission}
+              alt="PUSAB students studying together"
+              loading="lazy"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
             <div className="absolute inset-0 bg-gradient-to-tr from-background/25 via-transparent to-transparent" />
           </div>
           <div className="space-y-5 text-muted-foreground leading-relaxed">
@@ -43,10 +56,14 @@ function AboutPage() {
               A student-led organization rooted in service.
             </h2>
             <p>
-              PUSAB was founded on {SITE.founded} at {SITE.foundedAt}. It is the first organization of its kind in Sunamganj district and brings together more than {SITE.members} students from public universities, medical and engineering colleges across Bangladesh.
+              PUSAB was founded on {SITE.founded} at {SITE.foundedAt}. It is the first organization
+              of its kind in Sunamganj district and brings together more than {SITE.members}{" "}
+              students from public universities, medical and engineering colleges across Bangladesh.
             </p>
             <p>
-              The association is non-political and non-profit. Its work centers on education, cooperation, scholarship support, humanitarian relief and youth leadership for the development of Bishwambarpur Upazila.
+              The association is non-political and non-profit. Its work centers on education,
+              cooperation, scholarship support, humanitarian relief and youth leadership for the
+              development of Bishwambarpur Upazila.
             </p>
           </div>
         </div>
@@ -58,7 +75,8 @@ function AboutPage() {
             <div className="absolute inset-y-0 left-0 w-1 bg-[var(--color-accent-3)] shadow-[0_0_40px_var(--color-accent-3)]" />
             <p className="text-label mb-4">Our mission</p>
             <p className="font-display italic text-2xl md:text-3xl leading-snug max-w-4xl">
-              To build a stronger, more connected academic and social community for students from Bishwambarpur through cooperation, opportunity and service.
+              To build a stronger, more connected academic and social community for students from
+              Bishwambarpur through cooperation, opportunity and service.
             </p>
           </div>
         </div>
@@ -97,18 +115,48 @@ function AboutPage() {
       <section className="py-24 md:py-28">
         <div className="container-page">
           <p className="text-label mb-3">Timeline</p>
-          <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight mb-16">The journey so far.</h2>
+          <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight mb-16">
+            The journey so far.
+          </h2>
           <div className="relative">
             <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[var(--color-accent-1)] via-[var(--color-accent-2)] to-[var(--color-accent-3)]" />
             <ol className="space-y-14 md:space-y-20">
               {[
-                { date: SITE.founded, title: "Founding of PUSAB", desc: `Established at ${SITE.foundedAt} — the first organization of its kind in Sunamganj district.` },
-                { date: "2016", title: "First scholarship drive", desc: "Launched merit & need-based stipends for HSC graduates from Bishwambarpur preparing for university admissions." },
-                { date: "2018", title: "SAYOR — pre-admission coaching", desc: "Started the Students' Admission Yearly Orientation Round, mentoring hundreds of admission seekers each year." },
-                { date: "2020", title: "Pandemic relief operations", desc: "Distributed food, medical aid and learning materials across the upazila during COVID-19 lockdowns." },
-                { date: "2022", title: "Flood response in Sunamganj", desc: "Coordinated emergency relief, shelter support and rebuilding aid for flood-affected families." },
-                { date: "2024", title: "300+ active members", desc: "Crossed 300 members across public universities, medical and engineering colleges nationwide." },
-                { date: "2026", title: "Digital home of PUSAB", desc: "Launched the official PUSAB platform — programs, leadership, publicity and moments, all in one place." },
+                {
+                  date: SITE.founded,
+                  title: "Founding of PUSAB",
+                  desc: `Established at ${SITE.foundedAt} — the first organization of its kind in Sunamganj district.`,
+                },
+                {
+                  date: "2016",
+                  title: "First scholarship drive",
+                  desc: "Launched merit & need-based stipends for HSC graduates from Bishwambarpur preparing for university admissions.",
+                },
+                {
+                  date: "2018",
+                  title: "SAYOR — pre-admission coaching",
+                  desc: "Started the Students' Admission Yearly Orientation Round, mentoring hundreds of admission seekers each year.",
+                },
+                {
+                  date: "2020",
+                  title: "Pandemic relief operations",
+                  desc: "Distributed food, medical aid and learning materials across the upazila during COVID-19 lockdowns.",
+                },
+                {
+                  date: "2022",
+                  title: "Flood response in Sunamganj",
+                  desc: "Coordinated emergency relief, shelter support and rebuilding aid for flood-affected families.",
+                },
+                {
+                  date: "2024",
+                  title: "300+ active members",
+                  desc: "Crossed 300 members across public universities, medical and engineering colleges nationwide.",
+                },
+                {
+                  date: "2026",
+                  title: "Digital home of PUSAB",
+                  desc: "Launched the official PUSAB platform — programs, leadership, publicity and moments, all in one place.",
+                },
               ].map((item, i) => {
                 const left = i % 2 === 0;
                 return (
@@ -138,7 +186,9 @@ function AboutPage() {
         <div className="container-page">
           <GlowCard className="text-center">
             <p className="text-label mb-3">Connect with PUSAB</p>
-            <h3 className="font-display text-2xl md:text-3xl font-bold">{SITE.email} · {SITE.phone}</h3>
+            <h3 className="font-display text-2xl md:text-3xl font-bold">
+              {SITE.email} · {SITE.phone}
+            </h3>
           </GlowCard>
         </div>
       </section>

@@ -3,33 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { NAV_LINKS, SITE } from "@/lib/site-content";
-
-function Monogram({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 40 40"
-      className={className}
-      aria-hidden
-    >
-      <defs>
-        <linearGradient id="pusabMono" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0" stopColor="var(--color-accent-1)" />
-          <stop offset="0.6" stopColor="var(--color-accent-2)" />
-          <stop offset="1" stopColor="var(--color-accent-3)" />
-        </linearGradient>
-      </defs>
-      <rect x="2" y="2" width="36" height="36" rx="10" fill="url(#pusabMono)" opacity="0.18" />
-      <path
-        d="M11 30 V12 H19 C23 12 25 14 25 17 C25 20 23 22 19 22 H15"
-        stroke="url(#pusabMono)" strokeWidth="2.2" fill="none" strokeLinecap="round"
-      />
-      <path
-        d="M24 12 V22 C24 26 26 29 30 29"
-        stroke="url(#pusabMono)" strokeWidth="2.2" fill="none" strokeLinecap="round"
-      />
-    </svg>
-  );
-}
+import logoPusab from "@/assets/logo-pusab.png";
 
 export function FloatingNavbar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -74,7 +48,11 @@ export function FloatingNavbar() {
         >
           {/* Logo */}
           <Link to="/" className="group flex items-center gap-2.5 pr-3">
-            <Monogram className="h-8 w-8 transition-transform duration-700 group-hover:rotate-[360deg]" />
+            <img
+              src={logoPusab}
+              alt="PUSAB logo"
+              className="h-12 w-12 object-contain transition-transform duration-700 group-hover:rotate-[360deg]"
+            />
             <div className="flex flex-col leading-none">
               <span className="font-display text-[18px] font-bold tracking-[0.02em] text-foreground">
                 PUSAB
@@ -88,10 +66,7 @@ export function FloatingNavbar() {
           {/* Desktop links */}
           <ul className="hidden lg:flex items-center gap-1 mx-auto">
             {NAV_LINKS.map((link) => {
-              const isActive =
-                link.to === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(link.to);
+              const isActive = link.to === "/" ? pathname === "/" : pathname.startsWith(link.to);
               return (
                 <li key={link.to}>
                   <Link
@@ -178,7 +153,11 @@ export function FloatingNavbar() {
                     key={link.to}
                     variants={{
                       hidden: { opacity: 0, y: 28 },
-                      show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
+                      show: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                      },
                     }}
                   >
                     <Link

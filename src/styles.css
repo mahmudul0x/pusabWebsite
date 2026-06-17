@@ -203,3 +203,18 @@
   initial-value: 0deg;
   inherits: false;
 }
+
+/* SAYOR reader — Bengali long-form typography */
+.sayor-prose {
+  font-family: "Noto Serif Bengali", "Plus Jakarta Sans", Georgia, serif;
+}
+.sayor-prose h2,
+.sayor-prose h3 {
+  font-family: "Noto Serif Bengali", "Plus Jakarta Sans", Georgia, serif;
+  text-wrap: balance;
+}
+.sayor-prose p {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+}

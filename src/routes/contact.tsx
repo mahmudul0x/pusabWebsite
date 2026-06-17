@@ -5,7 +5,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { GradientButton } from "@/components/site/GradientButton";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Phone, MapPin, Facebook, ArrowUpRight, Clock, Copy, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Facebook,
+  ArrowUpRight,
+  Clock,
+  Copy,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { SITE } from "@/lib/site-content";
 import heroImg1 from "@/assets/contact-hero-1.jpg";
 import heroImg2 from "@/assets/contact-hero-2.jpg";
@@ -15,9 +26,16 @@ export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
       { title: "Contact — PUSAB" },
-      { name: "description", content: "Get in touch with the Public University Students' Association of Bishwambarpur — questions, partnerships, scholarship inquiries." },
+      {
+        name: "description",
+        content:
+          "Get in touch with the Public University Students' Association of Bishwambarpur — questions, partnerships, scholarship inquiries.",
+      },
       { property: "og:title", content: "Contact — PUSAB" },
-      { property: "og:description", content: "Reach the PUSAB team for questions, partnerships and scholarship inquiries." },
+      {
+        property: "og:description",
+        content: "Reach the PUSAB team for questions, partnerships and scholarship inquiries.",
+      },
       { property: "og:url", content: "/contact" },
     ],
     links: [{ rel: "canonical", href: "/contact" }],
@@ -25,16 +43,38 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
 });
 
-function Field({ label, type = "text", value, onChange, textarea }: { label: string; type?: string; value: string; onChange: (v: string) => void; textarea?: boolean }) {
+function Field({
+  label,
+  type = "text",
+  value,
+  onChange,
+  textarea,
+}: {
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (v: string) => void;
+  textarea?: boolean;
+}) {
   const hasValue = value.length > 0;
   const sharedClass =
     "peer w-full bg-transparent outline-none px-4 pt-6 pb-2 text-sm border border-border rounded-xl focus:border-[var(--color-accent-1)] transition-colors";
   return (
     <label className="relative block">
       {textarea ? (
-        <textarea rows={5} value={value} onChange={(e) => onChange(e.target.value)} className={sharedClass + " resize-none"} />
+        <textarea
+          rows={5}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={sharedClass + " resize-none"}
+        />
       ) : (
-        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className={sharedClass} />
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={sharedClass}
+        />
       )}
       <span
         className={
@@ -60,9 +100,24 @@ function ContactPage() {
 }
 
 const HERO_SLIDES = [
-  { img: heroImg1, kicker: "Get in touch", title: "Start a conversation", caption: "Questions, partnerships and scholarship inquiries are always welcome." },
-  { img: heroImg2, kicker: "From Bishwambarpur", title: "Rooted in service", caption: "A student-led organization shaped by community and commitment." },
-  { img: heroImg3, kicker: "We respond promptly", title: "A reply within 48 hours", caption: "Every message is reviewed by a member of the team." },
+  {
+    img: heroImg1,
+    kicker: "Get in touch",
+    title: "Start a conversation",
+    caption: "Questions, partnerships and scholarship inquiries are always welcome.",
+  },
+  {
+    img: heroImg2,
+    kicker: "From Bishwambarpur",
+    title: "Rooted in service",
+    caption: "A student-led organization shaped by community and commitment.",
+  },
+  {
+    img: heroImg3,
+    kicker: "We respond promptly",
+    title: "A reply within 48 hours",
+    caption: "Every message is reviewed by a member of the team.",
+  },
 ];
 
 function HeroSlider() {
@@ -85,7 +140,10 @@ function HeroSlider() {
           initial={{ opacity: 0, scale: 1.06 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ opacity: { duration: 0.9, ease: "easeOut" }, scale: { duration: 7, ease: "linear" } }}
+          transition={{
+            opacity: { duration: 0.9, ease: "easeOut" },
+            scale: { duration: 7, ease: "linear" },
+          }}
           className="absolute inset-0"
         >
           <img src={slide.img} alt="" className="w-full h-full object-cover" />
@@ -98,7 +156,9 @@ function HeroSlider() {
       <div className="absolute top-32 md:top-36 left-0 right-0 z-10">
         <div className="container-page">
           <nav className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Link to="/" className="hover:text-foreground">Home</Link>
+            <Link to="/" className="hover:text-foreground">
+              Home
+            </Link>
             <ChevronRight size={12} />
             <span className="text-foreground">Contact</span>
           </nav>
@@ -195,7 +255,10 @@ function ContactBody() {
       toast.error("Couldn't send your message. Please check the fields and try again.");
     } else {
       toast.success("Message sent — we'll get back to you soon.");
-      setName(""); setEmail(""); setSubject(""); setMessage("");
+      setName("");
+      setEmail("");
+      setSubject("");
+      setMessage("");
     }
   }
 
@@ -206,9 +269,7 @@ function ContactBody() {
         <div className="container-page">
           <div className="mb-8">
             <p className="text-label mb-2 text-[var(--color-accent-1)]">Write to us</p>
-            <h2 className="text-3xl md:text-5xl font-display tracking-tight">
-              Share your inquiry
-            </h2>
+            <h2 className="text-3xl md:text-5xl font-display tracking-tight">Share your inquiry</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
@@ -228,19 +289,41 @@ function ContactBody() {
               <Field label="Subject" value={subject} onChange={setSubject} />
               <Field label="Message" value={message} onChange={setMessage} textarea />
               <div className="pt-4 flex items-center justify-between gap-4 flex-wrap">
-                <p className="text-xs text-muted-foreground">
-                  We aim to respond within 48 hours.
-                </p>
+                <p className="text-xs text-muted-foreground">We aim to respond within 48 hours.</p>
                 <GradientButton type="submit">{busy ? "Sending…" : "Send Message"}</GradientButton>
               </div>
             </motion.form>
 
             {/* Direct channel cards */}
             {[
-              { key: "email", icon: Mail, label: "Email", value: SITE.email, href: `mailto:${SITE.email}` },
-              { key: "phone", icon: Phone, label: "Phone", value: SITE.phone, href: `tel:${SITE.phone}` },
-              { key: "social", icon: Facebook, label: "Facebook", value: "facebook.com/PUSAB", href: SITE.facebook },
-              { key: "hours", icon: Clock, label: "Response time", value: "Within 48 hours", href: null },
+              {
+                key: "email",
+                icon: Mail,
+                label: "Email",
+                value: SITE.email,
+                href: `mailto:${SITE.email}`,
+              },
+              {
+                key: "phone",
+                icon: Phone,
+                label: "Phone",
+                value: SITE.phone,
+                href: `tel:${SITE.phone}`,
+              },
+              {
+                key: "social",
+                icon: Facebook,
+                label: "Facebook",
+                value: "facebook.com/PUSAB",
+                href: SITE.facebook,
+              },
+              {
+                key: "hours",
+                icon: Clock,
+                label: "Response time",
+                value: "Within 48 hours",
+                href: null,
+              },
             ].map((c, idx) => (
               <motion.div
                 key={c.key}
@@ -256,7 +339,12 @@ function ContactBody() {
                 <p className="text-label mt-5">{c.label}</p>
                 <div className="mt-1 flex items-center justify-between gap-3">
                   {c.href ? (
-                    <a href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer" className="text-sm md:text-base font-medium truncate hover:text-[var(--color-accent-1)] transition-colors">
+                    <a
+                      href={c.href}
+                      target={c.href.startsWith("http") ? "_blank" : undefined}
+                      rel="noreferrer"
+                      className="text-sm md:text-base font-medium truncate hover:text-[var(--color-accent-1)] transition-colors"
+                    >
                       {c.value}
                     </a>
                   ) : (
@@ -265,7 +353,10 @@ function ContactBody() {
                   {c.href && c.key !== "hours" && (
                     <button
                       type="button"
-                      onClick={(e) => { e.preventDefault(); copyValue(c.key, c.value); }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        copyValue(c.key, c.value);
+                      }}
                       className="shrink-0 text-muted-foreground hover:text-[var(--color-accent-1)] transition-colors"
                       aria-label={`Copy ${c.label}`}
                     >
@@ -324,7 +415,8 @@ function ContactBody() {
                   <p className="text-label mb-2">Our location</p>
                   <p className="text-lg font-display leading-tight">PUSAB · Bishwambarpur</p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Govt. Digendra Barman College vicinity, Bishwambarpur Upazila, Sunamganj — Sylhet Division, Bangladesh.
+                    Govt. Digendra Barman College vicinity, Bishwambarpur Upazila, Sunamganj —
+                    Sylhet Division, Bangladesh.
                   </p>
                 </div>
 
@@ -347,7 +439,10 @@ function ContactBody() {
                     className="flex items-center justify-between text-sm group hover:text-[var(--color-accent-1)] transition-colors"
                   >
                     <span>Open in Google Maps</span>
-                    <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    <ArrowUpRight
+                      size={14}
+                      className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                    />
                   </a>
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${COORDS.lat},${COORDS.lng}`}
@@ -356,7 +451,10 @@ function ContactBody() {
                     className="flex items-center justify-between text-sm group hover:text-[var(--color-accent-1)] transition-colors"
                   >
                     <span>Get directions</span>
-                    <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    <ArrowUpRight
+                      size={14}
+                      className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                    />
                   </a>
                 </div>
               </div>

@@ -59,7 +59,9 @@ function AuthPage() {
         <div className="container-page max-w-md">
           <form onSubmit={submit} className="glass rounded-3xl p-8 space-y-5 border border-border">
             <label className="block">
-              <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Email</span>
+              <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                Email
+              </span>
               <input
                 type="email"
                 required
@@ -69,7 +71,9 @@ function AuthPage() {
               />
             </label>
             <label className="block">
-              <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Password</span>
+              <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                Password
+              </span>
               <input
                 type="password"
                 required
@@ -91,7 +95,9 @@ function AuthPage() {
               onClick={() => setMode((m) => (m === "sign-in" ? "sign-up" : "sign-in"))}
               className="text-xs text-muted-foreground hover:text-foreground"
             >
-              {mode === "sign-in" ? "Need an account? Create one" : "Already have an account? Sign in"}
+              {mode === "sign-in"
+                ? "Need an account? Create one"
+                : "Already have an account? Sign in"}
             </button>
           </form>
         </div>

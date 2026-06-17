@@ -4,7 +4,17 @@ import { useState, type ComponentType } from "react";
 import { PageHero } from "@/components/site/PageHero";
 import { GradientButton } from "@/components/site/GradientButton";
 import { PROGRAMS } from "@/lib/site-content";
-import { Users, GraduationCap, HeartHandshake, Trees, Stethoscope, Radio, BookOpen, Sparkles, ArrowUpRight } from "lucide-react";
+import {
+  Users,
+  GraduationCap,
+  HeartHandshake,
+  Trees,
+  Stethoscope,
+  Radio,
+  BookOpen,
+  Sparkles,
+  ArrowUpRight,
+} from "lucide-react";
 import heroPrograms from "@/assets/hero-programs.jpg";
 
 const ICONS: Record<string, ComponentType<{ size?: number; className?: string }>> = {
@@ -18,24 +28,72 @@ const ICONS: Record<string, ComponentType<{ size?: number; className?: string }>
   others: Sparkles,
 };
 
-const META: Record<string, { tag: string; cadence: string; impact: string; highlights: string[] }> = {
-  reunion:    { tag: "Flagship",    cadence: "Annual · December",  impact: "500+ attendees",  highlights: ["Cross-batch networking", "Awards & recognition", "Cultural evening"] },
-  schooling:  { tag: "Education",   cadence: "Weekly sessions",    impact: "12 schools",      highlights: ["Free tutoring", "Career mentoring", "Olympiad prep"] },
-  scholarship:{ tag: "Aid",         cadence: "Yearly intake",      impact: "Need-based",      highlights: ["Merit + need based", "Direct disbursal", "Mentor pairing"] },
-  picnic:     { tag: "Community",   cadence: "Annual · Winter",    impact: "All members",     highlights: ["Outdoor venue", "Games & cuisine", "Family welcome"] },
-  humanity:   { tag: "Relief",      cadence: "On-demand drives",   impact: "Upazila-wide",    highlights: ["Flood response", "Blanket drive", "Free medical camps"] },
-  online:     { tag: "Digital",     cadence: "Monthly",            impact: "Reach anywhere",  highlights: ["Admission AMAs", "Career webinars", "Live Q&A"] },
-  sayor:      { tag: "Publication", cadence: "Yearly issue",       impact: "6 sections",      highlights: ["Literature & essays", "Alumni voices", "Print + digital"] },
-  others:     { tag: "Culture",     cadence: "Year round",         impact: "Mixed formats",   highlights: ["Cultural nights", "Sports tournaments", "Partnerships"] },
-};
+const META: Record<string, { tag: string; cadence: string; impact: string; highlights: string[] }> =
+  {
+    reunion: {
+      tag: "Flagship",
+      cadence: "Annual · December",
+      impact: "500+ attendees",
+      highlights: ["Cross-batch networking", "Awards & recognition", "Cultural evening"],
+    },
+    schooling: {
+      tag: "Education",
+      cadence: "Weekly sessions",
+      impact: "12 schools",
+      highlights: ["Free tutoring", "Career mentoring", "Olympiad prep"],
+    },
+    scholarship: {
+      tag: "Aid",
+      cadence: "Yearly intake",
+      impact: "Need-based",
+      highlights: ["Merit + need based", "Direct disbursal", "Mentor pairing"],
+    },
+    picnic: {
+      tag: "Community",
+      cadence: "Annual · Winter",
+      impact: "All members",
+      highlights: ["Outdoor venue", "Games & cuisine", "Family welcome"],
+    },
+    humanity: {
+      tag: "Relief",
+      cadence: "On-demand drives",
+      impact: "Upazila-wide",
+      highlights: ["Flood response", "Blanket drive", "Free medical camps"],
+    },
+    online: {
+      tag: "Digital",
+      cadence: "Monthly",
+      impact: "Reach anywhere",
+      highlights: ["Admission AMAs", "Career webinars", "Live Q&A"],
+    },
+    sayor: {
+      tag: "Publication",
+      cadence: "Yearly issue",
+      impact: "6 sections",
+      highlights: ["Literature & essays", "Alumni voices", "Print + digital"],
+    },
+    others: {
+      tag: "Culture",
+      cadence: "Year round",
+      impact: "Mixed formats",
+      highlights: ["Cultural nights", "Sports tournaments", "Partnerships"],
+    },
+  };
 
 export const Route = createFileRoute("/programs")({
   head: () => ({
     meta: [
       { title: "Programs & Activities — PUSAB" },
-      { name: "description", content: "PUSAB programs: annual reunion, schooling, scholarships, picnic, humanity initiatives, online events, SAYOR magazine, and more." },
+      {
+        name: "description",
+        content:
+          "PUSAB programs: annual reunion, schooling, scholarships, picnic, humanity initiatives, online events, SAYOR magazine, and more.",
+      },
       { property: "og:title", content: "Programs & Activities — PUSAB" },
-      { property: "og:description", content: "Explore the programs powering PUSAB's mission across Bishwambarpur." },
+      {
+        property: "og:description",
+        content: "Explore the programs powering PUSAB's mission across Bishwambarpur.",
+      },
       { property: "og:url", content: "/programs" },
     ],
     links: [{ rel: "canonical", href: "/programs" }],
@@ -86,7 +144,12 @@ function ProgramsPage() {
                           className="absolute inset-0 rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] shadow-[0_8px_24px_-10px_color-mix(in_oklab,var(--color-accent-1)_70%,transparent)]"
                         />
                       )}
-                      <span className={"relative z-10 font-display text-[10px] tabular-nums " + (isActive ? "text-white/80" : "text-muted-foreground")}>
+                      <span
+                        className={
+                          "relative z-10 font-display text-[10px] tabular-nums " +
+                          (isActive ? "text-white/80" : "text-muted-foreground")
+                        }
+                      >
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <Icon size={14} className="relative z-10" />
@@ -119,7 +182,8 @@ function ProgramsPage() {
                       {currentMeta.tag}
                     </span>
                     <span className="rounded-full border border-white/15 bg-black/30 backdrop-blur px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-white/80">
-                      {String(activeIdx + 1).padStart(2, "0")} / {String(PROGRAMS.length).padStart(2, "0")}
+                      {String(activeIdx + 1).padStart(2, "0")} /{" "}
+                      {String(PROGRAMS.length).padStart(2, "0")}
                     </span>
                   </div>
 
@@ -137,20 +201,28 @@ function ProgramsPage() {
 
               {/* Content column */}
               <div className="p-6 sm:p-8 lg:p-10">
-                <p className="text-base leading-relaxed text-foreground/85 sm:text-lg">{current.desc}</p>
+                <p className="text-base leading-relaxed text-foreground/85 sm:text-lg">
+                  {current.desc}
+                </p>
 
                 {/* Meta strip */}
                 <dl className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div className="rounded-2xl border border-border bg-background/40 p-4">
-                    <dt className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Cadence</dt>
+                    <dt className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                      Cadence
+                    </dt>
                     <dd className="mt-1.5 font-display font-semibold">{currentMeta.cadence}</dd>
                   </div>
                   <div className="rounded-2xl border border-border bg-background/40 p-4">
-                    <dt className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Reach</dt>
+                    <dt className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                      Reach
+                    </dt>
                     <dd className="mt-1.5 font-display font-semibold">{currentMeta.impact}</dd>
                   </div>
                   <div className="rounded-2xl border border-border bg-background/40 p-4">
-                    <dt className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Format</dt>
+                    <dt className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                      Format
+                    </dt>
                     <dd className="mt-1.5 font-display font-semibold">{currentMeta.tag}</dd>
                   </div>
                 </dl>
@@ -176,7 +248,9 @@ function ProgramsPage() {
                     <GradientButton to="/contact">Apply for Scholarship</GradientButton>
                   ) : (
                     <GradientButton to="/contact">
-                      <span className="inline-flex items-center gap-1.5">Get Involved <ArrowUpRight size={16} /></span>
+                      <span className="inline-flex items-center gap-1.5">
+                        Get Involved <ArrowUpRight size={16} />
+                      </span>
                     </GradientButton>
                   )}
                   <button

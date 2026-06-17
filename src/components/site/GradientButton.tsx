@@ -11,7 +11,15 @@ interface Props {
   type?: "button" | "submit";
 }
 
-export function GradientButton({ to, href, variant = "solid", children, className = "", onClick, type }: Props) {
+export function GradientButton({
+  to,
+  href,
+  variant = "solid",
+  children,
+  className = "",
+  onClick,
+  type,
+}: Props) {
   const base =
     "inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 will-change-transform";
   const solid =
@@ -20,7 +28,21 @@ export function GradientButton({ to, href, variant = "solid", children, classNam
     "border border-white/15 text-foreground hover:bg-white/[0.05] hover:border-white/30";
   const cls = `${base} ${variant === "solid" ? solid : ghost} ${className}`;
 
-  if (to) return <Link to={to} className={cls}>{children}</Link>;
-  if (href) return <a href={href} className={cls}>{children}</a>;
-  return <button onClick={onClick} type={type} className={cls}>{children}</button>;
+  if (to)
+    return (
+      <Link to={to} className={cls}>
+        {children}
+      </Link>
+    );
+  if (href)
+    return (
+      <a href={href} className={cls}>
+        {children}
+      </a>
+    );
+  return (
+    <button onClick={onClick} type={type} className={cls}>
+      {children}
+    </button>
+  );
 }

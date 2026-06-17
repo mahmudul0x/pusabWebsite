@@ -10,9 +10,16 @@ export const Route = createFileRoute("/moments")({
   head: () => ({
     meta: [
       { title: "Proud Moments — PUSAB" },
-      { name: "description", content: "A photo journey through PUSAB's events, achievements, community service and reunions." },
+      {
+        name: "description",
+        content:
+          "A photo journey through PUSAB's events, achievements, community service and reunions.",
+      },
       { property: "og:title", content: "Proud Moments — PUSAB" },
-      { property: "og:description", content: "Memories from PUSAB events, achievements and community service." },
+      {
+        property: "og:description",
+        content: "Memories from PUSAB events, achievements and community service.",
+      },
       { property: "og:url", content: "/moments" },
     ],
     links: [{ rel: "canonical", href: "/moments" }],
@@ -20,7 +27,13 @@ export const Route = createFileRoute("/moments")({
   component: MomentsPage,
 });
 
-type Item = { id: string; title: string | null; category: string; image_url: string; year: number | null };
+type Item = {
+  id: string;
+  title: string | null;
+  category: string;
+  image_url: string;
+  year: number | null;
+};
 const CATS = ["all", "events", "achievements", "community", "reunion"] as const;
 
 function MomentsPage() {
@@ -40,18 +53,38 @@ function MomentsPage() {
 
   return (
     <>
-      <PageHero title="Proud Moments" lede="A photo journey through PUSAB's events, achievements, community service and reunions." crumbs={[{ label: "Home", to: "/" }, { label: "Moments" }]} image={heroMoments} imageAlt="PUSAB reunion moments collage" />
+      <PageHero
+        title="Proud Moments"
+        lede="A photo journey through PUSAB's events, achievements, community service and reunions."
+        crumbs={[{ label: "Home", to: "/" }, { label: "Moments" }]}
+        image={heroMoments}
+        imageAlt="PUSAB reunion moments collage"
+      />
 
       <section className="pb-24">
         <div className="container-page">
           <div className="inline-flex glass rounded-full p-1 gap-1 mb-10 capitalize">
             {CATS.map((c) => (
-              <button key={c} onClick={() => setFilter(c)} className="relative px-4 py-2 text-sm font-medium">
+              <button
+                key={c}
+                onClick={() => setFilter(c)}
+                className="relative px-4 py-2 text-sm font-medium"
+              >
                 {filter === c && (
-                  <motion.span layoutId="cat-pill" transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                    className="absolute inset-0 rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))]" />
+                  <motion.span
+                    layoutId="cat-pill"
+                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    className="absolute inset-0 rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))]"
+                  />
                 )}
-                <span className={"relative z-10 " + (filter === c ? "text-white" : "text-foreground/70 hover:text-foreground")}>{c}</span>
+                <span
+                  className={
+                    "relative z-10 " +
+                    (filter === c ? "text-white" : "text-foreground/70 hover:text-foreground")
+                  }
+                >
+                  {c}
+                </span>
               </button>
             ))}
           </div>
@@ -59,7 +92,11 @@ function MomentsPage() {
           {items === null ? (
             <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="mb-4 break-inside-avoid rounded-2xl shimmer" style={{ height: 180 + (i % 3) * 60 }} />
+                <div
+                  key={i}
+                  className="mb-4 break-inside-avoid rounded-2xl shimmer"
+                  style={{ height: 180 + (i % 3) * 60 }}
+                />
               ))}
             </div>
           ) : shown.length === 0 ? (
@@ -75,7 +112,11 @@ function MomentsPage() {
                   onClick={() => setOpen(it)}
                   className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]"
                 >
-                  <img src={it.image_url} alt={it.title ?? ""} className="w-full h-auto transition-transform duration-500 hover:scale-105" />
+                  <img
+                    src={it.image_url}
+                    alt={it.title ?? ""}
+                    className="w-full h-auto transition-transform duration-500 hover:scale-105"
+                  />
                 </motion.button>
               ))}
             </div>
@@ -86,7 +127,9 @@ function MomentsPage() {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={() => setOpen(null)}
             onKeyDown={(e) => e.key === "Escape" && setOpen(null)}
             className="fixed inset-0 z-[10000] bg-black/85 backdrop-blur-xl grid place-items-center p-6"
@@ -97,7 +140,10 @@ function MomentsPage() {
               alt={open.title ?? ""}
               className="max-h-[88vh] max-w-[92vw] rounded-2xl border border-border"
             />
-            <button onClick={() => setOpen(null)} className="absolute top-6 right-6 h-10 w-10 rounded-full glass grid place-items-center">
+            <button
+              onClick={() => setOpen(null)}
+              className="absolute top-6 right-6 h-10 w-10 rounded-full glass grid place-items-center"
+            >
               <X size={18} />
             </button>
           </motion.div>

@@ -10,7 +10,7 @@ interface Props {
 
 export function AnimatedHeading({ children, as = "h1", className = "", delay = 0 }: Props) {
   const words = children.split(" ");
-  const Comp: any = motion[as];
+  const Comp = motion[as];
   return (
     <Comp
       initial="hidden"
@@ -27,7 +27,12 @@ export function AnimatedHeading({ children, as = "h1", className = "", delay = 0
             className="inline-block"
             variants={{
               hidden: { y: "110%", opacity: 0, filter: "blur(8px)" },
-              show: { y: 0, opacity: 1, filter: "blur(0px)", transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
+              show: {
+                y: 0,
+                opacity: 1,
+                filter: "blur(0px)",
+                transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+              },
             }}
           >
             {word}

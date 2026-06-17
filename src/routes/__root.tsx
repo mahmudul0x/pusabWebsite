@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import faviconPusab from "../assets/logo-pusab.png?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FloatingNavbar } from "../components/site/FloatingNavbar";
 import { SiteFooter } from "../components/site/SiteFooter";
@@ -82,28 +83,56 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#07070D" },
       { title: "PUSAB — Public University Students' Association of Bishwambarpur" },
-      { name: "description", content: "A non-profit association of 300+ students from public universities, medical & engineering colleges — united for one upazila." },
+      {
+        name: "description",
+        content:
+          "A non-profit association of 300+ students from public universities, medical & engineering colleges — united for one upazila.",
+      },
       { name: "author", content: "PUSAB" },
-      { property: "og:title", content: "PUSAB — Public University Students' Association of Bishwambarpur" },
-      { property: "og:description", content: "A non-profit association of 300+ students from public universities, medical & engineering colleges — united for one upazila." },
+      {
+        property: "og:title",
+        content: "PUSAB — Public University Students' Association of Bishwambarpur",
+      },
+      {
+        property: "og:description",
+        content:
+          "A non-profit association of 300+ students from public universities, medical & engineering colleges — united for one upazila.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "PUSAB" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "PUSAB — Public University Students' Association of Bishwambarpur" },
-      { name: "twitter:description", content: "A non-profit association of 300+ students from public universities, medical & engineering colleges — united for one upazila." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f537e135-106d-4695-a44e-911e2ae1aeb1/id-preview-f24b7edb--8f0f20d1-de75-4037-967d-0dbc5b1d8d01.lovable.app-1781700696901.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f537e135-106d-4695-a44e-911e2ae1aeb1/id-preview-f24b7edb--8f0f20d1-de75-4037-967d-0dbc5b1d8d01.lovable.app-1781700696901.png" },
+      {
+        name: "twitter:title",
+        content: "PUSAB — Public University Students' Association of Bishwambarpur",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "A non-profit association of 300+ students from public universities, medical & engineering colleges — united for one upazila.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f537e135-106d-4695-a44e-911e2ae1aeb1/id-preview-f24b7edb--8f0f20d1-de75-4037-967d-0dbc5b1d8d01.lovable.app-1781700696901.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f537e135-106d-4695-a44e-911e2ae1aeb1/id-preview-f24b7edb--8f0f20d1-de75-4037-967d-0dbc5b1d8d01.lovable.app-1781700696901.png",
+      },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "icon", type: "image/png", href: faviconPusab },
+      { rel: "apple-touch-icon", href: faviconPusab },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@400;500;600;700&display=swap",
       },
     ],
   }),
