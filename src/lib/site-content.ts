@@ -29,6 +29,95 @@ export const NAV_LINKS = [
   { to: "/contact", label: "Contact" },
 ] as const;
 
+// Demo Executive Committee history (2014 -> 2026). Used on the frontend when the
+// database has no ec_members yet; real data from the admin panel takes over once
+// added. Replace with real members/photos any time.
+export type EcMember = {
+  id: string;
+  name: string;
+  role: string;
+  university: string | null;
+  year: number;
+  is_current: boolean;
+  photo_url: string | null;
+};
+
+const ec = (
+  name: string,
+  role: string,
+  university: string,
+  year: number,
+  is_current = false,
+): EcMember => ({ id: `${year}-${role}-${name}`, name, role, university, year, is_current, photo_url: null });
+
+const SUST = "Shahjalal University of Science & Technology";
+const DU = "University of Dhaka";
+
+export const DEMO_EC_MEMBERS: EcMember[] = [
+  // 2026 — current
+  ec("Tanvir Ahmed Rafi", "President", SUST, 2026, true),
+  ec("Mahir Tajwar", "General Secretary", DU, 2026, true),
+  ec("Nusrat Jahan Mim", "Vice President", "Jahangirnagar University", 2026, true),
+  ec("Sadia Islam", "Treasurer", "Rajshahi University", 2026, true),
+  ec("Rakibul Hasan", "Organizing Secretary", "CUET", 2026, true),
+  // 2025
+  ec("Sabbir Hossain", "President", "BUET", 2025),
+  ec("Imran Kabir", "General Secretary", SUST, 2025),
+  ec("Farzana Yeasmin", "Vice President", DU, 2025),
+  ec("Mehedi Hasan Joy", "Treasurer", "Chittagong University", 2025),
+  // 2024
+  ec("Mahmudul Hasan", "President", DU, 2024),
+  ec("Tasnim Rahman", "General Secretary", SUST, 2024),
+  ec("Jubayer Alam", "Vice President", "CUET", 2024),
+  ec("Anika Tabassum", "Treasurer", "Khulna University", 2024),
+  // 2023
+  ec("Md. Rahim Uddin", "President", DU, 2023),
+  ec("Tanvir Hasan", "General Secretary", "BUET", 2023),
+  ec("Mahbubur Rahman", "Organizing Secretary", "Rajshahi University", 2023),
+  ec("Nusrat Jahan", "Treasurer", DU, 2023),
+  ec("Sadia Akter", "Vice President", "Jahangirnagar University", 2023),
+  // 2022
+  ec("Arifur Rahman", "President", "BUET", 2022),
+  ec("Shakil Ahmed", "General Secretary", "Jahangirnagar University", 2022),
+  ec("Rumana Parvin", "Treasurer", "Chittagong University", 2022),
+  ec("Farzana Yasmin", "Vice President", DU, 2022),
+  // 2021
+  ec("Kamrul Islam", "President", DU, 2021),
+  ec("Sumaiya Islam", "General Secretary", "BUET", 2021),
+  ec("Mahmuda Khatun", "Organizing Secretary", SUST, 2021),
+  ec("Jahidul Hoque", "Treasurer", SUST, 2021),
+  // 2020
+  ec("Habibur Rahman", "President", DU, 2020),
+  ec("Selina Akter", "General Secretary", "Jahangirnagar University", 2020),
+  ec("Mizanur Rahman", "Treasurer", "BUET", 2020),
+  // 2019
+  ec("Nazmul Haque", "President", DU, 2019),
+  ec("Rezaul Karim", "General Secretary", SUST, 2019),
+  ec("Shahidul Islam", "Organizing Secretary", "Rajshahi University", 2019),
+  // 2018
+  ec("Asaduzzaman Noor", "President", "BUET", 2018),
+  ec("Tania Sultana", "General Secretary", "Chittagong University", 2018),
+  ec("Forhad Hossain", "Treasurer", DU, 2018),
+  // 2017
+  ec("Mizanur Rahman Sumon", "President", DU, 2017),
+  ec("Sanjida Akter", "General Secretary", "Jahangirnagar University", 2017),
+  ec("Rasel Ahmed", "Vice President", SUST, 2017),
+  // 2016
+  ec("Jahangir Alam", "President", SUST, 2016),
+  ec("Mehedi Hasan", "General Secretary", DU, 2016),
+  ec("Sabuj Mia", "Organizing Secretary", "BUET", 2016),
+  // 2015
+  ec("Abdul Karim", "President", DU, 2015),
+  ec("Roknuzzaman", "General Secretary", "Rajshahi University", 2015),
+  ec("Shamima Nasrin", "Treasurer", "Chittagong University", 2015),
+  // 2014 — founding committee (convening leadership + first office-bearers)
+  ec("Shahjalal Mia", "Convenor", DU, 2014),
+  ec("Abdul Hannan", "Member Secretary", SUST, 2014),
+  ec("Nurul Amin", "Founding President", "BUET", 2014),
+  ec("Kamal Uddin", "Founding General Secretary", DU, 2014),
+  ec("Ruhul Amin", "Founding Treasurer", "Rajshahi University", 2014),
+];
+
 export const OBJECTIVES = [
   {
     title: "Student Unity",

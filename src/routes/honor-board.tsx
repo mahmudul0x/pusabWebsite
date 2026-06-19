@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
 import { supabase } from "@/integrations/supabase/client";
+import { DEMO_EC_MEMBERS } from "@/lib/site-content";
 import { Gavel, Crown, Award } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
 import { supabase } from "@/integrations/supabase/client";
+import { DEMO_EC_MEMBERS } from "@/lib/site-content";
 import { Crown, Gavel, Sparkles } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
@@ -80,7 +81,10 @@ function ExecutiveCommitteePage() {
       .from("ec_members")
       .select("id,name,role,university,year,is_current,photo_url")
       .order("year", { ascending: false })
-      .then(({ data }) => setMembers((data as Member[] | null) ?? []));
+      .then(({ data }) => {
+        const rows = (data as Member[] | null) ?? [];
+        setMembers(rows.length ? rows : DEMO_EC_MEMBERS);
+      });
   }, []);
 
   // Group into committees by session year (newest first).
@@ -192,17 +196,29 @@ function ExecutiveCommitteePage() {
                       )}
                     </div>
 
-                    {/* Full roster: name + designation */}
+                    {/* Full roster: name · university · designation, with the session date */}
                     <div className="px-6 py-6 sm:px-8">
-                      <p className="text-label mb-4">Committee members</p>
-                      <ul className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <div className="mb-4 flex items-baseline justify-between gap-3">
+                        <p className="text-label">Committee members</p>
+                        <span className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                          Session {year}
+                        </span>
+                      </div>
+                      <ul className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
                         {roster.map((m) => (
                           <li
                             key={m.id}
-                            className="flex items-baseline justify-between gap-3 border-b border-border/60 pb-2"
+                            className="flex items-start justify-between gap-3 border-b border-border/60 pb-3"
                           >
-                            <span className="font-medium">{m.name}</span>
-                            <span className="shrink-0 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                            <div className="min-w-0">
+                              <p className="font-medium leading-tight">{m.name}</p>
+                              {m.university && (
+                                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                                  {m.university}
+                                </p>
+                              )}
+                            </div>
+                            <span className="shrink-0 text-right text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-accent-1)]">
                               {m.role}
                             </span>
                           </li>
