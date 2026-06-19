@@ -279,6 +279,7 @@ function PublicityAdmin() {
   const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [excerpt, setExcerpt] = useState("");
   const [body, setBody] = useState("");
+  const [link, setLink] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -310,6 +311,7 @@ function PublicityAdmin() {
         date,
         excerpt: excerpt || null,
         body: body || null,
+        link: link.trim() || null,
         image_url,
         storage_path,
         published: true,
@@ -319,6 +321,7 @@ function PublicityAdmin() {
       setTitle("");
       setExcerpt("");
       setBody("");
+      setLink("");
       setFile(null);
       await refresh();
     } catch (err) {
@@ -385,6 +388,15 @@ function PublicityAdmin() {
             rows={5}
             value={body}
             onChange={(e) => setBody(e.target.value)}
+            className={inputCls}
+          />
+        </Field>
+        <Field label="External link (optional)">
+          <input
+            type="url"
+            placeholder="https://…  — clicking the card opens this"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
             className={inputCls}
           />
         </Field>

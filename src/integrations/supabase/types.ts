@@ -112,6 +112,7 @@ export type Database = {
           excerpt: string | null;
           id: string;
           image_url: string | null;
+          link: string | null;
           published: boolean;
           storage_path: string | null;
           title: string;
@@ -124,6 +125,7 @@ export type Database = {
           excerpt?: string | null;
           id?: string;
           image_url?: string | null;
+          link?: string | null;
           published?: boolean;
           storage_path?: string | null;
           title: string;
@@ -136,6 +138,7 @@ export type Database = {
           excerpt?: string | null;
           id?: string;
           image_url?: string | null;
+          link?: string | null;
           published?: boolean;
           storage_path?: string | null;
           title?: string;

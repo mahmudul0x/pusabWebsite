@@ -10,7 +10,6 @@ import {
   Stethoscope,
   Megaphone,
   Quote,
-  Sparkles,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
@@ -22,6 +21,7 @@ import { SITE, STATS } from "@/lib/site-content";
 import homeHero1 from "@/assets/home-hero-1.jpg";
 import homeHero2 from "@/assets/home-hero-2.jpg";
 import homeHero3 from "@/assets/home-hero-3.jpg";
+import sayorHome from "@/assets/sayor-home.png";
 
 const HERO_SLIDES = [homeHero1, homeHero2, homeHero3];
 
@@ -104,27 +104,12 @@ function MagazineTilt() {
         style={{ transformStyle: "preserve-3d" }}
         className="absolute inset-0 rounded-3xl overflow-hidden border border-white/10 shadow-[0_30px_80px_-20px_rgba(124,58,237,0.45)]"
       >
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,#0F0F1A,#16162A)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(79,110,247,0.4),transparent_55%),radial-gradient(circle_at_80%_90%,rgba(124,58,237,0.4),transparent_55%)]" />
-        <div className="relative h-full flex flex-col justify-between p-7">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-white/70">
-              Vol · Annual
-            </span>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-white/70">PUSAB</span>
-          </div>
-          <div>
-            <div className="font-display text-6xl font-extrabold tracking-tighter gradient-text">
-              SAYOR
-            </div>
-            <p className="mt-2 text-sm text-white/70 max-w-[14rem]">
-              The annual magazine of PUSAB · Bishwambarpur
-            </p>
-          </div>
-          <div className="text-[10px] uppercase tracking-[0.2em] text-white/50">
-            Education · Culture · Science · Heritage
-          </div>
-        </div>
+        <img
+          src={sayorHome}
+          alt="SAYOR — the annual magazine of PUSAB"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-3xl" />
       </motion.div>
     </div>
   );
@@ -139,41 +124,45 @@ function Index() {
       {/* HERO */}
       <section className="relative min-h-[100dvh] flex items-center overflow-hidden">
         <HeroSlideshow />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/15 via-slate-900/10 to-background/10" />
-        <div className="container-page relative z-10 pt-44 pb-28">
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="mx-auto w-fit"
-          >
-            <div className="formal-pill flex items-center gap-2 text-xs font-medium">
-              <Sparkles size={13} className="text-[var(--color-accent-1)]" />
-              <span>Student-led · Non-political · Community-focused</span>
-            </div>
-          </motion.div>
+        <div className="container-page relative z-10 pt-40 pb-28 md:pt-32">
+          <div className="mx-auto max-w-4xl text-center [text-shadow:0_2px_30px_rgba(2,6,23,0.55)]">
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="mx-auto w-fit"
+            >
+              <div className="formal-pill flex items-center gap-2.5 text-xs font-medium text-white/90">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-accent-1)] opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--color-accent-1)]" />
+                </span>
+                <span className="tracking-wide">Student-led · Non-political · Community-focused</span>
+              </div>
+            </motion.div>
 
-          <div className="mt-8 text-center mx-auto max-w-5xl">
-            <AnimatedHeading
-              as="h1"
-              className="font-display text-[44px] leading-[1.0] sm:text-6xl md:text-7xl lg:text-[78px] font-extrabold tracking-[-0.04em] text-foreground"
-            >
-              Building a stronger
-            </AnimatedHeading>
-            <motion.h1
-              initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ delay: 0.55, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="font-display text-[44px] leading-[1.0] sm:text-6xl md:text-7xl lg:text-[78px] font-extrabold tracking-[-0.04em] gradient-text"
-            >
-              future for Bishwambarpur.
-            </motion.h1>
+            <div className="mt-7">
+              <AnimatedHeading
+                as="h1"
+                className="font-display text-[44px] leading-[1.02] sm:text-6xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.045em] text-white"
+              >
+                Building a stronger
+              </AnimatedHeading>
+              <motion.span
+                initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ delay: 0.55, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="block font-display text-[44px] leading-[1.02] sm:text-6xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.045em] text-white/90"
+              >
+                future for Bishwambarpur<span className="text-[var(--color-accent-2)]">.</span>
+              </motion.span>
+            </div>
 
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.7 }}
-              className="mt-8 mx-auto max-w-2xl text-base md:text-lg text-foreground/90 leading-relaxed"
+              className="mt-7 mx-auto max-w-xl text-base md:text-lg text-white/85 leading-relaxed"
             >
               PUSAB brings together {SITE.members} students from public universities, medical and
               engineering colleges to support learning, leadership, and community development in
@@ -184,26 +173,44 @@ function Index() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.05, duration: 0.7 }}
-              className="mt-10 flex flex-wrap items-center justify-center gap-3"
+              className="mt-9 flex flex-wrap items-center justify-center gap-3"
             >
               <GradientButton to="/programs">Explore Our Programs</GradientButton>
-              <GradientButton to="/about" variant="ghost">
+              <GradientButton
+                to="/about"
+                variant="ghost"
+                className="text-white! border-white/45! bg-white/5 backdrop-blur-sm hover:bg-white/15! hover:border-white/70!"
+              >
                 About PUSAB{" "}
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </GradientButton>
             </motion.div>
-          </div>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.4 }}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-          >
-            <ChevronDown className="animate-float-bounce text-foreground/60" size={18} />
-            <div className="h-12 w-px bg-gradient-to-b from-foreground/40 to-transparent" />
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.25, duration: 0.7 }}
+              className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.22em] text-white/65"
+            >
+              <span>Est. {SITE.founded.slice(-4)}</span>
+              <span className="hidden sm:inline text-white/30">/</span>
+              <span>{SITE.members} Members</span>
+              <span className="hidden sm:inline text-white/30">/</span>
+              <span>Bishwambarpur · Sunamganj</span>
+            </motion.div>
+          </div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
+        >
+          <ChevronDown className="animate-float-bounce text-white/70" size={18} />
+          <div className="h-12 w-px bg-gradient-to-b from-white/50 to-transparent" />
+        </motion.div>
+
         <style>{`
           .formal-pill {
             padding: 8px 14px;
@@ -359,8 +366,11 @@ function HeroSlideshow() {
           className="absolute inset-0 w-full h-full object-cover"
         />
       </AnimatePresence>
-      <div className="absolute inset-0 bg-gradient-to-b from-background/25 via-background/40 to-background/85" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(79,110,247,0.10),transparent_50%),radial-gradient(circle_at_70%_75%,rgba(124,58,237,0.08),transparent_50%)]" />
+      {/* Cinematic scrim — darkens the photo just enough for crisp white text. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/55 via-slate-950/45 to-slate-950/80" />
+      {/* Center focus + faint brand tint. */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(2,6,23,0.30),transparent_72%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(124,58,237,0.18),transparent_55%)]" />
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
         {HERO_SLIDES.map((_, idx) => (
           <button
