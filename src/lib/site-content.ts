@@ -15,8 +15,16 @@ export const NAV_LINKS = [
   { to: "/about", label: "About" },
   { to: "/programs", label: "Programs" },
   { to: "/sayor", label: "SAYOR" },
+  { to: "/felicitation", label: "Felicitation" },
   { to: "/publicity", label: "Publicity" },
-  { to: "/leadership", label: "Leadership" },
+  {
+    to: "/leadership",
+    label: "Leadership",
+    children: [
+      { to: "/leadership", label: "Executive Committee" },
+      { to: "/honor-board", label: "Honor Board" },
+    ],
+  },
   { to: "/moments", label: "Moments" },
   { to: "/contact", label: "Contact" },
 ] as const;

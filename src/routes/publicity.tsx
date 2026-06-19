@@ -179,14 +179,12 @@ function PublicityPage() {
           ) : (
             <div className="space-y-5">
               {/* Featured story */}
-              {featured && (
-                <PostCard post={featured} featured onRead={setReading} index={0} />
-              )}
+              {featured && <PostCard post={featured} featured onOpen={openPost} index={0} />}
               {/* Rest */}
               {rest.length > 0 && (
                 <div className="grid gap-5 md:grid-cols-3">
                   {rest.map((p, i) => (
-                    <PostCard key={p.id} post={p} onRead={setReading} index={i + 1} />
+                    <PostCard key={p.id} post={p} onOpen={openPost} index={i + 1} />
                   ))}
                 </div>
               )}
@@ -260,18 +258,93 @@ function PublicityPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* In-site link viewer — embeds the external source, with an open-in-new-tab fallback. */}
+      <AnimatePresence>
+        {framed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex flex-col bg-slate-950/80 backdrop-blur-sm sm:p-4 md:p-6"
+            onClick={() => setFramed(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 24, scale: 0.99 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden border border-border bg-[var(--color-surface)] sm:rounded-2xl"
+            >
+              {/* Toolbar */}
+              <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+                <div className="min-w-0">
+                  <p className="truncate font-display text-sm font-semibold sm:text-base">
+                    {framed.title}
+                  </p>
+                  <p className="truncate text-[11px] text-muted-foreground">{framed.link}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <a
+                    href={framed.link!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-3.5 py-2 text-xs font-semibold text-white"
+                  >
+                    <ExternalLink size={13} /> <span className="hidden sm:inline">New tab</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setFramed(null)}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)]"
+                    aria-label="Close"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Embed */}
+              <div className="relative flex-1 bg-background">
+                {frameLoading && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                    <Loader2 className="animate-spin" size={22} />
+                    <span className="text-sm">Loading the source…</span>
+                  </div>
+                )}
+                <iframe
+                  key={framed.id}
+                  src={framed.link!}
+                  title={framed.title}
+                  onLoad={() => setFrameLoading(false)}
+                  referrerPolicy="no-referrer"
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                  className="h-full w-full border-0"
+                />
+              </div>
+
+              {/* Fallback hint */}
+              <div className="border-t border-border px-4 py-2 text-center text-[11px] text-muted-foreground">
+                সাইটটি এখানে না খুললে উপরের <span className="font-medium text-foreground">New tab</span>{" "}
+                বাটন ব্যবহার করুন — কিছু সংবাদ সাইট embed করতে দেয় না।
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
 
 function PostCard({
   post,
-  onRead,
+  onOpen,
   index,
   featured = false,
 }: {
   post: Post;
-  onRead: (p: Post) => void;
+  onOpen: (p: Post) => void;
   index: number;
   featured?: boolean;
 }) {
@@ -350,16 +423,9 @@ function PostCard({
     transition: { duration: 0.5, delay: Math.min(index, 4) * 0.05 },
   } as const;
 
-  // External link → open the source; otherwise open the in-page reader.
-  if (hasLink) {
-    return (
-      <motion.a href={post.link!} target="_blank" rel="noopener noreferrer" className={cls} {...motionProps}>
-        {body}
-      </motion.a>
-    );
-  }
+  // Both link and non-link posts open in-site: link -> iframe viewer, else reader.
   return (
-    <motion.button type="button" onClick={() => onRead(post)} className={cls + " w-full"} {...motionProps}>
+    <motion.button type="button" onClick={() => onOpen(post)} className={cls + " w-full"} {...motionProps}>
       {body}
     </motion.button>
   );

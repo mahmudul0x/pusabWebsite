@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { NAV_LINKS, SITE } from "@/lib/site-content";
 import logoPusab from "@/assets/logo-pusab.png";
 
@@ -9,6 +9,7 @@ export function FloatingNavbar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -19,7 +20,21 @@ export function FloatingNavbar() {
 
   useEffect(() => {
     setMobileOpen(false);
+    setOpenMenu(null);
   }, [pathname]);
+
+  // Close any open dropdown on outside click or Escape.
+  useEffect(() => {
+    if (!openMenu) return;
+    const close = () => setOpenMenu(null);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpenMenu(null);
+    document.addEventListener("click", close);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("click", close);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [openMenu]);
 
   return (
     <>
@@ -66,22 +81,94 @@ export function FloatingNavbar() {
           {/* Desktop links */}
           <ul className="hidden lg:flex items-center gap-1 mx-auto">
             {NAV_LINKS.map((link) => {
-              const isActive = link.to === "/" ? pathname === "/" : pathname.startsWith(link.to);
+              const children = "children" in link ? link.children : undefined;
+              const childActive = children?.some((c) => pathname.startsWith(c.to));
+              const isActive =
+                (link.to === "/" ? pathname === "/" : pathname.startsWith(link.to)) ||
+                Boolean(childActive);
+              const pillClasses =
+                "relative inline-flex cursor-pointer items-center gap-1 px-3.5 py-1.5 text-sm font-semibold tracking-[0.02em] text-foreground/75 hover:text-foreground transition-colors";
+              const pill = isActive && (
+                <motion.span
+                  layoutId="nav-pill"
+                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                  className="absolute inset-0 rounded-full bg-[var(--color-surface-2)] border border-border"
+                />
+              );
+
+              if (!children) {
+                return (
+                  <li key={link.to}>
+                    <Link to={link.to} className={pillClasses}>
+                      {pill}
+                      <span className="relative z-10">{link.label}</span>
+                    </Link>
+                  </li>
+                );
+              }
+
+              const isOpen = openMenu === link.to;
               return (
-                <li key={link.to}>
-                  <Link
-                    to={link.to}
-                    className="relative px-3.5 py-1.5 text-sm font-semibold tracking-[0.02em] text-foreground/75 hover:text-foreground transition-colors"
+                <li
+                  key={link.to}
+                  className="relative"
+                  onMouseEnter={() => setOpenMenu(link.to)}
+                  onMouseLeave={() => setOpenMenu(null)}
+                >
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenMenu(isOpen ? null : link.to);
+                    }}
+                    className={pillClasses}
                   >
-                    {isActive && (
-                      <motion.span
-                        layoutId="nav-pill"
-                        transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                        className="absolute inset-0 rounded-full bg-[var(--color-surface-2)] border border-border"
-                      />
-                    )}
+                    {pill}
                     <span className="relative z-10">{link.label}</span>
-                  </Link>
+                    <ChevronDown
+                      size={13}
+                      className={
+                        "relative z-10 opacity-60 transition-transform duration-200 " +
+                        (isOpen ? "rotate-180" : "")
+                      }
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                        transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="absolute left-1/2 top-full z-20 -translate-x-1/2 pt-3"
+                      >
+                        <ul className="min-w-[220px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
+                          {children.map((c) => {
+                            const cActive = pathname.startsWith(c.to);
+                            return (
+                              <li key={c.to + c.label}>
+                                <Link
+                                  to={c.to}
+                                  onClick={() => setOpenMenu(null)}
+                                  className={
+                                    "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                                    (cActive
+                                      ? "bg-[var(--color-surface-2)] text-foreground"
+                                      : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+                                  }
+                                >
+                                  {c.label}
+                                </Link>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </li>
               );
             })}
@@ -148,27 +235,44 @@ export function FloatingNavbar() {
                 variants={{ show: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
                 className="space-y-3"
               >
-                {NAV_LINKS.map((link) => (
-                  <motion.li
-                    key={link.to}
-                    variants={{
-                      hidden: { opacity: 0, y: 28 },
-                      show: {
-                        opacity: 1,
-                        y: 0,
-                        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-                      },
-                    }}
-                  >
-                    <Link
-                      to={link.to}
-                      className="group flex items-center gap-3 text-[36px] font-display font-bold tracking-tight"
+                {NAV_LINKS.map((link) => {
+                  const children = "children" in link ? link.children : undefined;
+                  return (
+                    <motion.li
+                      key={link.to}
+                      variants={{
+                        hidden: { opacity: 0, y: 28 },
+                        show: {
+                          opacity: 1,
+                          y: 0,
+                          transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                        },
+                      }}
                     >
-                      <span className="h-px w-6 bg-foreground/40 transition-all duration-300 group-hover:w-14 group-hover:bg-[var(--color-accent-1)]" />
-                      <span>{link.label}</span>
-                    </Link>
-                  </motion.li>
-                ))}
+                      <Link
+                        to={link.to}
+                        className="group flex items-center gap-3 text-[32px] font-display font-bold tracking-tight"
+                      >
+                        <span className="h-px w-6 bg-foreground/40 transition-all duration-300 group-hover:w-14 group-hover:bg-[var(--color-accent-1)]" />
+                        <span>{link.label}</span>
+                      </Link>
+                      {children && (
+                        <ul className="mt-2 ml-9 space-y-1.5">
+                          {children.map((c) => (
+                            <li key={c.to + c.label}>
+                              <Link
+                                to={c.to}
+                                className="text-lg font-medium text-foreground/70 hover:text-foreground transition-colors"
+                              >
+                                {c.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </motion.li>
+                  );
+                })}
               </motion.ul>
               <div className="mt-12 text-xs text-muted-foreground space-y-1">
                 <p>{SITE.email}</p>

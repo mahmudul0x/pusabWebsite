@@ -3,28 +3,28 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
 import { supabase } from "@/integrations/supabase/client";
-import { Crown, Sparkles } from "lucide-react";
+import { Crown, Gavel, Sparkles } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
 export const Route = createFileRoute("/leadership")({
   head: () => ({
     meta: [
-      { title: "Leadership — PUSAB" },
+      { title: "Executive Committee — PUSAB" },
       {
         name: "description",
         content:
-          "Meet the present Executive Committee and explore past ECs and the PUSAB Honor Board.",
+          "The PUSAB Executive Committee — the present session and the full history of past committees.",
       },
-      { property: "og:title", content: "Leadership — PUSAB" },
+      { property: "og:title", content: "Executive Committee — PUSAB" },
       {
         property: "og:description",
-        content: "Present and past Executive Committees and PUSAB Honor Board.",
+        content: "Present and past Executive Committees of PUSAB, session by session.",
       },
       { property: "og:url", content: "/leadership" },
     ],
     links: [{ rel: "canonical", href: "/leadership" }],
   }),
-  component: LeadershipPage,
+  component: ExecutiveCommitteePage,
 });
 
 type Member = {
@@ -46,39 +46,34 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-const PLACEHOLDER_ROLES = [
-  "Vice President",
-  "General Secretary",
-  "Treasurer",
-  "Organizing Secretary",
-];
+const isPresident = (m: Member) => /president/i.test(m.role) && !/vice/i.test(m.role);
+const isGS = (m: Member) => /general secretary/i.test(m.role) || /^gs\b/i.test(m.role.trim());
 
-function MemberPortrait({ m, size = "md" }: { m: Member; size?: "sm" | "md" | "lg" }) {
-  const dim =
-    size === "lg"
-      ? "h-20 w-20 text-xl"
-      : size === "sm"
-        ? "h-10 w-10 text-xs"
-        : "h-14 w-14 text-base";
+function LeadPortrait({ m, label }: { m: Member; label: string }) {
   return (
-    <div
-      className={
-        "shrink-0 rounded-full grid place-items-center text-white font-semibold overflow-hidden " +
-        "bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] " +
-        "ring-2 ring-[color-mix(in_oklab,var(--color-accent-1)_25%,transparent)] " +
-        dim
-      }
-    >
-      {m.photo_url ? (
-        <img src={m.photo_url} alt={m.name} className="h-full w-full object-cover" />
-      ) : (
-        <span>{initials(m.name)}</span>
-      )}
+    <div className="flex items-center gap-4">
+      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] ring-2 ring-[color-mix(in_oklab,var(--color-accent-1)_25%,transparent)]">
+        {m.photo_url ? (
+          <img src={m.photo_url} alt={m.name} className="h-full w-full object-cover" />
+        ) : (
+          <span className="grid h-full w-full place-items-center text-xl font-semibold text-white">
+            {initials(m.name)}
+          </span>
+        )}
+      </div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-accent-1)]">
+          {label}
+        </p>
+        <p className="mt-1 font-display text-lg font-bold leading-tight">{m.name}</p>
+        <p className="text-sm text-muted-foreground">{m.role}</p>
+        {m.university && <p className="text-xs text-muted-foreground/80">{m.university}</p>}
+      </div>
     </div>
   );
 }
 
-function LeadershipPage() {
+function ExecutiveCommitteePage() {
   const [members, setMembers] = useState<Member[] | null>(null);
   useEffect(() => {
     supabase
@@ -88,220 +83,137 @@ function LeadershipPage() {
       .then(({ data }) => setMembers((data as Member[] | null) ?? []));
   }, []);
 
-  const current = members?.filter((m) => m.is_current) ?? [];
-  const past = members?.filter((m) => !m.is_current) ?? [];
+  // Group into committees by session year (newest first).
   const byYear: Record<number, Member[]> = {};
-  past.forEach((m) => {
-    (byYear[m.year] ||= []).push(m);
-  });
-  const years = Object.keys(byYear).sort((a, b) => Number(b) - Number(a));
-
-  const featured =
-    current.find((m) => /president/i.test(m.role) && !/vice/i.test(m.role)) ?? current[0];
-  const rest = current.filter((m) => m !== featured);
+  (members ?? []).forEach((m) => (byYear[m.year] ||= []).push(m));
+  const sessions = Object.keys(byYear)
+    .map(Number)
+    .sort((a, b) => b - a);
 
   return (
     <>
       <PageHero
-        title="Leadership"
-        lede="Meet the present Executive Committee and look back at the leaders who built PUSAB."
-        crumbs={[{ label: "Home", to: "/" }, { label: "Leadership" }]}
+        title="Executive Committee"
+        lede="The present committee and the full line of those who served before — session by session."
+        crumbs={[
+          { label: "Home", to: "/" },
+          { label: "Leadership" },
+          { label: "Executive Committee" },
+        ]}
         image={heroLeadership}
         imageAlt="PUSAB executive committee"
       />
 
-      {/* Current EC — bento */}
-      <section className="pb-16">
+      <section className="py-16 md:py-24">
         <div className="container-page">
-          <div className="mb-10 flex items-end justify-between gap-6 border-b border-border pb-4">
-            <div>
-              <p className="text-label mb-2" style={{ color: "var(--color-accent-2)" }}>
-                Governance
-              </p>
-              <h2 className="font-display text-2xl md:text-4xl font-bold tracking-tight">
-                Current Executive Committee
-              </h2>
-            </div>
-            <span className="hidden sm:block text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              Session · {new Date().getFullYear()}
-            </span>
+          <div className="mb-12 max-w-2xl">
+            <p className="text-label mb-3" style={{ color: "var(--color-accent-2)" }}>
+              Governance
+            </p>
+            <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight">
+              Committee history.
+            </h2>
+            <p className="mt-4 text-muted-foreground leading-relaxed">
+              Each session is led by a President and General Secretary, supported by the full
+              committee below.
+            </p>
           </div>
 
           {members === null ? (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[160px]">
-              <div className="md:col-span-2 md:row-span-2 rounded-3xl border border-border shimmer" />
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="rounded-2xl border border-border shimmer" />
+            <div className="space-y-6">
+              {[0, 1].map((i) => (
+                <div key={i} className="h-64 rounded-3xl border border-border shimmer" />
               ))}
+            </div>
+          ) : sessions.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-border bg-[var(--color-surface)] p-12 text-center">
+              <Sparkles size={28} className="mx-auto mb-4 text-[var(--color-accent-1)]" />
+              <p className="text-muted-foreground">
+                Committee records are being curated. Past and present committees will appear here
+                soon.
+              </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[160px]">
-              {/* Featured leader / president */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.5 }}
-                className="md:col-span-2 md:row-span-2 group relative overflow-hidden rounded-3xl border border-[color-mix(in_oklab,var(--color-accent-1)_25%,transparent)] bg-[linear-gradient(135deg,var(--color-surface-2),var(--color-surface))] p-8 flex flex-col justify-end min-h-[400px] hover:border-[color-mix(in_oklab,var(--color-accent-1)_55%,transparent)] transition-colors"
-              >
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,color-mix(in_oklab,var(--color-accent-1)_40%,transparent),transparent_55%),radial-gradient(circle_at_80%_80%,color-mix(in_oklab,var(--color-accent-2)_35%,transparent),transparent_55%)]" />
-                <div className="absolute inset-0 [background-image:linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:32px_32px]" />
-                <div className="absolute top-6 left-6 z-20 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/30 backdrop-blur px-3 py-1">
-                  <Crown size={12} className="text-[var(--color-accent-1)]" />
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/85">
-                    {featured ? "President" : "Presidential Office"}
-                  </span>
-                </div>
-
-                {featured ? (
-                  <div className="relative z-20 space-y-4">
-                    <MemberPortrait m={featured} size="lg" />
-                    <div className="w-12 h-1 rounded-full bg-[var(--color-accent-1)]" />
-                    <div>
-                      <h3 className="font-display text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
-                        {featured.name}
-                      </h3>
-                      <p className="mt-1 text-[var(--color-accent-1)] text-sm font-semibold uppercase tracking-[0.18em]">
-                        {featured.role}
-                      </p>
-                      {featured.university && (
-                        <p className="mt-2 text-foreground/60 text-sm">{featured.university}</p>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative z-20 space-y-3">
-                    <div className="w-12 h-1 rounded-full bg-[var(--color-accent-1)]" />
-                    <h3 className="font-display text-3xl font-bold text-foreground/30">
-                      Presidential Office
-                    </h3>
-                    <p className="text-foreground/45 italic max-w-md">
-                      No current members on record yet. Nominations for the upcoming term will be
-                      announced shortly.
-                    </p>
-                  </div>
-                )}
-              </motion.div>
-
-              {/* Rest of EC or placeholder roles */}
-              {(rest.length > 0
-                ? rest.slice(0, 4).map((m, i) => ({ kind: "member" as const, m, i }))
-                : PLACEHOLDER_ROLES.map((role, i) => ({ kind: "placeholder" as const, role, i }))
-              ).map((slot) => (
-                <motion.div
-                  key={slot.kind === "member" ? slot.m.id : slot.role}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.45, delay: 0.06 * (slot.i + 1) }}
-                  className="rounded-2xl border border-border bg-[color-mix(in_oklab,var(--color-surface)_92%,transparent)] backdrop-blur-sm p-6 flex flex-col justify-between gap-3 hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] transition-colors"
-                >
-                  {slot.kind === "member" ? (
-                    <>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-accent-1)]">
-                        {slot.m.role}
-                      </span>
-                      <div className="flex items-center gap-3">
-                        <MemberPortrait m={slot.m} size="sm" />
-                        <div className="min-w-0">
-                          <p className="font-display font-semibold truncate">{slot.m.name}</p>
-                          {slot.m.university && (
-                            <p className="text-xs text-muted-foreground truncate">
-                              {slot.m.university}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-accent-1)]">
-                        {slot.role}
-                      </span>
-                      <div className="h-4 w-2/3 bg-white/10 rounded animate-pulse" />
-                      <div className="h-3 w-1/2 bg-white/5 rounded" />
-                    </>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Through the years — timeline */}
-      <section className="py-16">
-        <div className="container-page">
-          <div className="mb-10">
-            <p className="text-label mb-2" style={{ color: "var(--color-accent-2)" }}>
-              Legacy
-            </p>
-            <h2 className="font-display text-2xl md:text-4xl font-bold tracking-tight">
-              Through the years
-            </h2>
-          </div>
-
-          <div className="relative">
-            <div className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-[var(--color-accent-1)] via-border to-transparent" />
-
-            {years.length === 0 ? (
-              <div className="relative pl-10">
-                <div className="absolute -left-[1px] top-1.5 w-4 h-4 rounded-full border-4 border-background bg-[var(--color-accent-1)] shadow-[0_0_15px_color-mix(in_oklab,var(--color-accent-1)_45%,transparent)]" />
-                <div className="space-y-4">
-                  <span className="font-display text-xl md:text-2xl font-bold block">
-                    Archive being curated
-                  </span>
-                  <div className="p-6 md:p-8 rounded-2xl bg-[color-mix(in_oklab,var(--color-surface)_60%,transparent)] border border-dashed border-border flex items-center gap-3">
-                    <Sparkles size={16} className="text-[var(--color-accent-1)] shrink-0" />
-                    <p className="text-sm text-foreground/60">
-                      Past EC archives will appear here as historical records are digitized and
-                      verified.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-12 pl-10">
-                {years.map((year, yi) => (
+            <div className="space-y-8">
+              {sessions.map((year, idx) => {
+                const list = byYear[year];
+                const current = list.some((m) => m.is_current);
+                const president = list.find(isPresident);
+                const gs = list.find(isGS);
+                const roster = [...list].sort((a, b) => a.role.localeCompare(b.role));
+                return (
                   <motion.div
                     key={year}
-                    initial={{ opacity: 0, y: 16 }}
+                    initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.45, delay: yi * 0.05 }}
-                    className="relative group"
+                    viewport={{ once: true, margin: "-60px" }}
+                    transition={{ duration: 0.5, delay: Math.min(idx, 4) * 0.05 }}
+                    className={
+                      "overflow-hidden rounded-3xl border bg-[var(--color-surface)] " +
+                      (current
+                        ? "border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] shadow-[0_28px_60px_-40px_rgba(29,78,216,0.55)]"
+                        : "border-border")
+                    }
                   >
-                    <div className="absolute -left-[37px] top-2 w-4 h-4 rounded-full border-4 border-background bg-[var(--color-accent-1)] shadow-[0_0_15px_color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] transition-transform group-hover:scale-125" />
-                    <div className="space-y-4">
+                    {/* Session header */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-5 sm:px-8">
                       <div className="flex items-baseline gap-3">
                         <span className="font-display text-2xl md:text-3xl font-extrabold tracking-tight">
-                          {year}
+                          Session {year}
                         </span>
-                        <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                          {byYear[Number(year)].length} members
-                        </span>
+                        {current && (
+                          <span className="rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white">
+                            Current
+                          </span>
+                        )}
                       </div>
-                      <div className="rounded-2xl border border-border bg-[var(--color-surface)] p-5">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {byYear[Number(year)].map((m) => (
-                            <div key={m.id} className="flex items-center gap-3 min-w-0">
-                              <MemberPortrait m={m} size="sm" />
-                              <div className="min-w-0 text-sm">
-                                <div className="font-medium truncate">{m.name}</div>
-                                <div className="text-muted-foreground text-xs truncate">
-                                  {m.role}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                      <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                        {list.length} members
+                      </span>
+                    </div>
+
+                    {/* President + GS with photos */}
+                    <div className="grid gap-6 border-b border-border px-6 py-7 sm:grid-cols-2 sm:px-8">
+                      {president ? (
+                        <LeadPortrait m={president} label="President" />
+                      ) : (
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                          <Crown size={18} className="text-[var(--color-accent-1)]" /> President — on
+                          record soon
                         </div>
-                      </div>
+                      )}
+                      {gs ? (
+                        <LeadPortrait m={gs} label="General Secretary" />
+                      ) : (
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                          <Gavel size={18} className="text-[var(--color-accent-1)]" /> General
+                          Secretary — on record soon
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Full roster: name + designation */}
+                    <div className="px-6 py-6 sm:px-8">
+                      <p className="text-label mb-4">Committee members</p>
+                      <ul className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {roster.map((m) => (
+                          <li
+                            key={m.id}
+                            className="flex items-baseline justify-between gap-3 border-b border-border/60 pb-2"
+                          >
+                            <span className="font-medium">{m.name}</span>
+                            <span className="shrink-0 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                              {m.role}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   </motion.div>
-                ))}
-              </div>
-            )}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     </>

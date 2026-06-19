@@ -14,6 +14,8 @@ import { Route as PublicityRouteImport } from './routes/publicity'
 import { Route as ProgramsRouteImport } from './routes/programs'
 import { Route as MomentsRouteImport } from './routes/moments'
 import { Route as LeadershipRouteImport } from './routes/leadership'
+import { Route as HonorBoardRouteImport } from './routes/honor-board'
+import { Route as FelicitationRouteImport } from './routes/felicitation'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
@@ -44,6 +46,16 @@ const MomentsRoute = MomentsRouteImport.update({
 const LeadershipRoute = LeadershipRouteImport.update({
   id: '/leadership',
   path: '/leadership',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HonorBoardRoute = HonorBoardRouteImport.update({
+  id: '/honor-board',
+  path: '/honor-board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FelicitationRoute = FelicitationRouteImport.update({
+  id: '/felicitation',
+  path: '/felicitation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -81,6 +93,8 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/felicitation': typeof FelicitationRoute
+  '/honor-board': typeof HonorBoardRoute
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/programs': typeof ProgramsRoute
@@ -93,6 +107,8 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/felicitation': typeof FelicitationRoute
+  '/honor-board': typeof HonorBoardRoute
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/programs': typeof ProgramsRoute
@@ -107,6 +123,8 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/felicitation': typeof FelicitationRoute
+  '/honor-board': typeof HonorBoardRoute
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/programs': typeof ProgramsRoute
@@ -121,6 +139,8 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/felicitation'
+    | '/honor-board'
     | '/leadership'
     | '/moments'
     | '/programs'
@@ -133,6 +153,8 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/felicitation'
+    | '/honor-board'
     | '/leadership'
     | '/moments'
     | '/programs'
@@ -146,6 +168,8 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/felicitation'
+    | '/honor-board'
     | '/leadership'
     | '/moments'
     | '/programs'
@@ -160,6 +184,8 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
+  FelicitationRoute: typeof FelicitationRoute
+  HonorBoardRoute: typeof HonorBoardRoute
   LeadershipRoute: typeof LeadershipRoute
   MomentsRoute: typeof MomentsRoute
   ProgramsRoute: typeof ProgramsRoute
@@ -202,6 +228,20 @@ declare module '@tanstack/react-router' {
       path: '/leadership'
       fullPath: '/leadership'
       preLoaderRoute: typeof LeadershipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/honor-board': {
+      id: '/honor-board'
+      path: '/honor-board'
+      fullPath: '/honor-board'
+      preLoaderRoute: typeof HonorBoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/felicitation': {
+      id: '/felicitation'
+      path: '/felicitation'
+      fullPath: '/felicitation'
+      preLoaderRoute: typeof FelicitationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -266,6 +306,8 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
+  FelicitationRoute: FelicitationRoute,
+  HonorBoardRoute: HonorBoardRoute,
   LeadershipRoute: LeadershipRoute,
   MomentsRoute: MomentsRoute,
   ProgramsRoute: ProgramsRoute,
