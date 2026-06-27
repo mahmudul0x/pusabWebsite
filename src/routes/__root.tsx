@@ -8,7 +8,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Home } from "lucide-react";
 
@@ -16,6 +16,7 @@ import appCss from "../styles.css?url";
 import faviconPusab from "../assets/logo-pusab.png?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FloatingNavbar } from "../components/site/FloatingNavbar";
+import { FlipbookContext } from "../lib/flipbook-context";
 import { SiteFooter } from "../components/site/SiteFooter";
 import { BackToTop } from "../components/site/BackToTop";
 import { Toaster } from "sonner";
@@ -175,13 +176,14 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  // Dashboard / auth routes are standalone — no public navbar or footer.
   const bare = ["/dashboard", "/admin", "/auth"].some((p) => pathname.startsWith(p));
+  const [flipbookOpen, setFlipbookOpen] = useState(false);
 
   return (
+    <FlipbookContext value={{ isOpen: flipbookOpen, setIsOpen: setFlipbookOpen }}>
     <QueryClientProvider client={queryClient}>
       <div className="relative min-h-screen flex flex-col">
-        {!bare && <FloatingNavbar />}
+        {!bare && !flipbookOpen && <FloatingNavbar />}
         <main className="flex-1">
           {bare ? (
             <Outlet />
@@ -211,5 +213,6 @@ function RootComponent() {
         }}
       />
     </QueryClientProvider>
+    </FlipbookContext>
   );
 }

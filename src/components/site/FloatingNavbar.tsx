@@ -45,7 +45,9 @@ export function FloatingNavbar() {
           paddingTop: scrolled ? 14 : 22,
         }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed inset-x-0 top-0 z-[9999] flex justify-center pointer-events-none"
+        id="floating-navbar"
+        className="fixed inset-x-0 top-0 flex justify-center pointer-events-none"
+        style={{ zIndex: 9999 }}
       >
         <motion.nav
           layout
