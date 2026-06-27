@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { useMemo, useState, type ComponentType } from "react";
+import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { PageHero } from "@/components/site/PageHero";
 import { GradientButton } from "@/components/site/GradientButton";
+import { programsApi, optimizeImage } from "@/lib/api";
 import {
   Users,
   GraduationCap,
@@ -50,7 +51,22 @@ type ProgramEvent = {
   recurrence?: string;
   location: string;
   desc: string;
+  /** Cloudinary/remote image (from the API). Falls back to a repo asset by id. */
+  image?: string;
 };
+
+// Map an API program's category to an icon for the card.
+const CATEGORY_ICON: Record<string, IconType> = {
+  flagship: Users,
+  education: GraduationCap,
+  aid: HeartHandshake,
+  community: Trees,
+  relief: Stethoscope,
+  digital: Radio,
+  publication: BookOpen,
+};
+const iconFor = (category: string): IconType =>
+  CATEGORY_ICON[category.trim().toLowerCase()] ?? Sparkles;
 
 // Real-world programme calendar. Status is derived from the date below, so the
 // page stays correct over time without code changes.
@@ -250,10 +266,36 @@ const FILTERS: { key: "all" | Status; label: string }[] = [
 function ProgramsPage() {
   const now = useMemo(() => Date.now(), []);
   const [filter, setFilter] = useState<"all" | Status>("all");
+  const [apiEvents, setApiEvents] = useState<ProgramEvent[] | null>(null);
+
+  // Load programs from the API; fall back to the built-in calendar if empty.
+  useEffect(() => {
+    programsApi
+      .listAll()
+      .then((rows) =>
+        setApiEvents(
+          rows.map((p) => ({
+            id: String(p.id),
+            title: p.title,
+            category: p.category,
+            Icon: iconFor(p.category),
+            date: p.date ?? undefined,
+            ongoing: p.ongoing,
+            recurrence: p.recurrence,
+            location: p.location,
+            desc: p.description,
+            image: p.image_url ? optimizeImage(p.image_url, 800) : undefined,
+          })),
+        ),
+      )
+      .catch(() => setApiEvents([]));
+  }, []);
+
+  const source = apiEvents && apiEvents.length > 0 ? apiEvents : EVENTS;
 
   const { ordered, counts } = useMemo(() => {
     const rank: Record<Status, number> = { upcoming: 0, ongoing: 1, completed: 2 };
-    const withStatus = EVENTS.map((e) => ({ e, status: statusOf(e, now) }));
+    const withStatus = source.map((e) => ({ e, status: statusOf(e, now) }));
     const counts = {
       all: withStatus.length,
       upcoming: withStatus.filter((x) => x.status === "upcoming").length,
@@ -268,7 +310,7 @@ function ProgramsPage() {
       return a.status === "completed" ? tb - ta : ta - tb;
     });
     return { ordered, counts };
-  }, [now]);
+  }, [source, now]);
 
   const visible = ordered.filter((x) => filter === "all" || x.status === filter);
 
@@ -335,7 +377,7 @@ function ProgramsPage() {
               {visible.map(({ e, status }) => {
                 const sm = STATUS_META[status];
                 const Icon = e.Icon;
-                const img = imageFor(e.id);
+                const img = e.image ?? imageFor(e.id);
                 const isUpcoming = status === "upcoming";
                 const isCompleted = status === "completed";
                 const dotColor = isUpcoming

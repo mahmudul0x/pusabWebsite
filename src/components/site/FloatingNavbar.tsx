@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Heart } from "lucide-react";
 import { NAV_LINKS, SITE } from "@/lib/site-content";
 import logoPusab from "@/assets/logo-pusab.png";
 
@@ -175,7 +175,13 @@ export function FloatingNavbar() {
           </ul>
 
           {/* CTA */}
-          <div className="ml-auto hidden lg:flex items-center">
+          <div className="ml-auto hidden lg:flex items-center gap-2">
+            <Link
+              to="/support"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-2 text-sm font-semibold text-foreground/80 transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] hover:text-foreground"
+            >
+              <Heart size={14} className="text-[var(--color-accent-1)]" /> Support
+            </Link>
             <Link to="/contact" className="formal-cta group">
               <span>Join PUSAB</span>
             </Link>
@@ -274,7 +280,18 @@ export function FloatingNavbar() {
                   );
                 })}
               </motion.ul>
-              <div className="mt-12 text-xs text-muted-foreground space-y-1">
+              <div className="mt-10 flex flex-wrap gap-3">
+                <Link
+                  to="/support"
+                  className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-semibold"
+                >
+                  <Heart size={15} className="text-[var(--color-accent-1)]" /> Support
+                </Link>
+                <Link to="/contact" className="formal-cta">
+                  <span>Join PUSAB</span>
+                </Link>
+              </div>
+              <div className="mt-8 text-xs text-muted-foreground space-y-1">
                 <p>{SITE.email}</p>
                 <p>{SITE.phone}</p>
               </div>

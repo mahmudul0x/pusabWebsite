@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { PageHero } from "@/components/site/PageHero";
-import { supabase } from "@/integrations/supabase/client";
+import { publicityApi, optimizeImage, type PublicityPost } from "@/lib/api";
 import {
   Calendar,
   Newspaper,
@@ -10,7 +10,6 @@ import {
   Inbox,
   ArrowUpRight,
   ExternalLink,
-  Loader2,
   X,
 } from "lucide-react";
 import heroPublicity from "@/assets/hero-publicity.jpg";
@@ -32,16 +31,7 @@ export const Route = createFileRoute("/publicity")({
   component: PublicityPage,
 });
 
-type Post = {
-  id: string;
-  type: "news" | "press" | "event";
-  title: string;
-  body: string | null;
-  excerpt: string | null;
-  date: string | null;
-  image_url: string | null;
-  link: string | null;
-};
+type Post = PublicityPost;
 
 const TABS: { key: Post["type"]; label: string; Icon: typeof Newspaper }[] = [
   { key: "news", label: "News", Icon: Newspaper },
@@ -66,32 +56,24 @@ function formatDate(iso: string) {
 function PublicityPage() {
   const [tab, setTab] = useState<Post["type"]>("news");
   const [posts, setPosts] = useState<Post[] | null>(null);
+  const [visibleCount, setVisibleCount] = useState(9);
   const [reading, setReading] = useState<Post | null>(null);
-  // Post whose external link is shown in the in-site iframe viewer.
+  // Post whose external link is shown in the in-site viewer.
   const [framed, setFramed] = useState<Post | null>(null);
-  const [frameLoading, setFrameLoading] = useState(true);
 
-  // Open a post: external link -> in-site iframe viewer; otherwise the reader.
+  // Open a post: external link -> in-site preview viewer; otherwise the reader.
   const openPost = (p: Post) => (p.link ? setFramed(p) : setReading(p));
 
   useEffect(() => {
     let active = true;
     setPosts(null);
-    const load = () =>
-      supabase
-        .from("publicity_posts")
-        .select("*")
-        .eq("type", tab)
-        .order("date", { ascending: false })
-        .then(({ data }) => active && setPosts((data as Post[] | null) ?? []));
-    load();
-    const channel = supabase
-      .channel(`publicity-${tab}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "publicity_posts" }, load)
-      .subscribe();
+    setVisibleCount(9);
+    publicityApi
+      .list({ type: tab })
+      .then((res) => active && setPosts(res.results))
+      .catch(() => active && setPosts([]));
     return () => {
       active = false;
-      supabase.removeChannel(channel);
     };
   }, [tab]);
 
@@ -104,13 +86,15 @@ function PublicityPage() {
     };
   }, [reading, framed]);
 
-  // Reset the loading state each time a new link is opened.
-  useEffect(() => {
-    if (framed) setFrameLoading(true);
-  }, [framed]);
-
-  const featured = posts && posts.length > 0 ? posts[0] : null;
-  const rest = posts ? posts.slice(1) : [];
+  // Newest first (by date, falling back to created_at) so the lead is the latest.
+  const sorted = posts
+    ? [...posts].sort(
+        (a, b) =>
+          new Date(b.date || b.created_at).getTime() - new Date(a.date || a.created_at).getTime(),
+      )
+    : [];
+  const featured = sorted[0] ?? null;
+  const rest = sorted.slice(1);
 
   return (
     <>
@@ -177,15 +161,29 @@ function PublicityPage() {
               <p className="text-muted-foreground">No posts yet. Check back soon.</p>
             </div>
           ) : (
-            <div className="space-y-5">
-              {/* Featured story */}
-              {featured && <PostCard post={featured} featured onOpen={openPost} index={0} />}
-              {/* Rest */}
+            <div className="space-y-10">
+              {/* Featured lead story */}
+              {featured && <FeaturedStory post={featured} onOpen={openPost} />}
+
+              {/* Compact news-grid of more stories — scales cleanly */}
               {rest.length > 0 && (
-                <div className="grid gap-5 md:grid-cols-3">
-                  {rest.map((p, i) => (
-                    <PostCard key={p.id} post={p} onOpen={openPost} index={i + 1} />
-                  ))}
+                <div>
+                  <p className="text-label mb-4">More stories</p>
+                  <div className="grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+                    {rest.slice(0, visibleCount).map((p) => (
+                      <PostGridCard key={p.id} post={p} onOpen={openPost} />
+                    ))}
+                  </div>
+                  {rest.length > visibleCount && (
+                    <div className="mt-10 text-center">
+                      <button
+                        onClick={() => setVisibleCount((c) => c + 9)}
+                        className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-foreground/80 transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] hover:text-foreground"
+                      >
+                        Load more stories
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -200,7 +198,7 @@ function PublicityPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/70 p-0 backdrop-blur-sm sm:items-center sm:p-6"
+            className="fixed inset-0 z-[10000] flex items-end justify-center bg-slate-950/70 p-0 backdrop-blur-sm sm:items-center sm:p-6"
             onClick={() => setReading(null)}
           >
             <motion.article
@@ -266,7 +264,7 @@ function PublicityPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex flex-col bg-slate-950/80 backdrop-blur-sm sm:p-4 md:p-6"
+            className="fixed inset-0 z-[10000] flex flex-col bg-slate-950/80 backdrop-blur-sm sm:p-4 md:p-6"
             onClick={() => setFramed(null)}
           >
             <motion.div
@@ -305,29 +303,31 @@ function PublicityPage() {
                 </div>
               </div>
 
-              {/* Embed */}
-              <div className="relative flex-1 bg-background">
-                {frameLoading && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-                    <Loader2 className="animate-spin" size={22} />
-                    <span className="text-sm">Loading the source…</span>
+              {/* Preview — many news sites block embedding, so we show the
+                  post's own image and link out to the full story. */}
+              <div className="relative flex-1 overflow-hidden bg-[var(--color-surface)]">
+                {framed.image_url ? (
+                  <img
+                    src={optimizeImage(framed.image_url, 1400)}
+                    alt={framed.title}
+                    className="absolute inset-0 h-full w-full object-contain"
+                  />
+                ) : (
+                  <div className="absolute inset-0 grid place-items-center px-6 text-center text-sm text-muted-foreground">
+                    এই সংবাদের জন্য কোনো ছবি যোগ করা হয়নি।
                   </div>
                 )}
-                <iframe
-                  key={framed.id}
-                  src={framed.link!}
-                  title={framed.title}
-                  onLoad={() => setFrameLoading(false)}
-                  referrerPolicy="no-referrer"
-                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-                  className="h-full w-full border-0"
-                />
-              </div>
-
-              {/* Fallback hint */}
-              <div className="border-t border-border px-4 py-2 text-center text-[11px] text-muted-foreground">
-                সাইটটি এখানে না খুললে উপরের <span className="font-medium text-foreground">New tab</span>{" "}
-                বাটন ব্যবহার করুন — কিছু সংবাদ সাইট embed করতে দেয় না।
+                <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-2.5 bg-gradient-to-t from-slate-950/75 via-slate-950/25 to-transparent p-6">
+                  <a
+                    href={framed.link!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-10px_rgba(29,78,216,0.7)]"
+                  >
+                    মূল সংবাদ পড়ুন <ExternalLink size={15} />
+                  </a>
+                  <p className="text-[11px] text-white/80">পুরো সংবাদটি মূল সাইটে খুলবে।</p>
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -337,96 +337,100 @@ function PublicityPage() {
   );
 }
 
-function PostCard({
-  post,
-  onOpen,
-  index,
-  featured = false,
-}: {
-  post: Post;
-  onOpen: (p: Post) => void;
-  index: number;
-  featured?: boolean;
-}) {
-  const hasLink = Boolean(post.link);
-
-  const body = (
-    <>
-      <div
-        className={
-          "relative overflow-hidden bg-[linear-gradient(135deg,#0F0F1A,#16162A)] " +
-          (featured ? "md:h-full md:min-h-[320px] aspect-[16/10] md:aspect-auto" : "aspect-[16/10]")
-        }
-      >
+/** Clean, professional lead story — image left, content right. */
+function FeaturedStory({ post, onOpen }: { post: Post; onOpen: (p: Post) => void }) {
+  const showExcerpt = post.excerpt && post.excerpt.trim() !== post.title.trim();
+  return (
+    <motion.button
+      type="button"
+      onClick={() => onOpen(post)}
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.5 }}
+      className="group grid w-full overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] text-left transition-all duration-300 hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] hover:shadow-[0_28px_55px_-35px_rgba(29,78,216,0.45)] md:grid-cols-2"
+    >
+      {/* Image */}
+      <div className="relative aspect-[16/10] overflow-hidden bg-[linear-gradient(135deg,#0F0F1A,#16162A)] md:aspect-auto md:min-h-[260px]">
         {post.image_url ? (
           <img
-            src={post.image_url}
+            src={optimizeImage(post.image_url, 1000)}
             alt={post.title}
-            loading="lazy"
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(79,110,247,0.35),transparent_55%),radial-gradient(circle_at_70%_70%,rgba(124,58,237,0.3),transparent_55%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(79,110,247,0.35),transparent_55%)]" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
         <span className="absolute left-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white backdrop-blur">
           {TYPE_LABEL[post.type]}
         </span>
-        {hasLink && (
+        {post.link && (
           <span className="absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur">
             <ExternalLink size={13} />
           </span>
         )}
       </div>
 
-      <div className={"flex flex-col " + (featured ? "p-7 md:p-9" : "p-6")}>
+      {/* Content */}
+      <div className="flex flex-col justify-center p-6 md:p-8">
         {post.date && (
-          <p className="text-xs text-muted-foreground">{formatDate(post.date)}</p>
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            {formatDate(post.date)}
+          </p>
         )}
-        <h3
-          className={
-            "mt-2 font-display font-bold leading-snug tracking-tight transition-colors group-hover:text-[var(--color-accent-1)] " +
-            (featured ? "text-2xl md:text-3xl" : "text-lg")
-          }
-        >
+        <h2 className="mt-2 line-clamp-3 font-display text-xl font-bold leading-snug tracking-tight transition-colors group-hover:text-[var(--color-accent-1)] md:text-2xl">
           {post.title}
-        </h3>
-        {post.excerpt && (
-          <p
-            className={
-              "mt-3 text-sm leading-relaxed text-muted-foreground " +
-              (featured ? "" : "line-clamp-2")
-            }
-          >
+        </h2>
+        {showExcerpt && (
+          <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground md:line-clamp-3">
             {post.excerpt}
           </p>
         )}
-        <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-accent-1)]">
-          {hasLink ? "Read full story" : "Read more"}
+        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-accent-1)]">
+          Read full story
           <ArrowUpRight
             size={15}
             className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
           />
         </span>
       </div>
-    </>
-  );
-
-  const cls =
-    "group block overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] text-left transition-all duration-300 hover:-translate-y-1 hover:border-[color-mix(in_oklab,var(--color-accent-1)_50%,transparent)] hover:shadow-[0_28px_55px_-35px_rgba(29,78,216,0.5)] " +
-    (featured ? "md:grid md:grid-cols-2" : "");
-
-  const motionProps = {
-    initial: { opacity: 0, y: 20 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, margin: "-60px" },
-    transition: { duration: 0.5, delay: Math.min(index, 4) * 0.05 },
-  } as const;
-
-  // Both link and non-link posts open in-site: link -> iframe viewer, else reader.
-  return (
-    <motion.button type="button" onClick={() => onOpen(post)} className={cls + " w-full"} {...motionProps}>
-      {body}
     </motion.button>
+  );
+}
+
+/** Compact news card (image top, headline, tag) — used in the stories grid. */
+function PostGridCard({ post, onOpen }: { post: Post; onOpen: (p: Post) => void }) {
+  return (
+    <button type="button" onClick={() => onOpen(post)} className="group block text-left">
+      <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-[linear-gradient(135deg,#0F0F1A,#16162A)]">
+        {post.image_url ? (
+          <img
+            src={optimizeImage(post.image_url, 560)}
+            alt={post.title}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(79,110,247,0.35),transparent_55%)]" />
+        )}
+        {post.link && (
+          <span className="absolute right-2.5 top-2.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur">
+            <ExternalLink size={12} />
+          </span>
+        )}
+      </div>
+
+      <h3 className="mt-3 line-clamp-2 font-display text-base font-bold leading-snug tracking-tight transition-colors group-hover:text-[var(--color-accent-1)]">
+        {post.title}
+      </h3>
+      <div className="mt-2 flex items-center gap-2">
+        <span className="rounded bg-[var(--color-accent-1)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+          {TYPE_LABEL[post.type]}
+        </span>
+        {post.date && (
+          <span className="text-[11px] text-muted-foreground">{formatDate(post.date)}</span>
+        )}
+      </div>
+    </button>
   );
 }

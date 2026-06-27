@@ -4,33 +4,49 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { motion } from "framer-motion";
+import { Home } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import faviconPusab from "../assets/logo-pusab.png?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FloatingNavbar } from "../components/site/FloatingNavbar";
 import { SiteFooter } from "../components/site/SiteFooter";
+import { BackToTop } from "../components/site/BackToTop";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--color-background)] px-6">
+      <div className="pointer-events-none absolute -top-40 left-1/2 h-[60vh] w-[60vh] -translate-x-1/2 rounded-full bg-[var(--color-accent-1)] opacity-10 blur-[120px]" />
+      <div className="pointer-events-none absolute inset-0 [background-image:linear-gradient(color-mix(in_oklab,var(--color-foreground)_4%,transparent)_1px,transparent_1px),linear-gradient(90deg,color-mix(in_oklab,var(--color-foreground)_4%,transparent)_1px,transparent_1px)] [background-size:40px_40px] opacity-50" />
+      <div className="relative max-w-lg text-center">
+        <p className="font-display text-[7rem] font-extrabold leading-none gradient-text sm:text-[10rem]">
+          404
         </p>
-        <div className="mt-6">
+        <h2 className="mt-2 font-display text-2xl font-bold tracking-tight">
+          This page wandered off.
+        </h2>
+        <p className="mx-auto mt-3 max-w-sm text-muted-foreground">
+          The page you're looking for doesn't exist or has moved. Let's get you back on track.
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-5 py-2.5 text-sm font-semibold text-white"
           >
-            Go home
+            <Home size={16} /> Go home
+          </Link>
+          <Link
+            to="/contact"
+            className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium text-foreground/80 hover:text-foreground"
+          >
+            Contact us
           </Link>
         </div>
       </div>
@@ -158,15 +174,30 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // Dashboard / auth routes are standalone — no public navbar or footer.
+  const bare = ["/dashboard", "/admin", "/auth"].some((p) => pathname.startsWith(p));
 
   return (
     <QueryClientProvider client={queryClient}>
       <div className="relative min-h-screen flex flex-col">
-        <FloatingNavbar />
+        {!bare && <FloatingNavbar />}
         <main className="flex-1">
-          <Outlet />
+          {bare ? (
+            <Outlet />
+          ) : (
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Outlet />
+            </motion.div>
+          )}
         </main>
-        <SiteFooter />
+        {!bare && <SiteFooter />}
+        {!bare && <BackToTop />}
       </div>
       <Toaster
         theme="dark"

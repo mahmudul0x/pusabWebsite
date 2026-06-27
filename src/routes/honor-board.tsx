@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
-import { supabase } from "@/integrations/supabase/client";
 import { DEMO_EC_MEMBERS } from "@/lib/site-content";
+import { committeeApi } from "@/lib/api";
 import { Gavel, Crown, Award } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
@@ -124,17 +124,17 @@ function Section({
 }
 
 function HonorBoardPage() {
-  const [members, setMembers] = useState<Member[] | null>(null);
+  const [apiMembers, setApiMembers] = useState<Member[] | null>(null);
   useEffect(() => {
-    supabase
-      .from("ec_members")
-      .select("id,name,role,university,year,is_current,photo_url")
-      .order("year", { ascending: true })
-      .then(({ data }) => setMembers((data as Member[] | null) ?? []));
+    committeeApi
+      .listAll()
+      .then((rows) => setApiMembers(rows.map((m) => ({ ...m, id: String(m.id) }))))
+      .catch(() => setApiMembers([]));
   }, []);
+  const members: Member[] = apiMembers && apiMembers.length > 0 ? apiMembers : DEMO_EC_MEMBERS;
 
   // The honor board lists former office-bearers.
-  const past = (members ?? []).filter((m) => !m.is_current);
+  const past = members.filter((m) => !m.is_current);
   const convenors = past.filter(isConvenorOrMemberSecretary);
   const presidents = past.filter(isPresidentOrGS);
 
@@ -150,30 +150,20 @@ function HonorBoardPage() {
 
       <section className="py-16 md:py-24">
         <div className="container-page space-y-16">
-          {members === null ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="h-24 rounded-2xl border border-border shimmer" />
-              ))}
-            </div>
-          ) : (
-            <>
-              <Section
-                Icon={Gavel}
-                kicker="Founding leadership"
-                title="Ex Convenor & Member Secretary"
-                members={convenors}
-              />
-              <Section
-                Icon={Crown}
-                kicker="Past office-bearers"
-                title="Ex President & General Secretary"
-                members={presidents}
-              />
-            </>
-          )}
+          <Section
+            Icon={Gavel}
+            kicker="Founding leadership"
+            title="Ex Convenor & Member Secretary"
+            members={convenors}
+          />
+          <Section
+            Icon={Crown}
+            kicker="Past office-bearers"
+            title="Ex President & General Secretary"
+            members={presidents}
+          />
 
-          {members !== null && convenors.length === 0 && presidents.length === 0 && (
+          {convenors.length === 0 && presidents.length === 0 && (
             <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <Award size={16} className="text-[var(--color-accent-1)]" />
               The honor board will fill in as historical records are verified.

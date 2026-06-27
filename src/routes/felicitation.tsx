@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Award, Sparkles, ArrowUpRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
 import { GradientButton } from "@/components/site/GradientButton";
+import { felicitationApi, optimizeImage, type FelicitationEntry } from "@/lib/api";
 import heroMoments from "@/assets/hero-moments.jpg";
 
 export const Route = createFileRoute("/felicitation")({
@@ -27,24 +29,24 @@ export const Route = createFileRoute("/felicitation")({
   component: FelicitationPage,
 });
 
-const SECTIONS = [
-  {
-    Icon: Award,
-    tag: "কৃতি সংবর্ধনা",
-    title: "Felicitation of Achievers",
-    desc: "We honour students from Bishwambarpur who earn places in public universities, medical and engineering colleges — celebrating merit publicly to inspire the next batch.",
-    points: ["Public university admits", "Board & olympiad toppers", "Crests, certificates & gifts"],
-  },
-  {
-    Icon: Sparkles,
-    tag: "নবীনবরণ",
-    title: "Freshers' Reception",
-    desc: "Newly admitted members are welcomed into the PUSAB family with an orientation that connects them to seniors, mentors and the association's mission.",
-    points: ["Warm orientation", "Senior–junior bonding", "Mentor & guidance pairing"],
-  },
-];
-
 function FelicitationPage() {
+  const [entries, setEntries] = useState<FelicitationEntry[] | null>(null);
+  useEffect(() => {
+    felicitationApi
+      .listAll()
+      .then(setEntries)
+      .catch(() => setEntries([]));
+  }, []);
+
+  // Group honourees by year (newest first).
+  const byYear = new Map<number, FelicitationEntry[]>();
+  (entries ?? []).forEach((e) => {
+    const list = byYear.get(e.year) ?? [];
+    list.push(e);
+    byYear.set(e.year, list);
+  });
+  const years = [...byYear.keys()].sort((a, b) => b - a);
+
   return (
     <>
       <PageHero
@@ -68,38 +70,65 @@ function FelicitationPage() {
             </p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
-            {SECTIONS.map((s, i) => (
-              <motion.div
-                key={s.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] hover:shadow-[0_28px_55px_-35px_rgba(29,78,216,0.5)]"
-              >
-                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-white shadow-lg">
-                  <s.Icon size={24} />
-                </div>
-                <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--color-accent-1)]">
-                  {s.tag}
-                </p>
-                <h3 className="mt-1 font-display text-2xl font-bold tracking-tight">{s.title}</h3>
-                <p className="mt-3 text-muted-foreground leading-relaxed">{s.desc}</p>
-                <ul className="mt-6 space-y-2">
-                  {s.points.map((p) => (
-                    <li key={p} className="flex items-center gap-2.5 text-sm text-foreground/85">
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent-1)] shadow-[0_0_10px_var(--color-accent-1)]" />
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
-          </div>
+          {/* Honourees — managed from the dashboard */}
+          {years.length > 0 && (
+            <div className="mt-16">
+              <p className="text-label mb-6">Recognised over the years</p>
+              <div className="space-y-10">
+                {years.map((year) => (
+                  <div key={year}>
+                    <div className="mb-4 flex items-baseline gap-3">
+                      <h3 className="font-display text-2xl font-extrabold tracking-tight">{year}</h3>
+                      <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                        {byYear.get(year)!.length} honoured
+                      </span>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      {byYear.get(year)!.map((e, i) => (
+                        <motion.div
+                          key={e.id}
+                          initial={{ opacity: 0, y: 18 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, margin: "-50px" }}
+                          transition={{ duration: 0.4, delay: Math.min(i, 6) * 0.04 }}
+                          className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]"
+                        >
+                          <div className="relative aspect-[4/3] overflow-hidden bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))]">
+                            {e.image_url ? (
+                              <img
+                                src={optimizeImage(e.image_url, 480)}
+                                alt={e.name}
+                                loading="lazy"
+                                className="absolute inset-0 h-full w-full object-cover"
+                              />
+                            ) : (
+                              <span className="absolute inset-0 grid place-items-center text-2xl font-bold text-white">
+                                {e.name.slice(0, 2).toUpperCase()}
+                              </span>
+                            )}
+                            <span className="absolute left-2.5 top-2.5 rounded-full bg-black/55 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white backdrop-blur">
+                              {e.category === "achiever" ? "Achiever" : "Fresher"}
+                            </span>
+                          </div>
+                          <div className="p-4">
+                            <div className="truncate font-display font-bold leading-tight">{e.name}</div>
+                            {e.title && (
+                              <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+                                {e.title}
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* CTA */}
-          <div className="mt-12 relative overflow-hidden rounded-[2rem] bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] p-8 md:p-12">
+          <div className="mt-16 relative overflow-hidden rounded-[2rem] bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] p-8 md:p-12">
             <div className="absolute inset-0 [background-image:linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:32px_32px] opacity-50" />
             <div className="relative flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
               <div className="max-w-xl text-white">

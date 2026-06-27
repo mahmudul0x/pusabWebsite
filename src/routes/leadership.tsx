@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
-import { supabase } from "@/integrations/supabase/client";
 import { DEMO_EC_MEMBERS } from "@/lib/site-content";
-import { Crown, Gavel, Sparkles } from "lucide-react";
+import { committeeApi } from "@/lib/api";
+import { Crown, Gavel } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
 export const Route = createFileRoute("/leadership")({
@@ -75,21 +75,20 @@ function LeadPortrait({ m, label }: { m: Member; label: string }) {
 }
 
 function ExecutiveCommitteePage() {
-  const [members, setMembers] = useState<Member[] | null>(null);
+  // Frontend demo committee history (2014 -> 2026).
+  const [apiMembers, setApiMembers] = useState<Member[] | null>(null);
   useEffect(() => {
-    supabase
-      .from("ec_members")
-      .select("id,name,role,university,year,is_current,photo_url")
-      .order("year", { ascending: false })
-      .then(({ data }) => {
-        const rows = (data as Member[] | null) ?? [];
-        setMembers(rows.length ? rows : DEMO_EC_MEMBERS);
-      });
+    committeeApi
+      .listAll()
+      .then((rows) => setApiMembers(rows.map((m) => ({ ...m, id: String(m.id) }))))
+      .catch(() => setApiMembers([]));
   }, []);
+  // API data drives the page; the demo set is a fallback until members are added.
+  const members: Member[] = apiMembers && apiMembers.length > 0 ? apiMembers : DEMO_EC_MEMBERS;
 
   // Group into committees by session year (newest first).
   const byYear: Record<number, Member[]> = {};
-  (members ?? []).forEach((m) => (byYear[m.year] ||= []).push(m));
+  members.forEach((m) => (byYear[m.year] ||= []).push(m));
   const sessions = Object.keys(byYear)
     .map(Number)
     .sort((a, b) => b - a);
@@ -123,21 +122,7 @@ function ExecutiveCommitteePage() {
             </p>
           </div>
 
-          {members === null ? (
-            <div className="space-y-6">
-              {[0, 1].map((i) => (
-                <div key={i} className="h-64 rounded-3xl border border-border shimmer" />
-              ))}
-            </div>
-          ) : sessions.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-border bg-[var(--color-surface)] p-12 text-center">
-              <Sparkles size={28} className="mx-auto mb-4 text-[var(--color-accent-1)]" />
-              <p className="text-muted-foreground">
-                Committee records are being curated. Past and present committees will appear here
-                soon.
-              </p>
-            </div>
-          ) : (
+          {sessions.length > 0 && (
             <div className="space-y-8">
               {sessions.map((year, idx) => {
                 const list = byYear[year];

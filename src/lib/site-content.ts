@@ -13,9 +13,15 @@ export const SITE = {
 export const NAV_LINKS = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
-  { to: "/programs", label: "Programs" },
+  {
+    to: "/programs",
+    label: "Programs",
+    children: [
+      { to: "/programs", label: "All Programs" },
+      { to: "/felicitation", label: "Felicitation & Freshers" },
+    ],
+  },
   { to: "/sayor", label: "SAYOR" },
-  { to: "/felicitation", label: "Felicitation" },
   { to: "/publicity", label: "Publicity" },
   {
     to: "/leadership",

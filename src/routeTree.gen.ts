@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as SayorRouteImport } from './routes/sayor'
 import { Route as PublicityRouteImport } from './routes/publicity'
 import { Route as ProgramsRouteImport } from './routes/programs'
@@ -16,6 +17,7 @@ import { Route as MomentsRouteImport } from './routes/moments'
 import { Route as LeadershipRouteImport } from './routes/leadership'
 import { Route as HonorBoardRouteImport } from './routes/honor-board'
 import { Route as FelicitationRouteImport } from './routes/felicitation'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
@@ -23,6 +25,11 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SayorRoute = SayorRouteImport.update({
   id: '/sayor',
   path: '/sayor',
@@ -56,6 +63,11 @@ const HonorBoardRoute = HonorBoardRouteImport.update({
 const FelicitationRoute = FelicitationRouteImport.update({
   id: '/felicitation',
   path: '/felicitation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -93,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
   '/honor-board': typeof HonorBoardRoute
   '/leadership': typeof LeadershipRoute
@@ -100,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/programs': typeof ProgramsRoute
   '/publicity': typeof PublicityRoute
   '/sayor': typeof SayorRoute
+  '/support': typeof SupportRoute
   '/admin': typeof AuthenticatedAdminRoute
 }
 export interface FileRoutesByTo {
@@ -107,6 +121,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
   '/honor-board': typeof HonorBoardRoute
   '/leadership': typeof LeadershipRoute
@@ -114,6 +129,7 @@ export interface FileRoutesByTo {
   '/programs': typeof ProgramsRoute
   '/publicity': typeof PublicityRoute
   '/sayor': typeof SayorRoute
+  '/support': typeof SupportRoute
   '/admin': typeof AuthenticatedAdminRoute
 }
 export interface FileRoutesById {
@@ -123,6 +139,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
   '/honor-board': typeof HonorBoardRoute
   '/leadership': typeof LeadershipRoute
@@ -130,6 +147,7 @@ export interface FileRoutesById {
   '/programs': typeof ProgramsRoute
   '/publicity': typeof PublicityRoute
   '/sayor': typeof SayorRoute
+  '/support': typeof SupportRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
 }
 export interface FileRouteTypes {
@@ -139,6 +157,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/dashboard'
     | '/felicitation'
     | '/honor-board'
     | '/leadership'
@@ -146,6 +165,7 @@ export interface FileRouteTypes {
     | '/programs'
     | '/publicity'
     | '/sayor'
+    | '/support'
     | '/admin'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -153,6 +173,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/dashboard'
     | '/felicitation'
     | '/honor-board'
     | '/leadership'
@@ -160,6 +181,7 @@ export interface FileRouteTypes {
     | '/programs'
     | '/publicity'
     | '/sayor'
+    | '/support'
     | '/admin'
   id:
     | '__root__'
@@ -168,6 +190,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/dashboard'
     | '/felicitation'
     | '/honor-board'
     | '/leadership'
@@ -175,6 +198,7 @@ export interface FileRouteTypes {
     | '/programs'
     | '/publicity'
     | '/sayor'
+    | '/support'
     | '/_authenticated/admin'
   fileRoutesById: FileRoutesById
 }
@@ -184,6 +208,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
+  DashboardRoute: typeof DashboardRoute
   FelicitationRoute: typeof FelicitationRoute
   HonorBoardRoute: typeof HonorBoardRoute
   LeadershipRoute: typeof LeadershipRoute
@@ -191,10 +216,18 @@ export interface RootRouteChildren {
   ProgramsRoute: typeof ProgramsRoute
   PublicityRoute: typeof PublicityRoute
   SayorRoute: typeof SayorRoute
+  SupportRoute: typeof SupportRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sayor': {
       id: '/sayor'
       path: '/sayor'
@@ -242,6 +275,13 @@ declare module '@tanstack/react-router' {
       path: '/felicitation'
       fullPath: '/felicitation'
       preLoaderRoute: typeof FelicitationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -306,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
+  DashboardRoute: DashboardRoute,
   FelicitationRoute: FelicitationRoute,
   HonorBoardRoute: HonorBoardRoute,
   LeadershipRoute: LeadershipRoute,
@@ -313,6 +354,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProgramsRoute: ProgramsRoute,
   PublicityRoute: PublicityRoute,
   SayorRoute: SayorRoute,
+  SupportRoute: SupportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { PageHero } from "@/components/site/PageHero";
-import { supabase } from "@/integrations/supabase/client";
+import { galleryApi, optimizeImage, type GalleryItem } from "@/lib/api";
 import { X } from "lucide-react";
 import heroMoments from "@/assets/hero-moments.jpg";
 
@@ -27,13 +27,7 @@ export const Route = createFileRoute("/moments")({
   component: MomentsPage,
 });
 
-type Item = {
-  id: string;
-  title: string | null;
-  category: string;
-  image_url: string;
-  year: number | null;
-};
+type Item = GalleryItem;
 const CATS = ["all", "events", "achievements", "community", "reunion"] as const;
 
 function MomentsPage() {
@@ -42,11 +36,10 @@ function MomentsPage() {
   const [open, setOpen] = useState<Item | null>(null);
 
   useEffect(() => {
-    supabase
-      .from("gallery_items")
-      .select("id,title,category,image_url,year")
-      .order("created_at", { ascending: false })
-      .then(({ data }) => setItems((data as Item[] | null) ?? []));
+    galleryApi
+      .listAll()
+      .then(setItems)
+      .catch(() => setItems([]));
   }, []);
 
   const shown = (items ?? []).filter((i) => filter === "all" || i.category === filter);
@@ -113,8 +106,9 @@ function MomentsPage() {
                   className="mb-4 block w-full break-inside-avoid overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]"
                 >
                   <img
-                    src={it.image_url}
+                    src={optimizeImage(it.image_url, 700)}
                     alt={it.title ?? ""}
+                    loading="lazy"
                     className="w-full h-auto transition-transform duration-500 hover:scale-105"
                   />
                 </motion.button>
@@ -136,7 +130,7 @@ function MomentsPage() {
           >
             <motion.img
               layoutId={`m-${open.id}`}
-              src={open.image_url}
+              src={optimizeImage(open.image_url, 1600)}
               alt={open.title ?? ""}
               className="max-h-[88vh] max-w-[92vw] rounded-2xl border border-border"
             />

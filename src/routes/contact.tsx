@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { GradientButton } from "@/components/site/GradientButton";
-import { supabase } from "@/integrations/supabase/client";
+import { contactApi } from "@/lib/api";
 import {
   Mail,
   Phone,
@@ -247,18 +247,17 @@ function ContactBody() {
     e.preventDefault();
     if (busy) return;
     setBusy(true);
-    const { error } = await supabase
-      .from("contact_submissions")
-      .insert({ name, email, subject: subject || null, message });
-    setBusy(false);
-    if (error) {
-      toast.error("Couldn't send your message. Please check the fields and try again.");
-    } else {
+    try {
+      await contactApi.create({ name, email, subject, message });
       toast.success("Message sent — we'll get back to you soon.");
       setName("");
       setEmail("");
       setSubject("");
       setMessage("");
+    } catch {
+      toast.error("Couldn't send your message. Please check the fields and try again.");
+    } finally {
+      setBusy(false);
     }
   }
 
