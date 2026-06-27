@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
 import { committeeApi, optimizeImage } from "@/lib/api";
-import { Crown, Gavel, GraduationCap, Users, Building2 } from "lucide-react";
+import { Crown, Gavel, GraduationCap, Users, Building2, Quote } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
 export const Route = createFileRoute("/leadership")({
@@ -37,83 +37,128 @@ const isPresident = (m: Member) => /president/i.test(m.role) && !/vice/i.test(m.
 const isGS = (m: Member) =>
   /general secretary/i.test(m.role) || /^gs\b/i.test(m.role.trim());
 
-function LeadCard({ m, label, Icon, delay }: {
-  m: Member; label: string; Icon: typeof Crown; delay: number;
+/* ── Premium editorial lead card ─────────────────────────────────────────── */
+function LeadCard({
+  m,
+  label,
+  Icon,
+  accent,
+  delay,
+}: {
+  m: Member;
+  label: string;
+  Icon: typeof Crown;
+  accent: "1" | "2";
+  delay: number;
 }) {
+  const c1 = accent === "1" ? "var(--color-accent-1)" : "var(--color-accent-2)";
+  const c2 = accent === "1" ? "var(--color-accent-2)" : "var(--color-accent-1)";
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
+    <motion.article
+      initial={{ opacity: 0, y: 44 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.65, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative flex flex-col overflow-hidden rounded-3xl"
+      transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative overflow-hidden rounded-[28px]"
       style={{
-        background: "linear-gradient(145deg, color-mix(in oklab, var(--color-accent-1) 12%, var(--color-surface)), var(--color-surface))",
-        border: "1px solid color-mix(in oklab, var(--color-accent-1) 28%, transparent)",
-        boxShadow: "0 24px 64px -32px color-mix(in oklab, var(--color-accent-1) 40%, transparent)",
+        background: "var(--color-surface)",
+        border: "1px solid color-mix(in oklab, " + c1 + " 22%, transparent)",
+        boxShadow: "0 30px 80px -40px color-mix(in oklab, " + c1 + " 55%, transparent)",
       }}
     >
-      {/* Accent top bar */}
+      {/* Decorative corner gradient wash */}
       <div
-        className="h-[3px] w-full shrink-0"
-        style={{ background: "linear-gradient(90deg, var(--color-accent-1), var(--color-accent-2))" }}
+        className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-[0.12] blur-3xl transition-opacity duration-500 group-hover:opacity-25"
+        style={{ background: "radial-gradient(circle, " + c1 + ", transparent 70%)" }}
+      />
+      {/* Big watermark icon */}
+      <Icon
+        className="pointer-events-none absolute right-5 top-5 opacity-[0.06]"
+        size={120}
+        style={{ color: c1 }}
+        strokeWidth={1.2}
       />
 
-      {/* Ambient glow */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{ background: "radial-gradient(ellipse at 50% 0%, color-mix(in oklab, var(--color-accent-1) 10%, transparent) 0%, transparent 70%)" }}
-      />
-
-      <div className="flex flex-col items-center gap-5 px-8 py-10 text-center">
-        {/* Role pill */}
+      {/* Photo band */}
+      <div className="relative px-7 pt-8">
         <div
-          className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-white"
-          style={{ background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))", boxShadow: "0 6px 20px -6px color-mix(in oklab, var(--color-accent-1) 70%, transparent)" }}
-        >
-          <Icon size={11} /> {label}
-        </div>
-
-        {/* Photo */}
-        <div
-          className="relative h-40 w-40 overflow-hidden transition-transform duration-500 group-hover:scale-[1.03]"
+          className="relative mx-auto h-52 w-52 overflow-hidden transition-transform duration-500 group-hover:scale-[1.02]"
           style={{
-            borderRadius: "24px",
-            boxShadow: "0 20px 56px -20px color-mix(in oklab, var(--color-accent-1) 55%, transparent)",
-            outline: "3px solid color-mix(in oklab, var(--color-accent-1) 30%, transparent)",
-            outlineOffset: "3px",
+            borderRadius: "26px",
+            boxShadow: "0 24px 60px -22px color-mix(in oklab, " + c1 + " 60%, transparent)",
           }}
         >
           {m.photo_url ? (
             <img
-              src={optimizeImage(m.photo_url, 360)}
+              src={optimizeImage(m.photo_url, 440)}
               alt={m.name}
               className="h-full w-full object-cover"
             />
           ) : (
             <div
               className="grid h-full w-full place-items-center"
-              style={{ background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))" }}
+              style={{ background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")" }}
             >
-              <span className="text-4xl font-bold text-white select-none">{initials(m.name)}</span>
+              <span className="text-5xl font-bold text-white select-none">{initials(m.name)}</span>
             </div>
           )}
+          {/* Subtle gradient ring overlay */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              borderRadius: "26px",
+              boxShadow: "inset 0 0 0 3px color-mix(in oklab, " + c1 + " 35%, transparent)",
+            }}
+          />
         </div>
 
-        {/* Info */}
-        <div className="space-y-1.5">
-          <p className="font-display text-2xl font-extrabold tracking-tight text-foreground">{m.name}</p>
-          <p className="text-sm font-semibold" style={{ color: "var(--color-accent-1)" }}>{m.role}</p>
-          {m.university && (
-            <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-              <GraduationCap size={11} /> {m.university}
-            </p>
-          )}
+        {/* Floating role pill overlapping photo bottom */}
+        <div className="relative z-10 -mt-4 flex justify-center">
+          <span
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-white"
+            style={{
+              background: "linear-gradient(120deg, " + c1 + ", " + c2 + ")",
+              boxShadow: "0 10px 28px -8px color-mix(in oklab, " + c1 + " 75%, transparent)",
+            }}
+          >
+            <Icon size={12} /> {label}
+          </span>
         </div>
       </div>
-    </motion.div>
+
+      {/* Identity */}
+      <div className="px-7 pb-2 pt-5 text-center">
+        <h3 className="font-display text-[26px] font-extrabold leading-tight tracking-tight text-foreground">
+          {m.name}
+        </h3>
+        <p className="mt-1 text-sm font-semibold" style={{ color: c1 }}>
+          {m.role}
+        </p>
+        {m.university && (
+          <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+            <GraduationCap size={12} /> {m.university}
+          </p>
+        )}
+      </div>
+
+      {/* Editorial footer strip */}
+      <div
+        className="mt-5 flex items-center gap-3 px-7 py-4"
+        style={{
+          borderTop: "1px solid color-mix(in oklab, " + c1 + " 14%, transparent)",
+          background: "color-mix(in oklab, " + c1 + " 5%, transparent)",
+        }}
+      >
+        <Quote size={15} style={{ color: c1 }} className="shrink-0 opacity-70" />
+        <p className="text-xs italic leading-snug text-muted-foreground">
+          Serving PUSAB and the community of Bishwambarpur this session.
+        </p>
+      </div>
+    </motion.article>
   );
 }
 
+/* ── Clean text roster row ───────────────────────────────────────────────── */
 function MemberRow({ m, index }: { m: Member; index: number }) {
   return (
     <motion.li
@@ -121,12 +166,13 @@ function MemberRow({ m, index }: { m: Member; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-20px" }}
       transition={{ duration: 0.3, delay: Math.min(index, 12) * 0.03 }}
-      className="group flex items-center gap-4 rounded-2xl border border-transparent px-4 py-3.5 transition-all hover:border-[color-mix(in_oklab,var(--color-accent-1)_20%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)]"
+      className="group flex items-center gap-4 rounded-2xl px-4 py-3.5 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_6%,transparent)]"
     >
-      {/* Index dot */}
       <span
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
-        style={{ background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))", opacity: 0.75 }}
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+        style={{
+          background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
+        }}
       >
         {index + 1}
       </span>
@@ -197,13 +243,34 @@ function ExecutiveCommitteePage() {
             transition={{ duration: 0.5 }}
             className="mb-14 max-w-2xl"
           >
-            <p className="text-label mb-3 font-bold uppercase tracking-[0.2em] text-xs" style={{ color: "var(--color-accent-2)" }}>
+            <p
+              className="mb-3 text-xs font-bold uppercase tracking-[0.22em]"
+              style={{ color: "var(--color-accent-2)" }}
+            >
               Governance
             </p>
             <h2 className="font-display text-4xl font-extrabold tracking-tight md:text-5xl">
-              {sessionYear ? `Session ${sessionYear}.` : "Current session."}
+              {sessionYear ? (
+                <>
+                  Session{" "}
+                  <span
+                    style={{
+                      background:
+                        "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))",
+                      WebkitBackgroundClip: "text",
+                      backgroundClip: "text",
+                      color: "transparent",
+                    }}
+                  >
+                    {sessionYear}
+                  </span>
+                  .
+                </>
+              ) : (
+                "Current session."
+              )}
             </h2>
-            <p className="mt-4 text-muted-foreground leading-relaxed">
+            <p className="mt-4 leading-relaxed text-muted-foreground">
               Elected by the members of PUSAB to lead the association, drive programmes, and serve
               the community of Bishwambarpur.
             </p>
@@ -211,31 +278,43 @@ function ExecutiveCommitteePage() {
 
           {loading ? (
             <div className="space-y-8">
-              <div className="grid gap-6 sm:grid-cols-2 max-w-3xl">
+              <div className="grid max-w-4xl gap-7 sm:grid-cols-2">
                 {[0, 1].map((i) => (
-                  <div key={i} className="h-96 animate-pulse rounded-3xl bg-[var(--color-surface)]" />
+                  <div
+                    key={i}
+                    className="h-[28rem] animate-pulse rounded-[28px] bg-[var(--color-surface)]"
+                  />
                 ))}
               </div>
-              <div className="h-72 animate-pulse rounded-3xl bg-[var(--color-surface)]" />
             </div>
           ) : current.length === 0 ? (
             <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-border bg-[var(--color-surface)] py-28 text-center">
               <Users size={44} className="opacity-20" style={{ color: "var(--color-accent-1)" }} />
-              <p className="text-sm text-muted-foreground max-w-xs">
+              <p className="max-w-xs text-sm text-muted-foreground">
                 The current committee will appear here once records are added by the admin.
               </p>
             </div>
           ) : (
-            <div className="space-y-10">
-              {/* President + GS cards */}
+            <div className="space-y-12">
+              {/* President + GS — premium editorial cards */}
               {(president || gs) && (
-                <div className="grid gap-6 sm:grid-cols-2 max-w-3xl">
-                  {president && <LeadCard m={president} label="President" Icon={Crown} delay={0} />}
-                  {gs && <LeadCard m={gs} label="General Secretary" Icon={Gavel} delay={0.1} />}
+                <div className="grid max-w-4xl gap-7 sm:grid-cols-2">
+                  {president && (
+                    <LeadCard m={president} label="President" Icon={Crown} accent="1" delay={0} />
+                  )}
+                  {gs && (
+                    <LeadCard
+                      m={gs}
+                      label="General Secretary"
+                      Icon={Gavel}
+                      accent="2"
+                      delay={0.12}
+                    />
+                  )}
                 </div>
               )}
 
-              {/* Full roster */}
+              {/* Full roster — clean text rows */}
               {roster.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 24 }}
@@ -245,20 +324,28 @@ function ExecutiveCommitteePage() {
                   className="overflow-hidden rounded-3xl border border-border"
                   style={{ background: "var(--color-surface)" }}
                 >
-                  {/* Roster header */}
                   <div
                     className="flex items-center justify-between gap-4 border-b border-border px-7 py-5"
-                    style={{ background: "color-mix(in oklab, var(--color-accent-1) 5%, var(--color-surface))" }}
+                    style={{
+                      background:
+                        "color-mix(in oklab, var(--color-accent-1) 5%, var(--color-surface))",
+                    }}
                   >
                     <div className="flex items-center gap-3">
                       <div
                         className="grid h-10 w-10 place-items-center rounded-xl text-white shadow"
-                        style={{ background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))" }}
+                        style={{
+                          background:
+                            "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
+                        }}
                       >
                         <Users size={17} />
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: "var(--color-accent-1)" }}>
+                        <p
+                          className="text-[10px] font-bold uppercase tracking-[0.2em]"
+                          style={{ color: "var(--color-accent-1)" }}
+                        >
                           Committee Members
                         </p>
                         <p className="font-display text-lg font-bold tracking-tight text-foreground">
@@ -267,11 +354,10 @@ function ExecutiveCommitteePage() {
                       </div>
                     </div>
                     <span className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground">
-                      {roster.length} members
+                      {roster.length} {roster.length === 1 ? "member" : "members"}
                     </span>
                   </div>
 
-                  {/* Member list */}
                   <div className="px-3 py-3">
                     <ul className="grid gap-1 sm:grid-cols-2">
                       {roster.map((m, i) => (
