@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { committeeApi, optimizeImage, type EcMember } from "@/lib/api";
 import { useResource, errMessage } from "./useResource";
@@ -15,7 +15,7 @@ import {
   inputCls,
 } from "./primitives";
 import { ImageUpload } from "./ImageUpload";
-import { Crown, Gavel, ShieldCheck } from "lucide-react";
+import { Check, ChevronDown, Crown, Gavel, ShieldCheck, X } from "lucide-react";
 
 const ROLES = [
   "President",
@@ -47,6 +47,99 @@ const empty: Form = {
   is_current: true,
   photo_url: "",
 };
+
+// ── Role Combobox ────────────────────────────────────────────────────────────
+function RoleCombobox({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState(value);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { setInput(value); }, [value]);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open]);
+
+  const filtered = ROLES.filter((r) =>
+    r.toLowerCase().includes(input.toLowerCase())
+  );
+
+  function select(role: string) {
+    onChange(role);
+    setInput(role);
+    setOpen(false);
+  }
+
+  function handleInput(v: string) {
+    setInput(v);
+    onChange(v);
+    setOpen(true);
+  }
+
+  return (
+    <div ref={ref} className="relative mt-1.5">
+      <div className="flex items-center rounded-lg border border-border bg-[var(--color-background)] focus-within:border-[var(--color-accent-1)] focus-within:ring-2 focus-within:ring-[color-mix(in_oklab,var(--color-accent-1)_22%,transparent)]">
+        <input
+          value={input}
+          onChange={(e) => handleInput(e.target.value)}
+          onFocus={() => setOpen(true)}
+          placeholder="Select or type a role…"
+          className="flex-1 bg-transparent px-3 py-2 text-sm text-foreground outline-none"
+        />
+        {input && (
+          <button
+            type="button"
+            onClick={() => { setInput(""); onChange(""); setOpen(true); }}
+            className="px-2 text-muted-foreground hover:text-foreground"
+          >
+            <X size={13} />
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="px-2 text-muted-foreground hover:text-foreground"
+        >
+          <ChevronDown size={14} className={"transition-transform " + (open ? "rotate-180" : "")} />
+        </button>
+      </div>
+
+      {open && (
+        <div className="absolute z-50 mt-1 max-h-52 w-full overflow-y-auto rounded-xl border border-border bg-[var(--color-surface)] shadow-[0_16px_40px_-20px_rgba(15,23,42,0.4)]">
+          {filtered.length === 0 ? (
+            <div className="flex items-center justify-between px-3 py-2.5 text-sm">
+              <span className="text-muted-foreground">Use "{input}"</span>
+              <button
+                type="button"
+                onClick={() => select(input)}
+                className="rounded-lg bg-[var(--color-accent-1)] px-2.5 py-1 text-xs font-semibold text-white"
+              >
+                Add
+              </button>
+            </div>
+          ) : (
+            filtered.map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => select(r)}
+                className="flex w-full items-center justify-between px-3 py-2.5 text-sm transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_8%,transparent)]"
+              >
+                <span>{r}</span>
+                {value === r && <Check size={13} className="text-[var(--color-accent-1)]" />}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const isPresident = (m: EcMember) => /president/i.test(m.role) && !/vice/i.test(m.role);
 const isGS = (m: EcMember) =>
@@ -368,15 +461,7 @@ export function CommitteeSection({ view }: { view: "executive-committee" | "hono
           <input value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} placeholder="Full name" />
         </Field>
         <Field label="Role / designation">
-          <input
-            list="ec-roles"
-            value={form.role}
-            onChange={(e) => set("role", e.target.value)}
-            className={inputCls}
-          />
-          <datalist id="ec-roles">
-            {ROLES.map((r) => <option key={r} value={r} />)}
-          </datalist>
+          <RoleCombobox value={form.role} onChange={(v) => set("role", v)} />
         </Field>
         <Field label="University">
           <input value={form.university} onChange={(e) => set("university", e.target.value)} className={inputCls} placeholder="University or college" />
