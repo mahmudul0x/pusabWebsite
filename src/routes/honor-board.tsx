@@ -74,61 +74,41 @@ function LeaderCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative flex items-stretch overflow-hidden rounded-3xl"
-      style={{
-        background: "var(--color-background)",
-        border: "1px solid color-mix(in oklab, " + c1 + " 20%, transparent)",
-        boxShadow: "0 18px 48px -32px color-mix(in oklab, " + c1 + " 55%, transparent)",
-      }}
+      className="group relative flex gap-5 rounded-2xl border border-border bg-[var(--color-surface)] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] hover:shadow-[0_24px_56px_-36px_rgba(29,78,216,0.45)]"
     >
-      {/* Watermark icon */}
-      <Icon
-        className="pointer-events-none absolute -right-3 -bottom-3 opacity-[0.05]"
-        size={110}
-        style={{ color: c1 }}
-        strokeWidth={1.2}
-      />
-
-      {/* Photo — full height, edge to edge */}
-      <div className="relative w-40 shrink-0 self-stretch overflow-hidden sm:w-48">
+      {/* Photo — fixed portrait, consistent across all members */}
+      <div
+        className="relative aspect-[3/4] w-28 shrink-0 overflow-hidden rounded-xl sm:w-32"
+        style={{ background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")" }}
+      >
         {m.photo_url ? (
           <img
-            src={optimizeImage(m.photo_url, 400)}
+            src={optimizeImage(m.photo_url, 320)}
             alt={m.name}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
           />
         ) : (
-          <div
-            className="grid h-full w-full place-items-center"
-            style={{ background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")" }}
-          >
-            <span className="text-4xl font-bold text-white select-none">{initials(m.name)}</span>
-          </div>
+          <span className="grid h-full w-full place-items-center text-3xl font-bold text-white select-none">
+            {initials(m.name)}
+          </span>
         )}
-        {/* Soft fade into card on the right edge */}
-        <div
-          className="pointer-events-none absolute inset-y-0 right-0 w-12"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-background) 90%, transparent))",
-          }}
-        />
       </div>
 
       {/* Info */}
-      <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-center px-6 py-7 sm:px-8">
+      <div className="flex min-w-0 flex-1 flex-col justify-center">
         <span
-          className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white"
+          className="inline-flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white"
           style={{ background: "linear-gradient(120deg, " + c1 + ", " + c2 + ")" }}
         >
           <Icon size={11} /> {label}
         </span>
-        <p className="mt-3 font-display text-[28px] font-extrabold leading-tight tracking-tight text-foreground truncate">
+        <p className="mt-2.5 font-display text-xl font-bold leading-tight tracking-tight text-foreground sm:text-2xl">
           {m.name}
         </p>
         {m.university && (
-          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground truncate">
-            <GraduationCap size={13} /> {m.university}
+          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <GraduationCap size={13} className="shrink-0" />
+            <span className="truncate">{m.university}</span>
           </p>
         )}
       </div>
@@ -215,7 +195,11 @@ function YearSection({
           >
             <div className="border-t border-border px-6 pb-7 pt-6 sm:px-8">
               {president || gs ? (
-                <div className="grid gap-5 lg:grid-cols-2">
+                <div
+                  className={
+                    "grid gap-5 " + (president && gs ? "lg:grid-cols-2" : "max-w-xl")
+                  }
+                >
                   {president && (
                     <LeaderCard m={president} label="President" Icon={Crown} accent="1" index={0} />
                   )}
