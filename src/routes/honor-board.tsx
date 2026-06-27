@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
 import { committeeApi, optimizeImage } from "@/lib/api";
-import { Crown, Gavel, Award, ChevronDown } from "lucide-react";
+import { Crown, Gavel, Award, ChevronDown, GraduationCap } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
 export const Route = createFileRoute("/honor-board")({
@@ -55,62 +55,94 @@ const isGS = (m: Member) =>
 function LeaderCard({
   m,
   label,
+  Icon,
   accent,
   index,
 }: {
   m: Member;
   label: string;
+  Icon: typeof Crown;
   accent: "1" | "2";
   index: number;
 }) {
-  const gradFrom = accent === "1" ? "var(--color-accent-1)" : "var(--color-accent-2)";
-  const gradTo = accent === "1" ? "var(--color-accent-2)" : "var(--color-accent-1)";
+  const c1 = accent === "1" ? "var(--color-accent-1)" : "var(--color-accent-2)";
+  const c2 = accent === "1" ? "var(--color-accent-2)" : "var(--color-accent-1)";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
+    <motion.article
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.45, delay: index * 0.06 }}
-      className="group flex flex-col items-center gap-4 rounded-2xl border border-border bg-[var(--color-surface)] p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_-30px_rgba(29,78,216,0.35)]"
+      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative flex items-center gap-5 overflow-hidden rounded-3xl p-5"
       style={{
-        borderColor: `color-mix(in oklab, ${gradFrom} 0%, var(--color-border))`,
+        background: "var(--color-background)",
+        border: "1px solid color-mix(in oklab, " + c1 + " 20%, transparent)",
+        boxShadow: "0 18px 48px -32px color-mix(in oklab, " + c1 + " 55%, transparent)",
       }}
     >
+      {/* Corner glow */}
+      <div
+        className="pointer-events-none absolute -left-16 -top-16 h-40 w-40 rounded-full opacity-[0.1] blur-2xl transition-opacity duration-500 group-hover:opacity-25"
+        style={{ background: "radial-gradient(circle, " + c1 + ", transparent 70%)" }}
+      />
+      {/* Watermark icon */}
+      <Icon
+        className="pointer-events-none absolute -right-2 -bottom-2 opacity-[0.05]"
+        size={72}
+        style={{ color: c1 }}
+        strokeWidth={1.2}
+      />
+
       {/* Photo */}
       <div
-        className="h-24 w-24 overflow-hidden rounded-2xl ring-4 ring-[color-mix(in_oklab,var(--color-accent-1)_22%,transparent)]"
+        className="relative h-24 w-24 shrink-0 overflow-hidden transition-transform duration-500 group-hover:scale-[1.03]"
         style={{
-          background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})`,
+          borderRadius: "18px",
+          boxShadow: "0 14px 36px -16px color-mix(in oklab, " + c1 + " 60%, transparent)",
         }}
       >
         {m.photo_url ? (
           <img
-            src={optimizeImage(m.photo_url, 200)}
+            src={optimizeImage(m.photo_url, 240)}
             alt={m.name}
             className="h-full w-full object-cover"
           />
         ) : (
-          <span className="grid h-full w-full place-items-center text-2xl font-bold text-white select-none">
-            {initials(m.name)}
-          </span>
+          <div
+            className="grid h-full w-full place-items-center"
+            style={{ background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")" }}
+          >
+            <span className="text-2xl font-bold text-white select-none">{initials(m.name)}</span>
+          </div>
         )}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            borderRadius: "18px",
+            boxShadow: "inset 0 0 0 2.5px color-mix(in oklab, " + c1 + " 32%, transparent)",
+          }}
+        />
       </div>
 
       {/* Info */}
-      <div className="min-w-0 w-full">
-        <p
-          className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em]"
-          style={{ color: gradFrom }}
+      <div className="relative z-10 min-w-0 flex-1">
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-white"
+          style={{ background: "linear-gradient(120deg, " + c1 + ", " + c2 + ")" }}
         >
-          {label}
+          <Icon size={10} /> {label}
+        </span>
+        <p className="mt-2 font-display text-lg font-extrabold leading-tight tracking-tight text-foreground truncate">
+          {m.name}
         </p>
-        <p className="font-display text-lg font-bold leading-tight">{m.name}</p>
         {m.university && (
-          <p className="mt-1 text-xs text-muted-foreground leading-snug">{m.university}</p>
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground truncate">
+            <GraduationCap size={11} /> {m.university}
+          </p>
         )}
       </div>
-    </motion.div>
+    </motion.article>
   );
 }
 
@@ -140,52 +172,76 @@ function YearSection({
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between gap-4 px-6 py-5 sm:px-8 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)]"
       >
-        <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-white">
-            <Crown size={16} />
+        <div className="flex items-center gap-4">
+          <div
+            className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-white shadow"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
+            }}
+          >
+            <Award size={20} />
           </div>
           <div className="text-left">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--color-accent-1)]">
+            <p
+              className="text-[10px] font-bold uppercase tracking-[0.22em]"
+              style={{ color: "var(--color-accent-1)" }}
+            >
               Past Office-Bearers
             </p>
-            <p className="font-display text-xl font-extrabold tracking-tight">
+            <p className="font-display text-2xl font-extrabold leading-none tracking-tight">
+              Session {year}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
               Ex President &amp; General Secretary
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="rounded-full bg-[color-mix(in_oklab,var(--color-accent-1)_12%,transparent)] px-3 py-1 text-sm font-bold text-[var(--color-accent-1)]">
-            Session {year}
-          </span>
+        <div
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors"
+          style={{
+            background: open
+              ? "color-mix(in oklab, var(--color-accent-1) 12%, transparent)"
+              : "color-mix(in oklab, var(--color-accent-1) 6%, transparent)",
+          }}
+        >
           <ChevronDown
-            size={18}
-            className={
-              "text-muted-foreground transition-transform duration-300 " +
-              (open ? "rotate-180" : "")
-            }
+            size={17}
+            className={"transition-transform duration-300 " + (open ? "rotate-180" : "")}
+            style={{ color: "var(--color-accent-1)" }}
           />
         </div>
       </button>
 
       {/* Cards */}
-      {open && (
-        <div className="border-t border-border px-6 pb-8 pt-6 sm:px-8">
-          {president || gs ? (
-            <div className="grid gap-6 sm:grid-cols-2 max-w-xl">
-              {president && (
-                <LeaderCard m={president} label="President" accent="1" index={0} />
-              )}
-              {gs && (
-                <LeaderCard m={gs} label="General Secretary" accent="2" index={1} />
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-border px-6 pb-7 pt-6 sm:px-8">
+              {president || gs ? (
+                <div className="grid gap-5 lg:grid-cols-2">
+                  {president && (
+                    <LeaderCard m={president} label="President" Icon={Crown} accent="1" index={0} />
+                  )}
+                  {gs && (
+                    <LeaderCard m={gs} label="General Secretary" Icon={Gavel} accent="2" index={1} />
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Records for this session are being verified.
+                </p>
               )}
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Records for this session are being verified.
-            </p>
-          )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
