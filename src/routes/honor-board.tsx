@@ -74,66 +74,56 @@ function LeaderCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative flex items-center gap-6 overflow-hidden rounded-3xl p-6 sm:p-7"
+      className="group relative flex items-stretch overflow-hidden rounded-3xl"
       style={{
         background: "var(--color-background)",
         border: "1px solid color-mix(in oklab, " + c1 + " 20%, transparent)",
         boxShadow: "0 18px 48px -32px color-mix(in oklab, " + c1 + " 55%, transparent)",
       }}
     >
-      {/* Corner glow */}
-      <div
-        className="pointer-events-none absolute -left-16 -top-16 h-40 w-40 rounded-full opacity-[0.1] blur-2xl transition-opacity duration-500 group-hover:opacity-25"
-        style={{ background: "radial-gradient(circle, " + c1 + ", transparent 70%)" }}
-      />
       {/* Watermark icon */}
       <Icon
         className="pointer-events-none absolute -right-3 -bottom-3 opacity-[0.05]"
-        size={96}
+        size={110}
         style={{ color: c1 }}
         strokeWidth={1.2}
       />
 
-      {/* Photo */}
-      <div
-        className="relative h-32 w-32 shrink-0 overflow-hidden transition-transform duration-500 group-hover:scale-[1.03]"
-        style={{
-          borderRadius: "22px",
-          boxShadow: "0 16px 42px -16px color-mix(in oklab, " + c1 + " 60%, transparent)",
-        }}
-      >
+      {/* Photo — full height, edge to edge */}
+      <div className="relative w-40 shrink-0 self-stretch overflow-hidden sm:w-48">
         {m.photo_url ? (
           <img
-            src={optimizeImage(m.photo_url, 320)}
+            src={optimizeImage(m.photo_url, 400)}
             alt={m.name}
-            className="h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
         ) : (
           <div
             className="grid h-full w-full place-items-center"
             style={{ background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")" }}
           >
-            <span className="text-3xl font-bold text-white select-none">{initials(m.name)}</span>
+            <span className="text-4xl font-bold text-white select-none">{initials(m.name)}</span>
           </div>
         )}
+        {/* Soft fade into card on the right edge */}
         <div
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-y-0 right-0 w-12"
           style={{
-            borderRadius: "22px",
-            boxShadow: "inset 0 0 0 3px color-mix(in oklab, " + c1 + " 32%, transparent)",
+            background:
+              "linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-background) 90%, transparent))",
           }}
         />
       </div>
 
       {/* Info */}
-      <div className="relative z-10 min-w-0 flex-1">
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-center px-6 py-7 sm:px-8">
         <span
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-white"
+          className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white"
           style={{ background: "linear-gradient(120deg, " + c1 + ", " + c2 + ")" }}
         >
-          <Icon size={10} /> {label}
+          <Icon size={11} /> {label}
         </span>
-        <p className="mt-2.5 font-display text-2xl font-extrabold leading-tight tracking-tight text-foreground truncate">
+        <p className="mt-3 font-display text-[28px] font-extrabold leading-tight tracking-tight text-foreground truncate">
           {m.name}
         </p>
         {m.university && (
