@@ -73,18 +73,18 @@ function LeadCard({
       />
       {/* Big watermark icon */}
       <Icon
-        className="pointer-events-none absolute right-5 top-5 opacity-[0.06]"
-        size={120}
+        className="pointer-events-none absolute right-4 top-4 opacity-[0.06]"
+        size={84}
         style={{ color: c1 }}
         strokeWidth={1.2}
       />
 
       {/* Photo band */}
-      <div className="relative px-7 pt-8">
+      <div className="relative px-6 pt-6">
         <div
-          className="relative mx-auto h-52 w-52 overflow-hidden transition-transform duration-500 group-hover:scale-[1.02]"
+          className="relative mx-auto h-36 w-36 overflow-hidden transition-transform duration-500 group-hover:scale-[1.02]"
           style={{
-            borderRadius: "26px",
+            borderRadius: "22px",
             boxShadow: "0 24px 60px -22px color-mix(in oklab, " + c1 + " 60%, transparent)",
           }}
         >
@@ -99,59 +99,59 @@ function LeadCard({
               className="grid h-full w-full place-items-center"
               style={{ background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")" }}
             >
-              <span className="text-5xl font-bold text-white select-none">{initials(m.name)}</span>
+              <span className="text-4xl font-bold text-white select-none">{initials(m.name)}</span>
             </div>
           )}
           {/* Subtle gradient ring overlay */}
           <div
             className="pointer-events-none absolute inset-0"
             style={{
-              borderRadius: "26px",
+              borderRadius: "22px",
               boxShadow: "inset 0 0 0 3px color-mix(in oklab, " + c1 + " 35%, transparent)",
             }}
           />
         </div>
 
         {/* Floating role pill overlapping photo bottom */}
-        <div className="relative z-10 -mt-4 flex justify-center">
+        <div className="relative z-10 -mt-3.5 flex justify-center">
           <span
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-white"
+            className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white"
             style={{
               background: "linear-gradient(120deg, " + c1 + ", " + c2 + ")",
-              boxShadow: "0 10px 28px -8px color-mix(in oklab, " + c1 + " 75%, transparent)",
+              boxShadow: "0 8px 22px -8px color-mix(in oklab, " + c1 + " 75%, transparent)",
             }}
           >
-            <Icon size={12} /> {label}
+            <Icon size={11} /> {label}
           </span>
         </div>
       </div>
 
       {/* Identity */}
-      <div className="px-7 pb-2 pt-5 text-center">
-        <h3 className="font-display text-[26px] font-extrabold leading-tight tracking-tight text-foreground">
+      <div className="px-6 pb-1 pt-4 text-center">
+        <h3 className="font-display text-xl font-extrabold leading-tight tracking-tight text-foreground">
           {m.name}
         </h3>
-        <p className="mt-1 text-sm font-semibold" style={{ color: c1 }}>
+        <p className="mt-0.5 text-sm font-semibold" style={{ color: c1 }}>
           {m.role}
         </p>
         {m.university && (
-          <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <GraduationCap size={12} /> {m.university}
+          <p className="mt-1.5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+            <GraduationCap size={11} /> {m.university}
           </p>
         )}
       </div>
 
       {/* Editorial footer strip */}
       <div
-        className="mt-5 flex items-center gap-3 px-7 py-4"
+        className="mt-4 flex items-center gap-2.5 px-6 py-3"
         style={{
           borderTop: "1px solid color-mix(in oklab, " + c1 + " 14%, transparent)",
           background: "color-mix(in oklab, " + c1 + " 5%, transparent)",
         }}
       >
-        <Quote size={15} style={{ color: c1 }} className="shrink-0 opacity-70" />
-        <p className="text-xs italic leading-snug text-muted-foreground">
-          Serving PUSAB and the community of Bishwambarpur this session.
+        <Quote size={13} style={{ color: c1 }} className="shrink-0 opacity-70" />
+        <p className="text-[11px] italic leading-snug text-muted-foreground">
+          Serving PUSAB and the community this session.
         </p>
       </div>
     </motion.article>
@@ -278,11 +278,11 @@ function ExecutiveCommitteePage() {
 
           {loading ? (
             <div className="space-y-8">
-              <div className="grid max-w-4xl gap-7 sm:grid-cols-2">
+              <div className="grid max-w-2xl gap-6 sm:grid-cols-2">
                 {[0, 1].map((i) => (
                   <div
                     key={i}
-                    className="h-[28rem] animate-pulse rounded-[28px] bg-[var(--color-surface)]"
+                    className="h-80 animate-pulse rounded-[28px] bg-[var(--color-surface)]"
                   />
                 ))}
               </div>
@@ -298,7 +298,7 @@ function ExecutiveCommitteePage() {
             <div className="space-y-12">
               {/* President + GS — premium editorial cards */}
               {(president || gs) && (
-                <div className="grid max-w-4xl gap-7 sm:grid-cols-2">
+                <div className="grid max-w-2xl gap-6 sm:grid-cols-2">
                   {president && (
                     <LeadCard m={president} label="President" Icon={Crown} accent="1" delay={0} />
                   )}
