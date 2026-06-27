@@ -82,7 +82,7 @@ function LeadCard({
       {/* Photo band */}
       <div className="relative px-6 pt-6">
         <div
-          className="relative mx-auto h-36 w-36 overflow-hidden transition-transform duration-500 group-hover:scale-[1.02]"
+          className="relative mx-auto h-44 w-44 overflow-hidden transition-transform duration-500 group-hover:scale-[1.02]"
           style={{
             borderRadius: "22px",
             boxShadow: "0 24px 60px -22px color-mix(in oklab, " + c1 + " 60%, transparent)",
@@ -99,7 +99,7 @@ function LeadCard({
               className="grid h-full w-full place-items-center"
               style={{ background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")" }}
             >
-              <span className="text-4xl font-bold text-white select-none">{initials(m.name)}</span>
+              <span className="text-5xl font-bold text-white select-none">{initials(m.name)}</span>
             </div>
           )}
           {/* Subtle gradient ring overlay */}
@@ -278,7 +278,7 @@ function ExecutiveCommitteePage() {
 
           {loading ? (
             <div className="space-y-8">
-              <div className="grid max-w-2xl gap-6 sm:grid-cols-2">
+              <div className="grid max-w-3xl gap-6 sm:grid-cols-2">
                 {[0, 1].map((i) => (
                   <div
                     key={i}
@@ -298,7 +298,7 @@ function ExecutiveCommitteePage() {
             <div className="space-y-12">
               {/* President + GS — premium editorial cards */}
               {(president || gs) && (
-                <div className="grid max-w-2xl gap-6 sm:grid-cols-2">
+                <div className="grid max-w-3xl gap-6 sm:grid-cols-2">
                   {president && (
                     <LeadCard m={president} label="President" Icon={Crown} accent="1" delay={0} />
                   )}
