@@ -33,6 +33,8 @@ import {
   UserCog,
   Settings as SettingsIcon,
   Award,
+  Crown,
+  ShieldCheck,
 } from "lucide-react";
 import logoPusab from "@/assets/logo-pusab.png";
 import { StatCard } from "@/components/dashboard/primitives";
@@ -162,7 +164,8 @@ const NAV = [
   { key: "overview", label: "Overview", Icon: LayoutDashboard, group: "main" },
   { key: "moments", label: "Moments", Icon: ImageIcon, group: "content" },
   { key: "publicity", label: "Publicity", Icon: Newspaper, group: "content" },
-  { key: "committee", label: "Committee", Icon: Users, group: "content" },
+  { key: "executive-committee", label: "Executive Committee", Icon: ShieldCheck, group: "content" },
+  { key: "honor-board", label: "Honor Board", Icon: Crown, group: "content" },
   { key: "programs", label: "Programs", Icon: CalendarRange, group: "content" },
   { key: "felicitation", label: "Felicitation", Icon: Award, group: "content" },
   { key: "messages", label: "Messages", Icon: MessageSquare, group: "system" },
@@ -354,7 +357,8 @@ function DashboardShell() {
           {section === "overview" && <Overview onJump={pick} />}
           {section === "moments" && <MomentsSection />}
           {section === "publicity" && <PublicitySection />}
-          {section === "committee" && <CommitteeSection />}
+          {section === "executive-committee" && <CommitteeSection view="executive-committee" />}
+          {section === "honor-board" && <CommitteeSection view="honor-board" />}
           {section === "programs" && <ProgramsSection />}
           {section === "felicitation" && <FelicitationSection />}
           {section === "messages" && <MessagesSection />}
@@ -468,7 +472,7 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
               ? ""
               : `${data!.committee.sessions} sessions · ${data!.committee.current} current`
           }
-          onClick={() => onJump("committee")}
+          onClick={() => onJump("executive-committee")}
         />
         <StatCard
           label="Programs"
@@ -522,7 +526,7 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
               [
                 { key: "moments", label: "Add a photo", Icon: ImageIcon },
                 { key: "publicity", label: "Write a post", Icon: Newspaper },
-                { key: "committee", label: "Add a member", Icon: Users },
+                { key: "executive-committee", label: "Add a member", Icon: Users },
                 { key: "programs", label: "Add a program", Icon: CalendarRange },
               ] as const
             ).map(({ key, label, Icon }) => (
