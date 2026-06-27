@@ -2,9 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
-import { DEMO_EC_MEMBERS } from "@/lib/site-content";
-import { committeeApi } from "@/lib/api";
-import { Crown, Gavel } from "lucide-react";
+import { committeeApi, optimizeImage } from "@/lib/api";
+import { Crown, Gavel, GraduationCap, Users } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
 export const Route = createFileRoute("/leadership")({
@@ -13,13 +12,12 @@ export const Route = createFileRoute("/leadership")({
       { title: "Executive Committee — PUSAB" },
       {
         name: "description",
-        content:
-          "The PUSAB Executive Committee — the present session and the full history of past committees.",
+        content: "The current PUSAB Executive Committee — leading the association this session.",
       },
       { property: "og:title", content: "Executive Committee — PUSAB" },
       {
         property: "og:description",
-        content: "Present and past Executive Committees of PUSAB, session by session.",
+        content: "The current Executive Committee of PUSAB.",
       },
       { property: "og:url", content: "/leadership" },
     ],
@@ -39,65 +37,119 @@ type Member = {
 };
 
 function initials(name: string) {
-  return name
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  return name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 }
 
 const isPresident = (m: Member) => /president/i.test(m.role) && !/vice/i.test(m.role);
-const isGS = (m: Member) => /general secretary/i.test(m.role) || /^gs\b/i.test(m.role.trim());
+const isGS = (m: Member) =>
+  /general secretary/i.test(m.role) || /^gs\b/i.test(m.role.trim());
 
-function LeadPortrait({ m, label }: { m: Member; label: string }) {
+function LeadCard({ m, label, Icon }: { m: Member; label: string; Icon: typeof Crown }) {
   return (
-    <div className="flex items-center gap-4">
-      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] ring-2 ring-[color-mix(in_oklab,var(--color-accent-1)_25%,transparent)]">
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      className="relative overflow-hidden rounded-3xl border border-[color-mix(in_oklab,var(--color-accent-1)_35%,transparent)] bg-[var(--color-surface)] p-8 shadow-[0_20px_60px_-30px_rgba(29,78,216,0.35)] flex flex-col items-center text-center gap-5"
+    >
+      {/* Glow blob */}
+      <div className="pointer-events-none absolute -top-16 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-[var(--color-accent-1)] opacity-[0.08] blur-3xl" />
+
+      {/* Role badge */}
+      <div className="flex items-center gap-2 rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow">
+        <Icon size={12} /> {label}
+      </div>
+
+      {/* Photo */}
+      <div className="h-32 w-32 overflow-hidden rounded-2xl ring-4 ring-[color-mix(in_oklab,var(--color-accent-1)_25%,transparent)] shadow-[0_12px_40px_-16px_rgba(29,78,216,0.5)]">
         {m.photo_url ? (
-          <img src={m.photo_url} alt={m.name} className="h-full w-full object-cover" />
+          <img
+            src={optimizeImage(m.photo_url, 300)}
+            alt={m.name}
+            className="h-full w-full object-cover"
+          />
         ) : (
-          <span className="grid h-full w-full place-items-center text-xl font-semibold text-white">
-            {initials(m.name)}
-          </span>
+          <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))]">
+            <span className="text-3xl font-bold text-white select-none">{initials(m.name)}</span>
+          </div>
         )}
       </div>
-      <div className="min-w-0">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-accent-1)]">
-          {label}
-        </p>
-        <p className="mt-1 font-display text-lg font-bold leading-tight">{m.name}</p>
-        <p className="text-sm text-muted-foreground">{m.role}</p>
-        {m.university && <p className="text-xs text-muted-foreground/80">{m.university}</p>}
+
+      {/* Info */}
+      <div>
+        <p className="font-display text-2xl font-extrabold tracking-tight leading-tight">{m.name}</p>
+        <p className="mt-1 text-sm font-semibold text-[var(--color-accent-1)]">{m.role}</p>
+        {m.university && (
+          <p className="mt-1 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+            <GraduationCap size={12} /> {m.university}
+          </p>
+        )}
       </div>
+    </motion.div>
+  );
+}
+
+function MemberRow({ m, index }: { m: Member; index: number }) {
+  return (
+    <motion.li
+      initial={{ opacity: 0, x: -12 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, margin: "-30px" }}
+      transition={{ duration: 0.35, delay: Math.min(index, 8) * 0.04 }}
+      className="flex items-center justify-between gap-4 py-3.5 border-b border-border/60 last:border-0"
+    >
+      <div className="min-w-0">
+        <p className="font-semibold leading-tight truncate">{m.name}</p>
+        {m.university && (
+          <p className="mt-0.5 text-xs text-muted-foreground truncate">{m.university}</p>
+        )}
+      </div>
+      <span className="shrink-0 rounded-full border border-[color-mix(in_oklab,var(--color-accent-1)_35%,transparent)] bg-[color-mix(in_oklab,var(--color-accent-1)_8%,transparent)] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--color-accent-1)]">
+        {m.role}
+      </span>
+    </motion.li>
+  );
+}
+
+function EmptyCommittee() {
+  return (
+    <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-border bg-[var(--color-surface)] py-24 text-center">
+      <Users size={36} className="text-[var(--color-accent-1)] opacity-40" />
+      <p className="text-sm text-muted-foreground max-w-xs">
+        The current committee will be listed here once records are added by the admin.
+      </p>
     </div>
   );
 }
 
 function ExecutiveCommitteePage() {
-  // Frontend demo committee history (2014 -> 2026).
-  const [apiMembers, setApiMembers] = useState<Member[] | null>(null);
+  const [members, setMembers] = useState<Member[] | null>(null);
+
   useEffect(() => {
     committeeApi
-      .listAll()
-      .then((rows) => setApiMembers(rows.map((m) => ({ ...m, id: String(m.id) }))))
-      .catch(() => setApiMembers([]));
+      .listAll({ current: true })
+      .then((rows) => setMembers(rows.map((m) => ({ ...m, id: String(m.id) }))))
+      .catch(() => setMembers([]));
   }, []);
-  // API data drives the page; the demo set is a fallback until members are added.
-  const members: Member[] = apiMembers && apiMembers.length > 0 ? apiMembers : DEMO_EC_MEMBERS;
 
-  // Group into committees by session year (newest first).
-  const byYear: Record<number, Member[]> = {};
-  members.forEach((m) => (byYear[m.year] ||= []).push(m));
-  const sessions = Object.keys(byYear)
-    .map(Number)
-    .sort((a, b) => b - a);
+  const loading = members === null;
+  const current = members ?? [];
+
+  // Find current session year
+  const sessionYear = current.length > 0 ? Math.max(...current.map((m) => m.year)) : null;
+  const sessionMembers = sessionYear ? current.filter((m) => m.year === sessionYear) : current;
+
+  const president = sessionMembers.find(isPresident) ?? null;
+  const gs = sessionMembers.find(isGS) ?? null;
+  const roster = sessionMembers
+    .filter((m) => !isPresident(m) && !isGS(m))
+    .sort((a, b) => a.role.localeCompare(b.role));
 
   return (
     <>
       <PageHero
         title="Executive Committee"
-        lede="The present committee and the full line of those who served before — session by session."
+        lede="The current committee leading PUSAB this session — elected to serve, committed to the community."
         crumbs={[
           { label: "Home", to: "/" },
           { label: "Leadership" },
@@ -109,110 +161,77 @@ function ExecutiveCommitteePage() {
 
       <section className="py-16 md:py-24">
         <div className="container-page">
+          {/* Section heading */}
           <div className="mb-12 max-w-2xl">
             <p className="text-label mb-3" style={{ color: "var(--color-accent-2)" }}>
               Governance
             </p>
             <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight">
-              Committee history.
+              {sessionYear ? `Session ${sessionYear}.` : "Current session."}
             </h2>
             <p className="mt-4 text-muted-foreground leading-relaxed">
-              Each session is led by a President and General Secretary, supported by the full
-              committee below.
+              Elected by the members of PUSAB to lead the association, drive programmes, and serve
+              the community of Bishwambarpur.
             </p>
           </div>
 
-          {sessions.length > 0 && (
+          {loading ? (
             <div className="space-y-8">
-              {sessions.map((year, idx) => {
-                const list = byYear[year];
-                const current = list.some((m) => m.is_current);
-                const president = list.find(isPresident);
-                const gs = list.find(isGS);
-                const roster = [...list].sort((a, b) => a.role.localeCompare(b.role));
-                return (
-                  <motion.div
-                    key={year}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-60px" }}
-                    transition={{ duration: 0.5, delay: Math.min(idx, 4) * 0.05 }}
-                    className={
-                      "overflow-hidden rounded-3xl border bg-[var(--color-surface)] " +
-                      (current
-                        ? "border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] shadow-[0_28px_60px_-40px_rgba(29,78,216,0.55)]"
-                        : "border-border")
-                    }
-                  >
-                    {/* Session header */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-5 sm:px-8">
-                      <div className="flex items-baseline gap-3">
-                        <span className="font-display text-2xl md:text-3xl font-extrabold tracking-tight">
-                          Session {year}
-                        </span>
-                        {current && (
-                          <span className="rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white">
-                            Current
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                        {list.length} members
-                      </span>
-                    </div>
+              <div className="grid gap-6 sm:grid-cols-2">
+                {[0, 1].map((i) => (
+                  <div key={i} className="h-72 animate-pulse rounded-3xl bg-[var(--color-surface)]" />
+                ))}
+              </div>
+              <div className="h-64 animate-pulse rounded-3xl bg-[var(--color-surface)]" />
+            </div>
+          ) : current.length === 0 ? (
+            <EmptyCommittee />
+          ) : (
+            <div className="space-y-10">
+              {/* President + GS — large photo cards */}
+              {(president || gs) && (
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {president && (
+                    <LeadCard m={president} label="President" Icon={Crown} />
+                  )}
+                  {gs && (
+                    <LeadCard m={gs} label="General Secretary" Icon={Gavel} />
+                  )}
+                </div>
+              )}
 
-                    {/* President + GS with photos */}
-                    <div className="grid gap-6 border-b border-border px-6 py-7 sm:grid-cols-2 sm:px-8">
-                      {president ? (
-                        <LeadPortrait m={president} label="President" />
-                      ) : (
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <Crown size={18} className="text-[var(--color-accent-1)]" /> President — on
-                          record soon
-                        </div>
-                      )}
-                      {gs ? (
-                        <LeadPortrait m={gs} label="General Secretary" />
-                      ) : (
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <Gavel size={18} className="text-[var(--color-accent-1)]" /> General
-                          Secretary — on record soon
-                        </div>
-                      )}
+              {/* Remaining members — text only */}
+              {roster.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  className="rounded-3xl border border-border bg-[var(--color-surface)] px-6 py-6 sm:px-8"
+                >
+                  <div className="mb-5 flex items-center gap-3">
+                    <div className="grid h-9 w-9 place-items-center rounded-xl bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-white">
+                      <Users size={16} />
                     </div>
-
-                    {/* Full roster: name · university · designation, with the session date */}
-                    <div className="px-6 py-6 sm:px-8">
-                      <div className="mb-4 flex items-baseline justify-between gap-3">
-                        <p className="text-label">Committee members</p>
-                        <span className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                          Session {year}
-                        </span>
-                      </div>
-                      <ul className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {roster.map((m) => (
-                          <li
-                            key={m.id}
-                            className="flex items-start justify-between gap-3 border-b border-border/60 pb-3"
-                          >
-                            <div className="min-w-0">
-                              <p className="font-medium leading-tight">{m.name}</p>
-                              {m.university && (
-                                <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                                  {m.university}
-                                </p>
-                              )}
-                            </div>
-                            <span className="shrink-0 text-right text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-accent-1)]">
-                              {m.role}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-accent-1)]">
+                        Committee Members
+                      </p>
+                      <p className="font-display text-xl font-bold tracking-tight">
+                        Full Roster
+                      </p>
                     </div>
-                  </motion.div>
-                );
-              })}
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      {roster.length} members
+                    </span>
+                  </div>
+                  <ul className="grid gap-x-8 sm:grid-cols-2">
+                    {roster.map((m, i) => (
+                      <MemberRow key={m.id} m={m} index={i} />
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
             </div>
           )}
         </div>
