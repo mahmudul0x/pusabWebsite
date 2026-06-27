@@ -74,7 +74,7 @@ function LeaderCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative flex items-center gap-5 overflow-hidden rounded-3xl p-5"
+      className="group relative flex items-center gap-6 overflow-hidden rounded-3xl p-6 sm:p-7"
       style={{
         background: "var(--color-background)",
         border: "1px solid color-mix(in oklab, " + c1 + " 20%, transparent)",
@@ -88,23 +88,23 @@ function LeaderCard({
       />
       {/* Watermark icon */}
       <Icon
-        className="pointer-events-none absolute -right-2 -bottom-2 opacity-[0.05]"
-        size={72}
+        className="pointer-events-none absolute -right-3 -bottom-3 opacity-[0.05]"
+        size={96}
         style={{ color: c1 }}
         strokeWidth={1.2}
       />
 
       {/* Photo */}
       <div
-        className="relative h-24 w-24 shrink-0 overflow-hidden transition-transform duration-500 group-hover:scale-[1.03]"
+        className="relative h-32 w-32 shrink-0 overflow-hidden transition-transform duration-500 group-hover:scale-[1.03]"
         style={{
-          borderRadius: "18px",
-          boxShadow: "0 14px 36px -16px color-mix(in oklab, " + c1 + " 60%, transparent)",
+          borderRadius: "22px",
+          boxShadow: "0 16px 42px -16px color-mix(in oklab, " + c1 + " 60%, transparent)",
         }}
       >
         {m.photo_url ? (
           <img
-            src={optimizeImage(m.photo_url, 240)}
+            src={optimizeImage(m.photo_url, 320)}
             alt={m.name}
             className="h-full w-full object-cover"
           />
@@ -113,14 +113,14 @@ function LeaderCard({
             className="grid h-full w-full place-items-center"
             style={{ background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")" }}
           >
-            <span className="text-2xl font-bold text-white select-none">{initials(m.name)}</span>
+            <span className="text-3xl font-bold text-white select-none">{initials(m.name)}</span>
           </div>
         )}
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            borderRadius: "18px",
-            boxShadow: "inset 0 0 0 2.5px color-mix(in oklab, " + c1 + " 32%, transparent)",
+            borderRadius: "22px",
+            boxShadow: "inset 0 0 0 3px color-mix(in oklab, " + c1 + " 32%, transparent)",
           }}
         />
       </div>
@@ -133,12 +133,12 @@ function LeaderCard({
         >
           <Icon size={10} /> {label}
         </span>
-        <p className="mt-2 font-display text-lg font-extrabold leading-tight tracking-tight text-foreground truncate">
+        <p className="mt-2.5 font-display text-2xl font-extrabold leading-tight tracking-tight text-foreground truncate">
           {m.name}
         </p>
         {m.university && (
-          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground truncate">
-            <GraduationCap size={11} /> {m.university}
+          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground truncate">
+            <GraduationCap size={13} /> {m.university}
           </p>
         )}
       </div>
