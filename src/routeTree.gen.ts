@@ -10,9 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SupportRouteImport } from './routes/support'
+import { Route as SecretaryMessageRouteImport } from './routes/secretary-message'
 import { Route as SayorRouteImport } from './routes/sayor'
 import { Route as PublicityRouteImport } from './routes/publicity'
 import { Route as ProgramsRouteImport } from './routes/programs'
+import { Route as PresidentMessageRouteImport } from './routes/president-message'
 import { Route as MomentsRouteImport } from './routes/moments'
 import { Route as LeadershipRouteImport } from './routes/leadership'
 import { Route as HonorBoardRouteImport } from './routes/honor-board'
@@ -30,6 +32,11 @@ const SupportRoute = SupportRouteImport.update({
   path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SecretaryMessageRoute = SecretaryMessageRouteImport.update({
+  id: '/secretary-message',
+  path: '/secretary-message',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SayorRoute = SayorRouteImport.update({
   id: '/sayor',
   path: '/sayor',
@@ -43,6 +50,11 @@ const PublicityRoute = PublicityRouteImport.update({
 const ProgramsRoute = ProgramsRouteImport.update({
   id: '/programs',
   path: '/programs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PresidentMessageRoute = PresidentMessageRouteImport.update({
+  id: '/president-message',
+  path: '/president-message',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MomentsRoute = MomentsRouteImport.update({
@@ -110,9 +122,11 @@ export interface FileRoutesByFullPath {
   '/honor-board': typeof HonorBoardRoute
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
+  '/president-message': typeof PresidentMessageRoute
   '/programs': typeof ProgramsRoute
   '/publicity': typeof PublicityRoute
   '/sayor': typeof SayorRoute
+  '/secretary-message': typeof SecretaryMessageRoute
   '/support': typeof SupportRoute
   '/admin': typeof AuthenticatedAdminRoute
 }
@@ -126,9 +140,11 @@ export interface FileRoutesByTo {
   '/honor-board': typeof HonorBoardRoute
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
+  '/president-message': typeof PresidentMessageRoute
   '/programs': typeof ProgramsRoute
   '/publicity': typeof PublicityRoute
   '/sayor': typeof SayorRoute
+  '/secretary-message': typeof SecretaryMessageRoute
   '/support': typeof SupportRoute
   '/admin': typeof AuthenticatedAdminRoute
 }
@@ -144,9 +160,11 @@ export interface FileRoutesById {
   '/honor-board': typeof HonorBoardRoute
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
+  '/president-message': typeof PresidentMessageRoute
   '/programs': typeof ProgramsRoute
   '/publicity': typeof PublicityRoute
   '/sayor': typeof SayorRoute
+  '/secretary-message': typeof SecretaryMessageRoute
   '/support': typeof SupportRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
 }
@@ -162,9 +180,11 @@ export interface FileRouteTypes {
     | '/honor-board'
     | '/leadership'
     | '/moments'
+    | '/president-message'
     | '/programs'
     | '/publicity'
     | '/sayor'
+    | '/secretary-message'
     | '/support'
     | '/admin'
   fileRoutesByTo: FileRoutesByTo
@@ -178,9 +198,11 @@ export interface FileRouteTypes {
     | '/honor-board'
     | '/leadership'
     | '/moments'
+    | '/president-message'
     | '/programs'
     | '/publicity'
     | '/sayor'
+    | '/secretary-message'
     | '/support'
     | '/admin'
   id:
@@ -195,9 +217,11 @@ export interface FileRouteTypes {
     | '/honor-board'
     | '/leadership'
     | '/moments'
+    | '/president-message'
     | '/programs'
     | '/publicity'
     | '/sayor'
+    | '/secretary-message'
     | '/support'
     | '/_authenticated/admin'
   fileRoutesById: FileRoutesById
@@ -213,9 +237,11 @@ export interface RootRouteChildren {
   HonorBoardRoute: typeof HonorBoardRoute
   LeadershipRoute: typeof LeadershipRoute
   MomentsRoute: typeof MomentsRoute
+  PresidentMessageRoute: typeof PresidentMessageRoute
   ProgramsRoute: typeof ProgramsRoute
   PublicityRoute: typeof PublicityRoute
   SayorRoute: typeof SayorRoute
+  SecretaryMessageRoute: typeof SecretaryMessageRoute
   SupportRoute: typeof SupportRoute
 }
 
@@ -226,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/secretary-message': {
+      id: '/secretary-message'
+      path: '/secretary-message'
+      fullPath: '/secretary-message'
+      preLoaderRoute: typeof SecretaryMessageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sayor': {
@@ -247,6 +280,13 @@ declare module '@tanstack/react-router' {
       path: '/programs'
       fullPath: '/programs'
       preLoaderRoute: typeof ProgramsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/president-message': {
+      id: '/president-message'
+      path: '/president-message'
+      fullPath: '/president-message'
+      preLoaderRoute: typeof PresidentMessageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/moments': {
@@ -351,9 +391,11 @@ const rootRouteChildren: RootRouteChildren = {
   HonorBoardRoute: HonorBoardRoute,
   LeadershipRoute: LeadershipRoute,
   MomentsRoute: MomentsRoute,
+  PresidentMessageRoute: PresidentMessageRoute,
   ProgramsRoute: ProgramsRoute,
   PublicityRoute: PublicityRoute,
   SayorRoute: SayorRoute,
+  SecretaryMessageRoute: SecretaryMessageRoute,
   SupportRoute: SupportRoute,
 }
 export const routeTree = rootRouteImport

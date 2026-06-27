@@ -29,6 +29,8 @@ export const NAV_LINKS = [
     children: [
       { to: "/leadership", label: "Executive Committee" },
       { to: "/honor-board", label: "Honor Board" },
+      { to: "/president-message", label: "President's Message" },
+      { to: "/secretary-message", label: "Secretary's Message" },
     ],
   },
   { to: "/moments", label: "Moments" },
