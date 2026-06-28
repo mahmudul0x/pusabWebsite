@@ -244,10 +244,14 @@ function ConveningCommitteePage() {
               {leads.length > 0 && (
                 <div
                   className={
-                    "grid gap-4 " +
+                    "grid gap-6 " +
                     (leads.length === 1
-                      ? "max-w-[200px]"
-                      : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4")
+                      ? "max-w-md"
+                      : leads.length === 2
+                        ? "sm:grid-cols-2"
+                        : leads.length === 3
+                          ? "sm:grid-cols-2 lg:grid-cols-3"
+                          : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4")
                   }
                 >
                   {leads.map((m, i) => (
