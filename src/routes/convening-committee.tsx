@@ -59,14 +59,14 @@ function LeadCard({ m, index }: { m: Member; index: number }) {
         style={{ background: `linear-gradient(90deg, ${accent}, ${accent2})` }}
       />
 
-      {/* Photo — square */}
+      {/* Photo */}
       <div
-        className="relative aspect-square w-full overflow-hidden"
+        className="relative aspect-[4/3] w-full overflow-hidden"
         style={{ background: `linear-gradient(135deg, ${accent}, ${accent2})` }}
       >
         {m.photo_url ? (
           <img
-            src={optimizeImage(m.photo_url, 320)}
+            src={optimizeImage(m.photo_url, 480)}
             alt={m.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
