@@ -46,6 +46,12 @@ function initials(name: string) {
     .toUpperCase();
 }
 
+/** Format a session year as a span, e.g. 2022 -> "2022-23". */
+function sessionLabel(year: number) {
+  const next = String((year + 1) % 100).padStart(2, "0");
+  return `${year}-${next}`;
+}
+
 const isPresident = (m: Member) =>
   /president/i.test(m.role) && !/vice/i.test(m.role);
 
@@ -179,7 +185,7 @@ function YearSection({
               Past Office-Bearers
             </p>
             <p className="font-display text-2xl font-extrabold leading-none tracking-tight">
-              Session {year}
+              Session {sessionLabel(year)}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Ex President &amp; General Secretary
