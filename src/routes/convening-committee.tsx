@@ -284,7 +284,18 @@ function ConveningCommitteePage() {
             <div className="space-y-10">
               {/* Lead cards — Convenor + Member Secretary */}
               {leads.length > 0 && (
-                <div className={`grid max-w-2xl gap-6 ${leads.length > 1 ? "sm:grid-cols-2" : ""}`}>
+                <div
+                  className={
+                    "grid gap-6 " +
+                    (leads.length === 1
+                      ? "sm:max-w-sm"
+                      : leads.length === 2
+                        ? "sm:grid-cols-2 lg:max-w-3xl"
+                        : leads.length === 3
+                          ? "sm:grid-cols-2 lg:grid-cols-3"
+                          : "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4")
+                  }
+                >
                   {leads.map((m, i) => (
                     <LeadCard key={m.id} m={m} index={i} />
                   ))}
@@ -338,7 +349,14 @@ function ConveningCommitteePage() {
 
                   {/* Member list */}
                   <div className="px-3 py-3">
-                    <ul className="grid gap-1 sm:grid-cols-2">
+                    <ul
+                      className={
+                        "grid gap-1 " +
+                        (rest.length > 6
+                          ? "sm:grid-cols-2 lg:grid-cols-3"
+                          : "sm:grid-cols-2")
+                      }
+                    >
                       {rest.map((m, i) => (
                         <MemberRow key={m.id} m={m} index={i} />
                       ))}
