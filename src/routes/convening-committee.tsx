@@ -147,25 +147,25 @@ function MemberRow({ m, index }: { m: Member; index: number }) {
       transition={{ duration: 0.4, delay: Math.min(index, 12) * 0.05, ease: [0.16, 1, 0.3, 1] }}
       className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-[var(--color-background)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-2)_30%,transparent)] hover:shadow-[0_18px_44px_-30px_rgba(29,78,216,0.4)]"
     >
-      {/* Photo — full width portrait */}
+      {/* Photo — square */}
       <div
-        className="relative aspect-[4/5] w-full overflow-hidden"
+        className="relative aspect-square w-full overflow-hidden"
         style={{ background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))" }}
       >
         {m.photo_url ? (
           <img
-            src={optimizeImage(m.photo_url, 360)}
+            src={optimizeImage(m.photo_url, 280)}
             alt={m.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
         ) : (
-          <span className="grid h-full w-full place-items-center text-4xl font-bold text-white select-none">
+          <span className="grid h-full w-full place-items-center text-3xl font-bold text-white select-none">
             {initials(m.name)}
           </span>
         )}
         {/* Role badge — floating on photo */}
         <span
-          className="absolute left-3 top-3 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white backdrop-blur"
+          className="absolute left-2.5 top-2.5 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-white backdrop-blur"
           style={{
             background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))",
           }}
@@ -175,11 +175,11 @@ function MemberRow({ m, index }: { m: Member; index: number }) {
       </div>
 
       {/* Info */}
-      <div className="p-4 text-center">
-        <p className="font-display text-base font-bold leading-tight text-foreground">{m.name}</p>
+      <div className="p-3 text-center">
+        <p className="font-display text-sm font-bold leading-tight text-foreground truncate">{m.name}</p>
         {m.university && (
-          <p className="mt-1 flex items-center justify-center gap-1 text-xs text-muted-foreground">
-            <GraduationCap size={11} className="shrink-0" />
+          <p className="mt-1 flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
+            <GraduationCap size={10} className="shrink-0" />
             <span className="truncate">{m.university}</span>
           </p>
         )}
@@ -347,7 +347,7 @@ function ConveningCommitteePage() {
 
                   {/* Member list */}
                   <div className="p-5">
-                    <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                       {rest.map((m, i) => (
                         <MemberRow key={m.id} m={m} index={i} />
                       ))}
