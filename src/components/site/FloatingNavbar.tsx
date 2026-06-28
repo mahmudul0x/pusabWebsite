@@ -95,7 +95,11 @@ export function FloatingNavbar() {
           <ul className="hidden lg:flex items-center gap-1 mx-auto">
             {NAV_LINKS.map((link) => {
               const children = "children" in link ? link.children : undefined;
-              const childActive = children?.some((c) => pathname.startsWith(c.to));
+              const childActive = children?.some(
+                (c) =>
+                  pathname.startsWith(c.to) ||
+                  ("children" in c && c.children?.some((g) => pathname.startsWith(g.to))),
+              );
               const isActive =
                 (link.to === "/" ? pathname === "/" : pathname.startsWith(link.to)) ||
                 Boolean(childActive);
@@ -158,8 +162,10 @@ export function FloatingNavbar() {
                         onClick={(e) => e.stopPropagation()}
                         className="absolute left-1/2 top-full z-20 -translate-x-1/2 pt-3"
                       >
-                        <ul className="min-w-[220px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
+                        <ul className="min-w-[230px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
                           {children.map((c) => {
+                            const grandchildren =
+                              "children" in c ? c.children : undefined;
                             const cActive = pathname.startsWith(c.to);
                             return (
                               <li key={c.to + c.label}>
@@ -175,6 +181,29 @@ export function FloatingNavbar() {
                                 >
                                   {c.label}
                                 </Link>
+                                {grandchildren && (
+                                  <ul className="mb-1 ml-3.5 mt-0.5 space-y-0.5 border-l border-border pl-2.5">
+                                    {grandchildren.map((g) => {
+                                      const gActive = pathname.startsWith(g.to);
+                                      return (
+                                        <li key={g.to + g.label}>
+                                          <Link
+                                            to={g.to}
+                                            onClick={() => setOpenMenu(null)}
+                                            className={
+                                              "block rounded-lg px-3 py-2 text-[13px] font-medium transition-colors " +
+                                              (gActive
+                                                ? "text-[var(--color-accent-1)]"
+                                                : "text-foreground/65 hover:text-foreground")
+                                            }
+                                          >
+                                            {g.label}
+                                          </Link>
+                                        </li>
+                                      );
+                                    })}
+                                  </ul>
+                                )}
                               </li>
                             );
                           })}
@@ -312,6 +341,8 @@ export function FloatingNavbar() {
                         {children && (
                           <ul className="mb-1 ml-3 mt-0.5 space-y-0.5 border-l border-border pl-4">
                             {children.map((c) => {
+                              const grandchildren =
+                                "children" in c ? c.children : undefined;
                               const cActive = pathname.startsWith(c.to);
                               return (
                                 <li key={c.to + c.label}>
@@ -327,6 +358,29 @@ export function FloatingNavbar() {
                                   >
                                     {c.label}
                                   </Link>
+                                  {grandchildren && (
+                                    <ul className="ml-3 space-y-0.5 border-l border-border pl-3">
+                                      {grandchildren.map((g) => {
+                                        const gActive = pathname.startsWith(g.to);
+                                        return (
+                                          <li key={g.to + g.label}>
+                                            <Link
+                                              to={g.to}
+                                              onClick={() => setMobileOpen(false)}
+                                              className={
+                                                "block rounded-lg px-3 py-2 text-[13px] font-medium transition-colors " +
+                                                (gActive
+                                                  ? "text-[var(--color-accent-1)]"
+                                                  : "text-foreground/55 hover:text-foreground")
+                                              }
+                                            >
+                                              {g.label}
+                                            </Link>
+                                          </li>
+                                        );
+                                      })}
+                                    </ul>
+                                  )}
                                 </li>
                               );
                             })}
