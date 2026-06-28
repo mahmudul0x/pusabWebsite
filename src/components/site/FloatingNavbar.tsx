@@ -17,18 +17,18 @@ function LeadershipMegaMenu({
   onClose,
   openSubMenu,
   setOpenSubMenu,
+  timerRef,
 }: {
   children: readonly NavChild[];
   pathname: string;
   onClose: () => void;
   openSubMenu: string | null;
   setOpenSubMenu: (k: string | null) => void;
+  timerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
 }) {
-  const subTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function schedSub(key: string | null, delay = 80) {
-    if (subTimer.current) clearTimeout(subTimer.current);
-    subTimer.current = setTimeout(() => setOpenSubMenu(key), delay);
+  function schedSub(key: string | null, delay = 100) {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setOpenSubMenu(key), delay);
   }
 
   return (
@@ -97,6 +97,7 @@ function LeadershipMegaMenu({
                     onClose={onClose}
                     openSubMenu={openSubMenu}
                     setOpenSubMenu={setOpenSubMenu}
+                    timerRef={timerRef}
                   />
                 </motion.div>
               )}
@@ -115,18 +116,18 @@ function EcSubPanel({
   onClose,
   openSubMenu,
   setOpenSubMenu,
+  timerRef,
 }: {
   ecChildren: readonly NavChild[];
   pathname: string;
   onClose: () => void;
   openSubMenu: string | null;
   setOpenSubMenu: (k: string | null) => void;
+  timerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
 }) {
-  const subTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function schedSub(key: string | null, delay = 80) {
-    if (subTimer.current) clearTimeout(subTimer.current);
-    subTimer.current = setTimeout(() => setOpenSubMenu(key), delay);
+  function schedSub(key: string | null, delay = 100) {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setOpenSubMenu(key), delay);
   }
 
   return (
@@ -440,6 +441,7 @@ export function FloatingNavbar() {
                             onClose={() => { setOpenMenu(null); setOpenSubMenu(null); }}
                             openSubMenu={openSubMenu}
                             setOpenSubMenu={setOpenSubMenu}
+                            timerRef={subMenuTimer}
                           />
                         ) : (
                           <ul className="min-w-[200px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
