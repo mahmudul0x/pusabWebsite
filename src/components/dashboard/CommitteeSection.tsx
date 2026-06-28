@@ -561,8 +561,8 @@ export function CommitteeSection({
         <Field label="Session year">
           <input type="number" value={form.year} onChange={(e) => set("year", e.target.value)} className={inputCls} />
         </Field>
-        {!isConvening && (
-          <Field label="Current session?">
+        {view === "executive-committee" && (
+          <Field label="Current session?" full>
             <label className="mt-2 flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
@@ -573,16 +573,18 @@ export function CommitteeSection({
             </label>
           </Field>
         )}
-        <Field label="Convening Committee?" full>
-          <label className="mt-2 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={form.is_convening}
-              onChange={(e) => set("is_convening", e.target.checked)}
-            />
-            This member is part of the 2014 Convening Committee
-          </label>
-        </Field>
+        {isConvening && (
+          <Field label="Convening Committee?" full>
+            <label className="mt-2 flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.is_convening}
+                onChange={(e) => set("is_convening", e.target.checked)}
+              />
+              This member is part of the 2014 Convening Committee
+            </label>
+          </Field>
+        )}
       </Modal>
       {confirmEl}
     </div>
