@@ -65,7 +65,7 @@ function LeadCard({ m, index }: { m: Member; index: number }) {
         style={{ background: `radial-gradient(circle, ${accent}, transparent 70%)` }}
       />
 
-      <div className="flex flex-col items-center gap-4 px-7 pt-8 pb-6 text-center">
+      <div className="flex flex-col items-center gap-4 px-6 pt-7 pb-6 text-center">
         {/* Role pill */}
         <span
           className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-white"
@@ -79,21 +79,21 @@ function LeadCard({ m, index }: { m: Member; index: number }) {
 
         {/* Photo */}
         <div
-          className="relative h-36 w-36 overflow-hidden transition-transform duration-500 group-hover:scale-[1.03]"
+          className="relative aspect-square w-full overflow-hidden transition-transform duration-500 group-hover:scale-[1.02]"
           style={{
-            borderRadius: "22px",
+            borderRadius: "20px",
             background: `linear-gradient(135deg, ${accent}, ${accent2})`,
             boxShadow: `0 18px 48px -20px color-mix(in oklab, ${accent} 60%, transparent)`,
           }}
         >
           {m.photo_url ? (
             <img
-              src={optimizeImage(m.photo_url, 360)}
+              src={optimizeImage(m.photo_url, 500)}
               alt={m.name}
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="grid h-full w-full place-items-center text-4xl font-bold text-white select-none">
+            <span className="grid h-full w-full place-items-center text-5xl font-bold text-white select-none">
               {initials(m.name)}
             </span>
           )}
@@ -101,7 +101,7 @@ function LeadCard({ m, index }: { m: Member; index: number }) {
           <div
             className="pointer-events-none absolute inset-0"
             style={{
-              borderRadius: "22px",
+              borderRadius: "20px",
               boxShadow: `inset 0 0 0 3px color-mix(in oklab, ${accent} 35%, transparent)`,
             }}
           />
