@@ -116,6 +116,25 @@ function LeaderCard({
   );
 }
 
+/* Subtle placeholder so a lone card never leaves the row lopsided. */
+function MissingSlot({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-5 rounded-2xl border border-dashed border-border/70 bg-[color-mix(in_oklab,var(--color-surface)_60%,transparent)] p-5">
+      <div className="grid aspect-[3/4] w-28 shrink-0 place-items-center rounded-xl border border-dashed border-border/60 sm:w-32">
+        <Award size={28} className="opacity-15" style={{ color: "var(--color-accent-1)" }} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <span className="inline-flex w-fit items-center rounded-md border border-dashed border-border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          {label}
+        </span>
+        <p className="mt-2.5 text-sm leading-snug text-muted-foreground">
+          Record for this session is being verified.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function YearSection({
   year,
   president,
@@ -195,16 +214,16 @@ function YearSection({
           >
             <div className="border-t border-border px-6 pb-7 pt-6 sm:px-8">
               {president || gs ? (
-                <div
-                  className={
-                    "grid gap-5 " + (president && gs ? "lg:grid-cols-2" : "max-w-xl")
-                  }
-                >
+                <div className="grid gap-5 sm:grid-cols-2">
                   {president && (
                     <LeaderCard m={president} label="President" Icon={Crown} accent="1" index={0} />
                   )}
                   {gs && (
                     <LeaderCard m={gs} label="General Secretary" Icon={Gavel} accent="2" index={1} />
+                  )}
+                  {/* Placeholder when one office-bearer is missing — keeps the row balanced */}
+                  {(!president || !gs) && (
+                    <MissingSlot label={!president ? "President" : "General Secretary"} />
                   )}
                 </div>
               ) : (
