@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Menu, X, ChevronDown, Heart, ChevronRight } from "lucide-react";
+import { Menu, X, ChevronDown, Heart } from "lucide-react";
 import { NAV_LINKS, SITE } from "@/lib/site-content";
 import { committeeApi } from "@/lib/api";
 import { ecOrdinal } from "@/routes/ec.$year";
@@ -11,125 +11,116 @@ type NavChild = { to: string; label: string; children?: readonly NavChild[] };
 type NavItem = { to: string; label: string; children?: readonly NavChild[] };
 
 /**
- * Recursive flyout menu. Tracks the open branch as a path of keys
- * (e.g. ["Executive Committee", "Previous EC"]) so that opening a deeper
- * level never collapses its ancestors. A single shared timer keeps the
- * whole branch alive while the cursor travels between panels.
+ * Leadership dropdown — a single fixed-width panel that never spawns
+ * sideways flyouts (which overflowed the viewport). Nested groups expand
+ * inline as accordions: Executive Committee is a labelled group with
+ * Present EC + Previous EC; Previous EC expands its sessions in place.
  */
-function FlyoutMenu({
+function LeadershipMenu({
   items,
-  depth,
-  parentPath,
-  openPath,
-  setOpenPath,
-  timerRef,
+  expanded,
+  setExpanded,
   pathname,
   onClose,
 }: {
   items: readonly NavChild[];
-  depth: number;
-  parentPath: string[];
-  openPath: string[];
-  setOpenPath: (p: string[]) => void;
-  timerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
+  expanded: string[];
+  setExpanded: (p: string[]) => void;
   pathname: string;
   onClose: () => void;
 }) {
-  function schedule(path: string[], delay: number) {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setOpenPath(path), delay);
-  }
-  const cancelTimer = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
+  const toggle = (key: string) =>
+    setExpanded(expanded.includes(key) ? expanded.filter((k) => k !== key) : [...expanded, key]);
+
+  const itemLink = (item: NavChild, pad: string, accent = false) => {
+    const active = pathname.startsWith(item.to);
+    return (
+      <Link
+        to={item.to}
+        onClick={onClose}
+        className={
+          "block rounded-xl py-2.5 text-sm font-medium transition-colors " +
+          pad +
+          " " +
+          (active
+            ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
+            : (accent ? "text-foreground/75" : "text-foreground/70") +
+              " hover:bg-[var(--color-surface-2)] hover:text-foreground")
+        }
+      >
+        {item.label}
+      </Link>
+    );
   };
 
   return (
-    <ul
-      className={
-        "rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)] " +
-        (depth === 0 ? "min-w-[210px]" : "min-w-[210px] max-h-[340px] overflow-y-auto")
-      }
-    >
+    <div className="w-[260px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
       {items.map((item) => {
         const hasChildren = "children" in item && item.children && item.children.length > 0;
-        const itemPath = [...parentPath, item.label];
-        const branchOpen = openPath[depth] === item.label;
-        const active = pathname.startsWith(item.to);
 
-        if (!hasChildren) {
-          return (
-            <li key={item.to + item.label}>
-              <Link
-                to={item.to}
-                onClick={onClose}
-                onMouseEnter={() => schedule(parentPath, 0)}
-                className={
-                  "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
-                  (active
-                    ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
-                    : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
-                }
-              >
-                {item.label}
-              </Link>
-            </li>
-          );
-        }
+        if (!hasChildren) return <div key={item.to + item.label}>{itemLink(item, "px-3.5")}</div>;
 
-        const subItems: readonly NavChild[] =
+        // Executive Committee group
+        const ecChildren: readonly NavChild[] =
           "children" in item && item.children ? item.children : [];
 
         return (
-          <li
-            key={item.to + item.label}
-            className="relative"
-            onMouseEnter={() => {
-              cancelTimer();
-              setOpenPath(itemPath);
-            }}
-            onMouseLeave={() => schedule(parentPath, 140)}
-          >
-            <button
-              type="button"
-              className={
-                "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
-                (branchOpen || active
-                  ? "bg-[var(--color-surface-2)] text-foreground"
-                  : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
-              }
-            >
+          <div key={item.to + item.label} className="mb-1">
+            <p className="px-3.5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-accent-1)]">
               {item.label}
-              <ChevronRight size={13} className="opacity-40" />
-            </button>
+            </p>
+            {ecChildren.map((g) => {
+              const gHasChildren = "children" in g && g.children && g.children.length > 0;
+              if (!gHasChildren)
+                return <div key={g.to + g.label}>{itemLink(g, "px-3.5", true)}</div>;
 
-            <AnimatePresence>
-              {branchOpen && (
-                <motion.div
-                  initial={{ opacity: 0, x: -6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -6 }}
-                  transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                  // Bridge the visual gap so the cursor never leaves a hover zone
-                  className="absolute left-full top-0 pl-2"
-                  onMouseEnter={cancelTimer}
-                >
-                  <FlyoutMenu
-                    items={subItems}
-                    depth={depth + 1}
-                    parentPath={itemPath}
-                    openPath={openPath}
-                    setOpenPath={setOpenPath}
-                    timerRef={timerRef}
-                    pathname={pathname}
-                    onClose={onClose}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </li>
+              // Previous EC — inline accordion of sessions
+              const sessions: readonly NavChild[] = "children" in g && g.children ? g.children : [];
+              const key = g.label;
+              const open = expanded.includes(key);
+
+              return (
+                <div key={g.to + g.label}>
+                  <button
+                    type="button"
+                    onClick={() => toggle(key)}
+                    className={
+                      "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                      (open
+                        ? "bg-[var(--color-surface-2)] text-foreground"
+                        : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+                    }
+                  >
+                    {g.label}
+                    <ChevronDown
+                      size={14}
+                      className={
+                        "opacity-50 transition-transform duration-200 " + (open ? "rotate-180" : "")
+                      }
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {open && sessions.length > 0 && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="ml-3.5 mt-0.5 max-h-[40vh] space-y-0.5 overflow-y-auto border-l border-border pl-2 pr-0.5">
+                          {sessions.map((s) => itemLink(s, "px-3", true))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
         );
       })}
-    </ul>
+    </div>
   );
 }
 
@@ -140,7 +131,6 @@ export function FloatingNavbar() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openPath, setOpenPath] = useState<string[]>([]);
   const subMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const flyoutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [pastYears, setPastYears] = useState<number[]>([]);
 
@@ -213,11 +203,10 @@ export function FloatingNavbar() {
     }
   }, [mobileOpen]);
 
-  // Cleanup hover timers on unmount.
+  // Cleanup hover timer on unmount.
   useEffect(
     () => () => {
       if (subMenuTimer.current) clearTimeout(subMenuTimer.current);
-      if (flyoutTimer.current) clearTimeout(flyoutTimer.current);
     },
     [],
   );
@@ -366,13 +355,10 @@ export function FloatingNavbar() {
                         className="absolute left-1/2 top-full z-20 -translate-x-1/2 pt-3"
                       >
                         {link.label === "Leadership" ? (
-                          <FlyoutMenu
+                          <LeadershipMenu
                             items={children}
-                            depth={0}
-                            parentPath={[]}
-                            openPath={openPath}
-                            setOpenPath={setOpenPath}
-                            timerRef={flyoutTimer}
+                            expanded={openPath}
+                            setExpanded={setOpenPath}
                             pathname={pathname}
                             onClose={() => {
                               setOpenMenu(null);
