@@ -11,10 +11,10 @@ type NavChild = { to: string; label: string; children?: readonly NavChild[] };
 type NavItem = { to: string; label: string; children?: readonly NavChild[] };
 
 /**
- * Leadership dropdown — items with children open a flyout panel to the
- * right. Each panel measures itself; if it would overflow the viewport's
- * right edge it flips to open on the left instead, so nested levels never
- * spill off-screen. A shared hover timer bridges the gap between panels.
+ * Leadership dropdown. Top-level items with children (Executive Committee)
+ * open ONE flyout panel to the right. Inside that flyout, a deeper group
+ * (Previous EC) expands its sessions inline as an accordion — so the menu
+ * is never more than two panels wide and never overflows the viewport.
  */
 function LeadershipMenu({
   items,
@@ -33,128 +33,148 @@ function LeadershipMenu({
   const cancel = () => {
     if (timer.current) clearTimeout(timer.current);
   };
-  // Open this exact branch path (replacing siblings at the same depth).
-  const openBranch = (path: string[]) => {
+  const openKey = (key: string) => {
     cancel();
-    setExpanded(path);
+    setExpanded([key]);
   };
-  const scheduleClose = (path: string[]) => {
+  const scheduleClose = () => {
     cancel();
-    timer.current = setTimeout(() => setExpanded(path), 160);
+    timer.current = setTimeout(() => setExpanded([]), 160);
   };
 
-  function Panel({
-    list,
-    depth,
-    parentPath,
-  }: {
-    list: readonly NavChild[];
-    depth: number;
-    parentPath: string[];
-  }) {
+  const leaf = (item: NavChild, pad: string) => {
+    const active = pathname.startsWith(item.to);
     return (
-      <ul
+      <Link
+        to={item.to}
+        onClick={onClose}
         className={
-          "min-w-[230px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)] " +
-          (depth > 0 ? "max-h-[60vh] overflow-y-auto" : "")
+          "block rounded-xl py-2.5 text-sm font-medium transition-colors " +
+          pad +
+          " " +
+          (active
+            ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
+            : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
         }
-        onMouseEnter={cancel}
       >
-        {list.map((item) => {
-          const hasChildren = "children" in item && item.children && item.children.length > 0;
-          const active = pathname.startsWith(item.to);
-          const itemPath = [...parentPath, item.label];
-
-          if (!hasChildren) {
-            return (
-              <li key={item.to + item.label}>
-                <Link
-                  to={item.to}
-                  onClick={onClose}
-                  onMouseEnter={() => openBranch(parentPath)}
-                  className={
-                    "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
-                    (active
-                      ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
-                      : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
-                  }
-                >
-                  {item.label}
-                </Link>
-              </li>
-            );
-          }
-
-          const subItems: readonly NavChild[] =
-            "children" in item && item.children ? item.children : [];
-          // openBranch matches up to this depth
-          const branchOpen = expanded[depth] === item.label;
-
-          return (
-            <li
-              key={item.to + item.label}
-              className="relative"
-              onMouseEnter={() => openBranch(itemPath)}
-              onMouseLeave={() => scheduleClose(parentPath)}
-            >
-              <button
-                type="button"
-                className={
-                  "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
-                  (branchOpen || active
-                    ? "bg-[var(--color-surface-2)] text-foreground"
-                    : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
-                }
-              >
-                {item.label}
-                <ChevronRight size={14} className="opacity-50" />
-              </button>
-
-              <AnimatePresence>
-                {branchOpen && (
-                  <FlyoutWrapper>
-                    <Panel list={subItems} depth={depth + 1} parentPath={itemPath} />
-                  </FlyoutWrapper>
-                )}
-              </AnimatePresence>
-            </li>
-          );
-        })}
-      </ul>
+        {item.label}
+      </Link>
     );
-  }
+  };
 
-  return <Panel list={items} depth={0} parentPath={[]} />;
-}
-
-/**
- * Positions a flyout to the right of its parent, flipping to the left when
- * there isn't enough room before the viewport edge. Measures after mount.
- */
-function FlyoutWrapper({ children }: { children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [side, setSide] = useState<"right" | "left">("right");
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    // If the right-opening panel would overflow, flip left.
-    if (rect.right > window.innerWidth - 12) setSide("left");
-    else setSide("right");
-  }, []);
+  // A group rendered INSIDE the flyout that expands its children downward.
+  const InlineGroup = ({ group }: { group: NavChild }) => {
+    const sessions: readonly NavChild[] =
+      "children" in group && group.children ? group.children : [];
+    const key = "sub:" + group.label;
+    const open = expanded.includes(key);
+    return (
+      <li
+        onMouseEnter={() => setExpanded(["/leadership", key])}
+        onMouseLeave={() => setExpanded(["/leadership"])}
+      >
+        <button
+          type="button"
+          className={
+            "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+            (open
+              ? "bg-[var(--color-surface-2)] text-foreground"
+              : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+          }
+        >
+          {group.label}
+          <ChevronDown
+            size={14}
+            className={"opacity-50 transition-transform duration-200 " + (open ? "rotate-180" : "")}
+          />
+        </button>
+        <AnimatePresence initial={false}>
+          {open && sessions.length > 0 && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="ml-3.5 mt-0.5 space-y-0.5 border-l border-border pl-2">
+                {sessions.map((s) => (
+                  <div key={s.to + s.label}>{leaf(s, "px-3")}</div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </li>
+    );
+  };
 
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, x: side === "right" ? -6 : 6 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: side === "right" ? -6 : 6 }}
-      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-      className={"absolute top-0 " + (side === "right" ? "left-full pl-2" : "right-full pr-2")}
+    <ul
+      className="min-w-[230px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]"
+      onMouseEnter={cancel}
     >
-      {children}
-    </motion.div>
+      {items.map((item) => {
+        const hasChildren = "children" in item && item.children && item.children.length > 0;
+
+        if (!hasChildren) {
+          return <li key={item.to + item.label}>{leaf(item, "px-3.5")}</li>;
+        }
+
+        // Executive Committee → right-side flyout containing its children
+        const ecChildren: readonly NavChild[] =
+          "children" in item && item.children ? item.children : [];
+        const branchOpen = expanded[0] === item.to;
+
+        return (
+          <li
+            key={item.to + item.label}
+            className="relative"
+            onMouseEnter={() => openKey(item.to)}
+            onMouseLeave={scheduleClose}
+          >
+            <button
+              type="button"
+              className={
+                "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                (branchOpen
+                  ? "bg-[var(--color-surface-2)] text-foreground"
+                  : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+              }
+            >
+              {item.label}
+              <ChevronRight size={14} className="opacity-50" />
+            </button>
+
+            <AnimatePresence>
+              {branchOpen && (
+                <motion.div
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -6 }}
+                  transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute left-full top-0 pl-2"
+                  onMouseEnter={() => {
+                    cancel();
+                    setExpanded(["/leadership"]);
+                  }}
+                >
+                  <ul className="min-w-[230px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
+                    {ecChildren.map((g) => {
+                      const gHasChildren = "children" in g && g.children && g.children.length > 0;
+                      if (!gHasChildren) {
+                        return <li key={g.to + g.label}>{leaf(g, "px-3.5")}</li>;
+                      }
+                      return <InlineGroup key={g.to + g.label} group={g} />;
+                    })}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
