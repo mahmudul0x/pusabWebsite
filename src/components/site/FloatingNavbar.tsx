@@ -23,6 +23,17 @@ export function FloatingNavbar() {
     setOpenMenu(null);
   }, [pathname]);
 
+  // Lock body scroll while the mobile menu is open.
+  useEffect(() => {
+    if (mobileOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [mobileOpen]);
+
   // Close any open dropdown on outside click or Escape.
   useEffect(() => {
     if (!openMenu) return;
@@ -192,7 +203,7 @@ export function FloatingNavbar() {
           {/* Mobile toggle */}
           <button
             onClick={() => setMobileOpen((v) => !v)}
-            className="ml-auto lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full border border-white/10 bg-white/[0.04] text-foreground"
+            className="ml-auto lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full border border-border bg-[var(--color-surface-2)] text-foreground"
             aria-label="Open menu"
           >
             {mobileOpen ? <X size={18} /> : <Menu size={18} />}
@@ -222,80 +233,133 @@ export function FloatingNavbar() {
         }
       `}</style>
 
-      {/* Mobile overlay */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[9998] lg:hidden bg-background/95 backdrop-blur-2xl"
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 lg:hidden"
+            style={{ zIndex: 10000 }}
           >
-            <div className="absolute inset-0 overflow-hidden">
-              <div className="absolute -top-20 -left-20 h-[60vh] w-[60vh] rounded-full bg-[var(--color-accent-1)] opacity-10 blur-[120px] animate-blob" />
-              <div className="absolute -bottom-20 -right-20 h-[60vh] w-[60vh] rounded-full bg-[var(--color-accent-2)] opacity-10 blur-[120px] animate-blob" />
+            {/* Solid backdrop — fully covers page content */}
+            <div className="absolute inset-0 bg-[var(--color-background)]" />
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <div className="absolute -top-24 -right-16 h-[50vh] w-[50vh] rounded-full bg-[var(--color-accent-1)] opacity-[0.07] blur-[100px]" />
+              <div className="absolute -bottom-24 -left-16 h-[50vh] w-[50vh] rounded-full bg-[var(--color-accent-2)] opacity-[0.07] blur-[100px]" />
             </div>
-            <div className="relative h-full flex flex-col justify-center px-8 pt-24">
-              <motion.ul
-                initial="hidden"
-                animate="show"
-                variants={{ show: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
-                className="space-y-3"
-              >
-                {NAV_LINKS.map((link) => {
-                  const children = "children" in link ? link.children : undefined;
-                  return (
-                    <motion.li
-                      key={link.to}
-                      variants={{
-                        hidden: { opacity: 0, y: 28 },
-                        show: {
-                          opacity: 1,
-                          y: 0,
-                          transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-                        },
-                      }}
-                    >
-                      <Link
-                        to={link.to}
-                        className="group flex items-center gap-3 text-[32px] font-display font-bold tracking-tight"
-                      >
-                        <span className="h-px w-6 bg-foreground/40 transition-all duration-300 group-hover:w-14 group-hover:bg-[var(--color-accent-1)]" />
-                        <span>{link.label}</span>
-                      </Link>
-                      {children && (
-                        <ul className="mt-2 ml-9 space-y-1.5">
-                          {children.map((c) => (
-                            <li key={c.to + c.label}>
-                              <Link
-                                to={c.to}
-                                className="text-lg font-medium text-foreground/70 hover:text-foreground transition-colors"
-                              >
-                                {c.label}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </motion.li>
-                  );
-                })}
-              </motion.ul>
-              <div className="mt-10 flex flex-wrap gap-3">
-                <Link
-                  to="/support"
-                  className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-semibold"
+
+            {/* Panel */}
+            <div className="relative flex h-full flex-col">
+              {/* Header row inside menu */}
+              <div className="flex items-center justify-between border-b border-border px-5 py-4">
+                <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
+                  <img src={logoPusab} alt="PUSAB" className="h-10 w-10 object-contain" />
+                  <div className="flex flex-col leading-none">
+                    <span className="font-display text-base font-bold tracking-[0.02em]">PUSAB</span>
+                    <span className="mt-0.5 text-[8px] uppercase tracking-[0.28em] text-muted-foreground">
+                      est. 2014
+                    </span>
+                  </div>
+                </Link>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="grid h-10 w-10 place-items-center rounded-full border border-border text-foreground"
+                  aria-label="Close menu"
                 >
-                  <Heart size={15} className="text-[var(--color-accent-1)]" /> Support
-                </Link>
-                <Link to="/contact" className="formal-cta">
-                  <span>Join PUSAB</span>
-                </Link>
+                  <X size={18} />
+                </button>
               </div>
-              <div className="mt-8 text-xs text-muted-foreground space-y-1">
-                <p>{SITE.email}</p>
-                <p>{SITE.phone}</p>
+
+              {/* Scrollable nav */}
+              <nav className="flex-1 overflow-y-auto px-5 py-6">
+                <motion.ul
+                  initial="hidden"
+                  animate="show"
+                  variants={{ show: { transition: { staggerChildren: 0.04, delayChildren: 0.05 } } }}
+                  className="space-y-1"
+                >
+                  {NAV_LINKS.map((link) => {
+                    const children = "children" in link ? link.children : undefined;
+                    const isActive =
+                      link.to === "/" ? pathname === "/" : pathname.startsWith(link.to);
+                    return (
+                      <motion.li
+                        key={link.to}
+                        variants={{
+                          hidden: { opacity: 0, y: 12 },
+                          show: {
+                            opacity: 1,
+                            y: 0,
+                            transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
+                          },
+                        }}
+                      >
+                        <Link
+                          to={link.to}
+                          onClick={() => setMobileOpen(false)}
+                          className={
+                            "block rounded-xl px-4 py-3 font-display text-lg font-bold tracking-tight transition-colors " +
+                            (isActive
+                              ? "bg-[var(--color-surface-2)] text-foreground"
+                              : "text-foreground/85 hover:bg-[var(--color-surface-2)]")
+                          }
+                        >
+                          {link.label}
+                        </Link>
+                        {children && (
+                          <ul className="mb-1 ml-3 mt-0.5 space-y-0.5 border-l border-border pl-4">
+                            {children.map((c) => {
+                              const cActive = pathname.startsWith(c.to);
+                              return (
+                                <li key={c.to + c.label}>
+                                  <Link
+                                    to={c.to}
+                                    onClick={() => setMobileOpen(false)}
+                                    className={
+                                      "block rounded-lg px-3 py-2 text-sm font-medium transition-colors " +
+                                      (cActive
+                                        ? "text-[var(--color-accent-1)]"
+                                        : "text-foreground/65 hover:text-foreground")
+                                    }
+                                  >
+                                    {c.label}
+                                  </Link>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </motion.li>
+                    );
+                  })}
+                </motion.ul>
+              </nav>
+
+              {/* Footer — CTAs + contact */}
+              <div className="border-t border-border px-5 py-5">
+                <div className="flex gap-3">
+                  <Link
+                    to="/support"
+                    onClick={() => setMobileOpen(false)}
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-3 text-sm font-semibold"
+                  >
+                    <Heart size={15} className="text-[var(--color-accent-1)]" /> Support
+                  </Link>
+                  <Link
+                    to="/contact"
+                    onClick={() => setMobileOpen(false)}
+                    className="formal-cta flex-1 justify-center"
+                  >
+                    <span>Join PUSAB</span>
+                  </Link>
+                </div>
+                <div className="mt-4 flex flex-col gap-0.5 text-xs text-muted-foreground">
+                  <p>{SITE.email}</p>
+                  <p>{SITE.phone}</p>
+                </div>
               </div>
             </div>
           </motion.div>
