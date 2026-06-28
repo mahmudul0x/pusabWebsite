@@ -15,6 +15,8 @@ export function FloatingNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [pastYears, setPastYears] = useState<number[]>([]);
 
   // Load past (non-current) session years for the "Previous EC" submenu.
@@ -35,10 +37,9 @@ export function FloatingNavbar() {
     };
   }, []);
 
-  // Inject past sessions into the Executive Committee submenu:
-  // Present EC, Convening Committee, then 1st EC, 2nd EC, ... (oldest → newest).
+  // Inject past sessions as children of "Previous EC" inside Executive Committee.
   const navLinks = useMemo<readonly NavItem[]>(() => {
-    const sessionChildren: NavChild[] = [
+    const previousEcChildren: NavChild[] = [
       { to: "/convening-committee", label: "Convening Committee" },
       ...pastYears.map((y) => ({
         to: `/ec/${y}`,
@@ -49,11 +50,17 @@ export function FloatingNavbar() {
       if (link.to !== "/leadership" || !("children" in link)) return link;
       return {
         ...link,
-        children: link.children.map((c) =>
-          c.label === "Executive Committee"
-            ? { ...c, children: [...(("children" in c && c.children) || []), ...sessionChildren] }
-            : c,
-        ),
+        children: link.children.map((c) => {
+          if (c.label !== "Executive Committee" || !("children" in c)) return c;
+          return {
+            ...c,
+            children: c.children.map((gc) =>
+              gc.label === "Previous EC"
+                ? { ...gc, children: previousEcChildren }
+                : gc,
+            ),
+          };
+        }),
       };
     });
   }, [pastYears]);
@@ -68,6 +75,7 @@ export function FloatingNavbar() {
   useEffect(() => {
     setMobileOpen(false);
     setOpenMenu(null);
+    setMobileExpanded(null);
   }, [pathname]);
 
   // Lock body scroll while the mobile menu is open.
@@ -214,43 +222,139 @@ export function FloatingNavbar() {
                             const grandchildren =
                               "children" in c ? c.children : undefined;
                             const cActive = pathname.startsWith(c.to);
+                            if (!grandchildren) {
+                              return (
+                                <li key={c.to + c.label}>
+                                  <Link
+                                    to={c.to}
+                                    onClick={() => setOpenMenu(null)}
+                                    className={
+                                      "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                                      (cActive
+                                        ? "bg-[var(--color-surface-2)] text-foreground"
+                                        : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+                                    }
+                                  >
+                                    {c.label}
+                                  </Link>
+                                </li>
+                              );
+                            }
+                            // Item with nested children (e.g. "Executive Committee" or "Previous EC")
+                            // → show as a flyout submenu on hover
+                            const subKey = c.to + c.label;
+                            const subOpen = openSubMenu === subKey;
                             return (
-                              <li key={c.to + c.label}>
-                                <Link
-                                  to={c.to}
-                                  onClick={() => setOpenMenu(null)}
+                              <li
+                                key={subKey}
+                                className="relative"
+                                onMouseEnter={() => setOpenSubMenu(subKey)}
+                                onMouseLeave={() => setOpenSubMenu(null)}
+                              >
+                                <button
+                                  type="button"
                                   className={
-                                    "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                                    "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
                                     (cActive
                                       ? "bg-[var(--color-surface-2)] text-foreground"
                                       : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
                                   }
                                 >
                                   {c.label}
-                                </Link>
-                                {grandchildren && (
-                                  <ul className="mb-1 ml-3.5 mt-0.5 space-y-0.5 border-l border-border pl-2.5">
-                                    {grandchildren.map((g) => {
-                                      const gActive = pathname.startsWith(g.to);
-                                      return (
-                                        <li key={g.to + g.label}>
-                                          <Link
-                                            to={g.to}
-                                            onClick={() => setOpenMenu(null)}
-                                            className={
-                                              "block rounded-lg px-3 py-2 text-[13px] font-medium transition-colors " +
-                                              (gActive
-                                                ? "text-[var(--color-accent-1)]"
-                                                : "text-foreground/65 hover:text-foreground")
-                                            }
+                                  <ChevronDown
+                                    size={12}
+                                    className={"opacity-50 -rotate-90 transition-transform duration-150 " + (subOpen ? "rotate-90" : "")}
+                                  />
+                                </button>
+                                <AnimatePresence>
+                                  {subOpen && (
+                                    <motion.ul
+                                      initial={{ opacity: 0, x: -6 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      exit={{ opacity: 0, x: -6 }}
+                                      transition={{ duration: 0.14 }}
+                                      className="absolute left-full top-0 ml-1.5 min-w-[220px] max-h-[70vh] overflow-y-auto rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]"
+                                    >
+                                      {grandchildren.map((g) => {
+                                        const ggChildren = "children" in g ? g.children : undefined;
+                                        const gActive = pathname.startsWith(g.to);
+                                        if (!ggChildren) {
+                                          return (
+                                            <li key={g.to + g.label}>
+                                              <Link
+                                                to={g.to}
+                                                onClick={() => { setOpenMenu(null); setOpenSubMenu(null); }}
+                                                className={
+                                                  "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                                                  (gActive
+                                                    ? "bg-[var(--color-surface-2)] text-foreground"
+                                                    : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+                                                }
+                                              >
+                                                {g.label}
+                                              </Link>
+                                            </li>
+                                          );
+                                        }
+                                        // 4th level (Previous EC's children)
+                                        const ggKey = g.to + g.label;
+                                        const ggOpen = openSubMenu === ggKey + "_gg";
+                                        return (
+                                          <li
+                                            key={ggKey}
+                                            className="relative"
+                                            onMouseEnter={(e) => { e.stopPropagation(); setOpenSubMenu(ggKey + "_gg"); }}
+                                            onMouseLeave={(e) => { e.stopPropagation(); setOpenSubMenu(subKey); }}
                                           >
-                                            {g.label}
-                                          </Link>
-                                        </li>
-                                      );
-                                    })}
-                                  </ul>
-                                )}
+                                            <button
+                                              type="button"
+                                              className={
+                                                "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                                                (gActive
+                                                  ? "bg-[var(--color-surface-2)] text-foreground"
+                                                  : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+                                              }
+                                            >
+                                              {g.label}
+                                              <ChevronDown size={12} className="opacity-50 -rotate-90" />
+                                            </button>
+                                            <AnimatePresence>
+                                              {ggOpen && (
+                                                <motion.ul
+                                                  initial={{ opacity: 0, x: -6 }}
+                                                  animate={{ opacity: 1, x: 0 }}
+                                                  exit={{ opacity: 0, x: -6 }}
+                                                  transition={{ duration: 0.14 }}
+                                                  className="absolute left-full top-0 ml-1.5 min-w-[220px] max-h-[70vh] overflow-y-auto rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]"
+                                                >
+                                                  {ggChildren.map((item) => {
+                                                    const iActive = pathname.startsWith(item.to);
+                                                    return (
+                                                      <li key={item.to + item.label}>
+                                                        <Link
+                                                          to={item.to}
+                                                          onClick={() => { setOpenMenu(null); setOpenSubMenu(null); }}
+                                                          className={
+                                                            "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                                                            (iActive
+                                                              ? "text-[var(--color-accent-1)] bg-[var(--color-surface-2)]"
+                                                              : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+                                                          }
+                                                        >
+                                                          {item.label}
+                                                        </Link>
+                                                      </li>
+                                                    );
+                                                  })}
+                                                </motion.ul>
+                                              )}
+                                            </AnimatePresence>
+                                          </li>
+                                        );
+                                      })}
+                                    </motion.ul>
+                                  )}
+                                </AnimatePresence>
                               </li>
                             );
                           })}
@@ -388,41 +492,114 @@ export function FloatingNavbar() {
                         {children && (
                           <ul className="mb-1 ml-3 mt-0.5 space-y-0.5 border-l border-border pl-4">
                             {children.map((c) => {
-                              const grandchildren =
-                                "children" in c ? c.children : undefined;
+                              const grandchildren = "children" in c ? c.children : undefined;
                               const cActive = pathname.startsWith(c.to);
+                              if (!grandchildren) {
+                                return (
+                                  <li key={c.to + c.label}>
+                                    <Link
+                                      to={c.to}
+                                      onClick={() => setMobileOpen(false)}
+                                      className={
+                                        "block rounded-lg px-3 py-2 text-sm font-medium transition-colors " +
+                                        (cActive
+                                          ? "text-(--color-accent-1)"
+                                          : "text-foreground/65 hover:text-foreground")
+                                      }
+                                    >
+                                      {c.label}
+                                    </Link>
+                                  </li>
+                                );
+                              }
+                              // Item with nested children (e.g. "Executive Committee") — accordion
+                              const mKey = c.to + c.label;
+                              const mExpanded = mobileExpanded === mKey;
                               return (
-                                <li key={c.to + c.label}>
-                                  <Link
-                                    to={c.to}
-                                    onClick={() => setMobileOpen(false)}
+                                <li key={mKey}>
+                                  <button
+                                    type="button"
+                                    onClick={() => setMobileExpanded(mExpanded ? null : mKey)}
                                     className={
-                                      "block rounded-lg px-3 py-2 text-sm font-medium transition-colors " +
+                                      "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors " +
                                       (cActive
-                                        ? "text-[var(--color-accent-1)]"
+                                        ? "text-(--color-accent-1)"
                                         : "text-foreground/65 hover:text-foreground")
                                     }
                                   >
                                     {c.label}
-                                  </Link>
-                                  {grandchildren && (
+                                    <ChevronDown
+                                      size={12}
+                                      className={"opacity-50 transition-transform duration-200 " + (mExpanded ? "rotate-180" : "")}
+                                    />
+                                  </button>
+                                  {mExpanded && (
                                     <ul className="ml-3 space-y-0.5 border-l border-border pl-3">
                                       {grandchildren.map((g) => {
+                                        const ggChildren = "children" in g ? g.children : undefined;
                                         const gActive = pathname.startsWith(g.to);
+                                        if (!ggChildren) {
+                                          return (
+                                            <li key={g.to + g.label}>
+                                              <Link
+                                                to={g.to}
+                                                onClick={() => setMobileOpen(false)}
+                                                className={
+                                                  "block rounded-lg px-3 py-2 text-[13px] font-medium transition-colors " +
+                                                  (gActive
+                                                    ? "text-(--color-accent-1)"
+                                                    : "text-foreground/55 hover:text-foreground")
+                                                }
+                                              >
+                                                {g.label}
+                                              </Link>
+                                            </li>
+                                          );
+                                        }
+                                        // 4th level — "Previous EC" expandable
+                                        const ggKey = g.to + g.label;
+                                        const ggExpanded = mobileExpanded === ggKey;
                                         return (
-                                          <li key={g.to + g.label}>
-                                            <Link
-                                              to={g.to}
-                                              onClick={() => setMobileOpen(false)}
+                                          <li key={ggKey}>
+                                            <button
+                                              type="button"
+                                              onClick={() => setMobileExpanded(ggExpanded ? mKey : ggKey)}
                                               className={
-                                                "block rounded-lg px-3 py-2 text-[13px] font-medium transition-colors " +
+                                                "flex w-full items-center justify-between rounded-lg px-3 py-2 text-[13px] font-medium transition-colors " +
                                                 (gActive
-                                                  ? "text-[var(--color-accent-1)]"
+                                                  ? "text-(--color-accent-1)"
                                                   : "text-foreground/55 hover:text-foreground")
                                               }
                                             >
                                               {g.label}
-                                            </Link>
+                                              <ChevronDown
+                                                size={11}
+                                                className={"opacity-50 transition-transform duration-200 " + (ggExpanded ? "rotate-180" : "")}
+                                              />
+                                            </button>
+                                            {ggExpanded && (
+                                              <ul className="ml-3 space-y-0.5 border-l border-border pl-3">
+                                                {ggChildren.map((item) => {
+                                                  const iActive = pathname.startsWith(item.to);
+                                                  return (
+                                                    <li key={item.to + item.label}>
+                                                      <Link
+                                                        to={item.to}
+                                                        onClick={() => setMobileOpen(false)}
+                                                        className={
+                                                          "block rounded-lg px-3 py-2 text-[12px] font-medium transition-colors " +
+                                                          (iActive
+                                                            ? "text-(--color-accent-1)"
+                                                            : "text-foreground/50 hover:text-foreground")
+                                                        }
+                                                      >
+                                                        {item.label}
+                                                      </Link>
+                                                    </li>
+                                                  );
+                                                })}
+                                              </ul>
+                                            )}
                                           </li>
                                         );
                                       })}
