@@ -237,11 +237,11 @@ function ExecutiveCommitteeView({
                   {byYear.get(year)!.length} members
                 </span>
               </div>
-              <div className="overflow-hidden rounded-2xl border border-border bg-(--color-surface)">
+              <div className="overflow-hidden rounded-xl border border-border bg-(--color-surface)">
                 {byYear.get(year)!.map((it, idx) => (
                   <div
                     key={it.id}
-                    className={"flex items-center gap-3 p-3 " + (idx > 0 ? "border-t border-border" : "")}
+                    className={"flex items-center gap-3 px-4 py-3.5 " + (idx > 0 ? "border-t border-border" : "")}
                   >
                     <Avatar m={it} />
                     <div className="min-w-0 flex-1">
@@ -300,12 +300,10 @@ function HonorBoardView({
         const gs = list.find(isGS);
         if (!president && !gs) return null;
         return (
-          <div key={year} className="overflow-hidden rounded-2xl border border-border bg-(--color-surface)">
+          <div key={year} className="overflow-hidden rounded-xl border border-border bg-(--color-surface)">
             {/* Year header */}
-            <div className="flex items-center gap-3 border-b border-border bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)] px-4 py-3">
-              <div className="grid h-7 w-7 place-items-center rounded-lg bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-white">
-                <Crown size={13} />
-              </div>
+            <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
+              <Crown size={15} className="text-(--color-accent-1)" />
               <span className="font-display font-bold">Session {year}</span>
               <span className="ml-auto text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                 Ex President &amp; General Secretary
@@ -321,7 +319,7 @@ function HonorBoardView({
               .map(({ member, label, Icon }, idx) => (
                 <div
                   key={label}
-                  className={"flex items-center gap-3 p-3 " + (idx > 0 ? "border-t border-border" : "")}
+                  className={"flex items-center gap-3 px-4 py-3.5 " + (idx > 0 ? "border-t border-border" : "")}
                 >
                   <Avatar m={member!} size="lg" />
                   <div className="min-w-0 flex-1">
@@ -374,11 +372,9 @@ function ConveningView({
   });
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-(--color-surface)">
-      <div className="flex items-center gap-3 border-b border-border bg-[color-mix(in_oklab,var(--color-accent-2)_5%,transparent)] px-4 py-3">
-        <div className="grid h-7 w-7 place-items-center rounded-lg bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-white">
-          <Star size={13} />
-        </div>
+    <div className="overflow-hidden rounded-xl border border-border bg-(--color-surface)">
+      <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
+        <Star size={15} className="text-(--color-accent-2)" />
         <span className="font-display font-bold">Convening Committee 2014</span>
         <span className="ml-auto text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           30 Jul – 27 Sep 2014
@@ -387,7 +383,7 @@ function ConveningView({
       {sorted.map((member, idx) => (
         <div
           key={member.id}
-          className={"flex items-center gap-3 p-3 " + (idx > 0 ? "border-t border-border" : "")}
+          className={"flex items-center gap-3 px-4 py-3.5 " + (idx > 0 ? "border-t border-border" : "")}
         >
           <Avatar m={member} />
           <div className="min-w-0 flex-1">

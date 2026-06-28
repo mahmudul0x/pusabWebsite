@@ -39,12 +39,12 @@ export function SectionHeader({
   newLabel?: string;
 }) {
   return (
-    <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
       <div>
-        <div className="flex items-center gap-3">
-          <h2 className="font-display text-2xl font-bold tracking-tight">{title}</h2>
+        <div className="flex items-center gap-2.5">
+          <h2 className="font-display text-xl font-bold tracking-tight">{title}</h2>
           {count !== undefined && (
-            <span className="rounded-full bg-[var(--color-surface)] px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+            <span className="rounded-full border border-border px-2 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">
               {count}
             </span>
           )}
@@ -53,9 +53,9 @@ export function SectionHeader({
       </div>
       <button
         onClick={onNew}
-        className="inline-flex items-center gap-2 rounded-xl bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_-12px_rgba(29,78,216,0.7)] transition-transform hover:scale-[1.02]"
+        className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-accent-1)] px-3.5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
       >
-        <Plus size={16} /> {newLabel}
+        <Plus size={15} /> {newLabel}
       </button>
     </div>
   );
@@ -74,7 +74,7 @@ export function Toolbar({
   children?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-3 border-b border-border pb-5">
+    <div className="mb-5 flex flex-wrap items-center gap-3">
       <div className="relative min-w-[200px] flex-1">
         <Search
           size={15}
@@ -84,7 +84,7 @@ export function Toolbar({
           value={query}
           onChange={(e) => onQuery(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-border bg-[var(--color-surface)] py-2.5 pl-9 pr-3 text-sm outline-none focus:border-[var(--color-accent-1)]"
+          className="w-full rounded-lg border border-border bg-[var(--color-surface)] py-2 pl-9 pr-3 text-sm outline-none transition focus:border-[var(--color-accent-1)] focus:ring-2 focus:ring-[color-mix(in_oklab,var(--color-accent-1)_18%,transparent)]"
         />
       </div>
       {children}
@@ -105,7 +105,7 @@ export function FilterSelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="rounded-xl border border-border bg-[var(--color-surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--color-accent-1)]"
+      className="rounded-lg border border-border bg-[var(--color-surface)] px-3 py-2 text-sm outline-none transition focus:border-[var(--color-accent-1)]"
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>
@@ -118,8 +118,8 @@ export function FilterSelect({
 
 export function EmptyState({ label, icon }: { label: string; icon?: ReactNode }) {
   return (
-    <div className="grid place-items-center rounded-2xl border border-dashed border-border py-20 text-center text-sm text-muted-foreground">
-      <div className="flex flex-col items-center gap-3">
+    <div className="grid place-items-center rounded-xl border border-dashed border-border py-20 text-center text-sm text-muted-foreground">
+      <div className="flex max-w-sm flex-col items-center gap-3 px-6">
         {icon}
         {label}
       </div>
@@ -173,19 +173,19 @@ export function StatCard({
     <Tag
       onClick={onClick}
       className={
-        "rounded-2xl border border-border bg-[var(--color-surface)] p-5 text-left " +
+        "rounded-xl border border-border bg-[var(--color-surface)] p-5 text-left " +
         (onClick
-          ? "transition-all hover:-translate-y-1 hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] hover:shadow-[0_24px_50px_-35px_rgba(29,78,216,0.5)]"
+          ? "transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)]"
           : "")
       }
     >
       <div className="flex items-center justify-between">
-        <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           {label}
         </span>
-        <span className="text-[var(--color-accent-1)]">{icon}</span>
+        <span className="text-muted-foreground/70">{icon}</span>
       </div>
-      <p className="mt-3 font-display text-3xl font-bold leading-none">{value}</p>
+      <p className="mt-3 font-display text-3xl font-bold leading-none tabular-nums">{value}</p>
       {sub && <div className="mt-2 text-xs text-muted-foreground">{sub}</div>}
     </Tag>
   );
@@ -193,17 +193,17 @@ export function StatCard({
 
 export function CardActions({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0.5">
       <button
         onClick={onEdit}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)]"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_10%,transparent)] hover:text-[var(--color-accent-1)]"
         aria-label="Edit"
       >
         <Pencil size={14} />
       </button>
       <button
         onClick={onDelete}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-red-500 hover:text-red-500"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-500"
         aria-label="Delete"
       >
         <Trash2 size={14} />
@@ -287,7 +287,7 @@ export function Modal({
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-5 py-2 text-sm font-semibold text-white shadow-[0_8px_20px_-8px_rgba(29,78,216,0.7)] transition-opacity disabled:opacity-60"
+                className="rounded-lg bg-[var(--color-accent-1)] px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
               >
                 {saving ? "Saving…" : submitLabel}
               </button>

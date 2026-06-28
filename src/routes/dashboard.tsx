@@ -539,12 +539,10 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
       {/* Bottom two columns */}
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         {/* Recent activity */}
-        <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
+        <div className="overflow-hidden rounded-xl border border-border bg-[var(--color-surface)]">
           <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
             <div className="flex items-center gap-2.5">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-white">
-                <Clock size={14} />
-              </div>
+              <Clock size={15} className="text-muted-foreground" />
               <h3 className="font-display font-bold">Recent activity</h3>
             </div>
             <span className="text-xs text-muted-foreground">{recent.length} items</span>
@@ -591,14 +589,12 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
 
         {/* Quick actions */}
         <div className="flex flex-col gap-5">
-          <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
+          <div className="overflow-hidden rounded-xl border border-border bg-[var(--color-surface)]">
             <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-white">
-                <TrendingUp size={14} />
-              </div>
+              <TrendingUp size={15} className="text-muted-foreground" />
               <h3 className="font-display font-bold">Quick actions</h3>
             </div>
-            <div className="p-3 space-y-1.5">
+            <div className="p-2">
               {(
                 [
                   { key: "moments", label: "Add a photo", Icon: ImageIcon, desc: "Upload to Moments gallery" },
@@ -610,23 +606,23 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
                 <button
                   key={key}
                   onClick={() => onJump(key)}
-                  className="group flex w-full items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-left transition-all hover:border-[color-mix(in_oklab,var(--color-accent-1)_25%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)]"
+                  className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)]"
                 >
-                  <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border bg-[var(--color-background)] text-[var(--color-accent-1)] transition-colors group-hover:border-[var(--color-accent-1)] group-hover:bg-[color-mix(in_oklab,var(--color-accent-1)_10%,transparent)]">
+                  <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border bg-[var(--color-background)] text-muted-foreground transition-colors group-hover:text-[var(--color-accent-1)]">
                     <Icon size={15} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold leading-tight">{label}</p>
+                    <p className="text-sm font-medium leading-tight">{label}</p>
                     <p className="text-[11px] text-muted-foreground">{desc}</p>
                   </div>
-                  <Plus size={14} className="shrink-0 text-muted-foreground group-hover:text-[var(--color-accent-1)]" />
+                  <Plus size={14} className="shrink-0 text-muted-foreground/50 group-hover:text-[var(--color-accent-1)]" />
                 </button>
               ))}
             </div>
           </div>
 
           {/* Site links */}
-          <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
+          <div className="overflow-hidden rounded-xl border border-border bg-[var(--color-surface)]">
             <div className="border-b border-border px-5 py-3.5">
               <h3 className="font-display text-sm font-bold">Site sections</h3>
             </div>
