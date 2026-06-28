@@ -137,55 +137,53 @@ function LeadCard({ m, index }: { m: Member; index: number }) {
   );
 }
 
-/* ── Regular member row ── */
+/* ── Regular member card ── */
 function MemberRow({ m, index }: { m: Member; index: number }) {
   return (
     <motion.li
-      initial={{ opacity: 0, x: -12 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, margin: "-20px" }}
-      transition={{ duration: 0.35, delay: Math.min(index, 10) * 0.04 }}
-      className="group flex items-center gap-4 rounded-2xl border border-transparent px-4 py-3.5 transition-all hover:border-[color-mix(in_oklab,var(--color-accent-2)_20%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-accent-2)_5%,transparent)]"
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-30px" }}
+      transition={{ duration: 0.4, delay: Math.min(index, 12) * 0.05, ease: [0.16, 1, 0.3, 1] }}
+      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-[var(--color-background)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-2)_30%,transparent)] hover:shadow-[0_18px_44px_-30px_rgba(29,78,216,0.4)]"
     >
-      {/* Avatar */}
+      {/* Photo — full width portrait */}
       <div
-        className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl"
+        className="relative aspect-[4/5] w-full overflow-hidden"
         style={{ background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))" }}
       >
         {m.photo_url ? (
           <img
-            src={optimizeImage(m.photo_url, 120)}
+            src={optimizeImage(m.photo_url, 360)}
             alt={m.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.08]"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
         ) : (
-          <span className="grid h-full w-full place-items-center text-xs font-bold text-white select-none">
+          <span className="grid h-full w-full place-items-center text-4xl font-bold text-white select-none">
             {initials(m.name)}
           </span>
         )}
+        {/* Role badge — floating on photo */}
+        <span
+          className="absolute left-3 top-3 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white backdrop-blur"
+          style={{
+            background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))",
+          }}
+        >
+          {m.role}
+        </span>
       </div>
 
       {/* Info */}
-      <div className="min-w-0 flex-1">
-        <p className="font-semibold leading-tight text-foreground truncate">{m.name}</p>
+      <div className="p-4 text-center">
+        <p className="font-display text-base font-bold leading-tight text-foreground">{m.name}</p>
         {m.university && (
-          <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground truncate">
-            <GraduationCap size={10} className="shrink-0" /> {m.university}
+          <p className="mt-1 flex items-center justify-center gap-1 text-xs text-muted-foreground">
+            <GraduationCap size={11} className="shrink-0" />
+            <span className="truncate">{m.university}</span>
           </p>
         )}
       </div>
-
-      {/* Role badge */}
-      <span
-        className="shrink-0 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
-        style={{
-          background: "color-mix(in oklab, var(--color-accent-2) 10%, transparent)",
-          color: "var(--color-accent-2)",
-          border: "1px solid color-mix(in oklab, var(--color-accent-2) 25%, transparent)",
-        }}
-      >
-        {m.role}
-      </span>
     </motion.li>
   );
 }
@@ -348,15 +346,8 @@ function ConveningCommitteePage() {
                   </div>
 
                   {/* Member list */}
-                  <div className="px-3 py-3">
-                    <ul
-                      className={
-                        "grid gap-1 " +
-                        (rest.length > 6
-                          ? "sm:grid-cols-2 lg:grid-cols-3"
-                          : "sm:grid-cols-2")
-                      }
-                    >
+                  <div className="p-5">
+                    <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                       {rest.map((m, i) => (
                         <MemberRow key={m.id} m={m} index={i} />
                       ))}
