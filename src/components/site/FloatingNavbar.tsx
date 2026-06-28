@@ -10,211 +10,126 @@ import logoPusab from "@/assets/logo-pusab.png";
 type NavChild = { to: string; label: string; children?: readonly NavChild[] };
 type NavItem = { to: string; label: string; children?: readonly NavChild[] };
 
-/* ── Leadership dropdown: flat list with EC having a nested hover-panel ── */
-function LeadershipMegaMenu({
-  children,
+/**
+ * Recursive flyout menu. Tracks the open branch as a path of keys
+ * (e.g. ["Executive Committee", "Previous EC"]) so that opening a deeper
+ * level never collapses its ancestors. A single shared timer keeps the
+ * whole branch alive while the cursor travels between panels.
+ */
+function FlyoutMenu({
+  items,
+  depth,
+  parentPath,
+  openPath,
+  setOpenPath,
+  timerRef,
   pathname,
   onClose,
-  openSubMenu,
-  setOpenSubMenu,
-  timerRef,
 }: {
-  children: readonly NavChild[];
+  items: readonly NavChild[];
+  depth: number;
+  parentPath: string[];
+  openPath: string[];
+  setOpenPath: (p: string[]) => void;
+  timerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
   pathname: string;
   onClose: () => void;
-  openSubMenu: string | null;
-  setOpenSubMenu: (k: string | null) => void;
-  timerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
 }) {
-  function schedSub(key: string | null, delay = 100) {
+  function schedule(path: string[], delay: number) {
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setOpenSubMenu(key), delay);
+    timerRef.current = setTimeout(() => setOpenPath(path), delay);
   }
+  const cancelTimer = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  };
 
   return (
-    <div className="relative min-w-[200px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
-      {children.map((c) => {
-        const hasChildren = "children" in c && c.children && c.children.length > 0;
-        const cActive = pathname.startsWith(c.to);
-        const subKey = c.label;
-        const subOpen = openSubMenu === subKey;
+    <ul
+      className={
+        "rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)] " +
+        (depth === 0 ? "min-w-[210px]" : "min-w-[210px] max-h-[340px] overflow-y-auto")
+      }
+    >
+      {items.map((item) => {
+        const hasChildren = "children" in item && item.children && item.children.length > 0;
+        const itemPath = [...parentPath, item.label];
+        const branchOpen = openPath[depth] === item.label;
+        const active = pathname.startsWith(item.to);
 
         if (!hasChildren) {
           return (
-            <Link
-              key={c.to + c.label}
-              to={c.to}
-              onClick={onClose}
-              className={
-                "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
-                (cActive
-                  ? "bg-[var(--color-surface-2)] text-foreground"
-                  : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
-              }
-            >
-              {c.label}
-            </Link>
+            <li key={item.to + item.label}>
+              <Link
+                to={item.to}
+                onClick={onClose}
+                onMouseEnter={() => schedule(parentPath, 0)}
+                className={
+                  "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                  (active
+                    ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
+                    : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+                }
+              >
+                {item.label}
+              </Link>
+            </li>
           );
         }
 
-        // Item with children (Executive Committee) → hover reveals right flyout
-        const ecChildren: readonly NavChild[] = "children" in c && c.children ? c.children : [];
+        const subItems: readonly NavChild[] =
+          "children" in item && item.children ? item.children : [];
 
         return (
-          <div
-            key={c.to + c.label}
+          <li
+            key={item.to + item.label}
             className="relative"
-            onMouseEnter={() => schedSub(subKey, 0)}
-            onMouseLeave={() => schedSub(null, 120)}
+            onMouseEnter={() => {
+              cancelTimer();
+              setOpenPath(itemPath);
+            }}
+            onMouseLeave={() => schedule(parentPath, 140)}
           >
             <button
               type="button"
               className={
                 "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
-                (cActive
+                (branchOpen || active
                   ? "bg-[var(--color-surface-2)] text-foreground"
                   : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
               }
             >
-              {c.label}
+              {item.label}
               <ChevronRight size={13} className="opacity-40" />
             </button>
 
             <AnimatePresence>
-              {subOpen && (
+              {branchOpen && (
                 <motion.div
                   initial={{ opacity: 0, x: -6 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -6 }}
                   transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                  onMouseEnter={() => schedSub(subKey, 0)}
-                  onMouseLeave={() => schedSub(null, 120)}
-                  className="absolute left-full top-0 ml-2 min-w-[200px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]"
+                  // Bridge the visual gap so the cursor never leaves a hover zone
+                  className="absolute left-full top-0 pl-2"
+                  onMouseEnter={cancelTimer}
                 >
-                  <EcSubPanel
-                    ecChildren={ecChildren}
+                  <FlyoutMenu
+                    items={subItems}
+                    depth={depth + 1}
+                    parentPath={itemPath}
+                    openPath={openPath}
+                    setOpenPath={setOpenPath}
+                    timerRef={timerRef}
                     pathname={pathname}
                     onClose={onClose}
-                    openSubMenu={openSubMenu}
-                    setOpenSubMenu={setOpenSubMenu}
-                    timerRef={timerRef}
                   />
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </li>
         );
       })}
-    </div>
-  );
-}
-
-/* EC flyout: Present EC + Previous EC (with sessions panel) */
-function EcSubPanel({
-  ecChildren,
-  pathname,
-  onClose,
-  openSubMenu,
-  setOpenSubMenu,
-  timerRef,
-}: {
-  ecChildren: readonly NavChild[];
-  pathname: string;
-  onClose: () => void;
-  openSubMenu: string | null;
-  setOpenSubMenu: (k: string | null) => void;
-  timerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
-}) {
-  function schedSub(key: string | null, delay = 100) {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setOpenSubMenu(key), delay);
-  }
-
-  return (
-    <>
-      {ecChildren.map((g) => {
-        const hasGrandChildren = "children" in g && g.children && g.children.length > 0;
-        const gActive = pathname.startsWith(g.to);
-        const ggKey = "ec_" + g.label;
-        const ggOpen = openSubMenu === ggKey;
-
-        if (!hasGrandChildren) {
-          return (
-            <Link
-              key={g.to + g.label}
-              to={g.to}
-              onClick={onClose}
-              className={
-                "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
-                (gActive
-                  ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
-                  : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
-              }
-            >
-              {g.label}
-            </Link>
-          );
-        }
-
-        // Previous EC — has session children
-        const sessions: readonly NavChild[] = "children" in g && g.children ? g.children : [];
-
-        return (
-          <div
-            key={g.to + g.label}
-            className="relative"
-            onMouseEnter={() => schedSub(ggKey, 0)}
-            onMouseLeave={() => schedSub(null, 120)}
-          >
-            <button
-              type="button"
-              className={
-                "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
-                (ggOpen
-                  ? "bg-[var(--color-surface-2)] text-foreground"
-                  : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
-              }
-            >
-              {g.label}
-              <ChevronRight size={13} className="opacity-40" />
-            </button>
-
-            <AnimatePresence>
-              {ggOpen && sessions.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, x: -6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -6 }}
-                  transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                  onMouseEnter={() => schedSub(ggKey, 0)}
-                  onMouseLeave={() => schedSub(null, 120)}
-                  className="absolute left-full top-0 ml-2 min-w-[210px] max-h-[320px] overflow-y-auto rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]"
-                >
-                  {sessions.map((s) => {
-                    const sActive = pathname.startsWith(s.to);
-                    return (
-                      <Link
-                        key={s.to + s.label}
-                        to={s.to}
-                        onClick={onClose}
-                        className={
-                          "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
-                          (sActive
-                            ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
-                            : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
-                        }
-                      >
-                        {s.label}
-                      </Link>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        );
-      })}
-    </>
+    </ul>
   );
 }
 
@@ -223,15 +138,11 @@ export function FloatingNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
+  const [openPath, setOpenPath] = useState<string[]>([]);
   const subMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flyoutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [pastYears, setPastYears] = useState<number[]>([]);
-
-  function scheduleSubMenu(key: string | null, delay = 80) {
-    if (subMenuTimer.current) clearTimeout(subMenuTimer.current);
-    subMenuTimer.current = setTimeout(() => setOpenSubMenu(key), delay);
-  }
 
   // Load past (non-current) session years for the "Previous EC" submenu.
   useEffect(() => {
@@ -269,9 +180,7 @@ export function FloatingNavbar() {
           return {
             ...c,
             children: c.children.map((gc) =>
-              gc.label === "Previous EC"
-                ? { ...gc, children: previousEcChildren }
-                : gc,
+              gc.label === "Previous EC" ? { ...gc, children: previousEcChildren } : gc,
             ),
           };
         }),
@@ -289,6 +198,7 @@ export function FloatingNavbar() {
   useEffect(() => {
     setMobileOpen(false);
     setOpenMenu(null);
+    setOpenPath([]);
     setMobileExpanded(null);
   }, [pathname]);
 
@@ -303,13 +213,22 @@ export function FloatingNavbar() {
     }
   }, [mobileOpen]);
 
-  // Cleanup submenu timer on unmount.
-  useEffect(() => () => { if (subMenuTimer.current) clearTimeout(subMenuTimer.current); }, []);
+  // Cleanup hover timers on unmount.
+  useEffect(
+    () => () => {
+      if (subMenuTimer.current) clearTimeout(subMenuTimer.current);
+      if (flyoutTimer.current) clearTimeout(flyoutTimer.current);
+    },
+    [],
+  );
 
   // Close any open dropdown on outside click or Escape.
   useEffect(() => {
     if (!openMenu) return;
-    const close = () => { setOpenMenu(null); setOpenSubMenu(null); };
+    const close = () => {
+      setOpenMenu(null);
+      setOpenPath([]);
+    };
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
     document.addEventListener("click", close);
     document.addEventListener("keydown", onKey);
@@ -397,12 +316,23 @@ export function FloatingNavbar() {
               }
 
               const isOpen = openMenu === link.to;
+              const openThisMenu = () => {
+                if (subMenuTimer.current) clearTimeout(subMenuTimer.current);
+                setOpenMenu(link.to);
+              };
+              const closeThisMenu = () => {
+                if (subMenuTimer.current) clearTimeout(subMenuTimer.current);
+                subMenuTimer.current = setTimeout(() => {
+                  setOpenMenu(null);
+                  setOpenPath([]);
+                }, 160);
+              };
               return (
                 <li
                   key={link.to}
                   className="relative"
-                  onMouseEnter={() => setOpenMenu(link.to)}
-                  onMouseLeave={() => setOpenMenu(null)}
+                  onMouseEnter={openThisMenu}
+                  onMouseLeave={closeThisMenu}
                 >
                   <button
                     type="button"
@@ -432,16 +362,22 @@ export function FloatingNavbar() {
                         exit={{ opacity: 0, y: 8, scale: 0.98 }}
                         transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                         onClick={(e) => e.stopPropagation()}
+                        onMouseEnter={openThisMenu}
                         className="absolute left-1/2 top-full z-20 -translate-x-1/2 pt-3"
                       >
                         {link.label === "Leadership" ? (
-                          <LeadershipMegaMenu
-                            children={children}
+                          <FlyoutMenu
+                            items={children}
+                            depth={0}
+                            parentPath={[]}
+                            openPath={openPath}
+                            setOpenPath={setOpenPath}
+                            timerRef={flyoutTimer}
                             pathname={pathname}
-                            onClose={() => { setOpenMenu(null); setOpenSubMenu(null); }}
-                            openSubMenu={openSubMenu}
-                            setOpenSubMenu={setOpenSubMenu}
-                            timerRef={subMenuTimer}
+                            onClose={() => {
+                              setOpenMenu(null);
+                              setOpenPath([]);
+                            }}
                           />
                         ) : (
                           <ul className="min-w-[200px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
@@ -542,10 +478,16 @@ export function FloatingNavbar() {
             <div className="relative flex h-full flex-col">
               {/* Header row inside menu */}
               <div className="flex items-center justify-between border-b border-border px-5 py-4">
-                <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
+                <Link
+                  to="/"
+                  className="flex items-center gap-2.5"
+                  onClick={() => setMobileOpen(false)}
+                >
                   <img src={logoPusab} alt="PUSAB" className="h-10 w-10 object-contain" />
                   <div className="flex flex-col leading-none">
-                    <span className="font-display text-base font-bold tracking-[0.02em]">PUSAB</span>
+                    <span className="font-display text-base font-bold tracking-[0.02em]">
+                      PUSAB
+                    </span>
                     <span className="mt-0.5 text-[8px] uppercase tracking-[0.28em] text-muted-foreground">
                       est. 2014
                     </span>
@@ -565,7 +507,9 @@ export function FloatingNavbar() {
                 <motion.ul
                   initial="hidden"
                   animate="show"
-                  variants={{ show: { transition: { staggerChildren: 0.04, delayChildren: 0.05 } } }}
+                  variants={{
+                    show: { transition: { staggerChildren: 0.04, delayChildren: 0.05 } },
+                  }}
                   className="space-y-1"
                 >
                   {navLinks.map((link) => {
@@ -637,7 +581,10 @@ export function FloatingNavbar() {
                                     {c.label}
                                     <ChevronDown
                                       size={12}
-                                      className={"opacity-50 transition-transform duration-200 " + (mExpanded ? "rotate-180" : "")}
+                                      className={
+                                        "opacity-50 transition-transform duration-200 " +
+                                        (mExpanded ? "rotate-180" : "")
+                                      }
                                     />
                                   </button>
                                   {mExpanded && (
@@ -670,7 +617,9 @@ export function FloatingNavbar() {
                                           <li key={ggKey}>
                                             <button
                                               type="button"
-                                              onClick={() => setMobileExpanded(ggExpanded ? mKey : ggKey)}
+                                              onClick={() =>
+                                                setMobileExpanded(ggExpanded ? mKey : ggKey)
+                                              }
                                               className={
                                                 "flex w-full items-center justify-between rounded-lg px-3 py-2 text-[13px] font-medium transition-colors " +
                                                 (gActive
@@ -681,7 +630,10 @@ export function FloatingNavbar() {
                                               {g.label}
                                               <ChevronDown
                                                 size={11}
-                                                className={"opacity-50 transition-transform duration-200 " + (ggExpanded ? "rotate-180" : "")}
+                                                className={
+                                                  "opacity-50 transition-transform duration-200 " +
+                                                  (ggExpanded ? "rotate-180" : "")
+                                                }
                                               />
                                             </button>
                                             {ggExpanded && (
