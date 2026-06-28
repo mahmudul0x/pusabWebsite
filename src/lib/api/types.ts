@@ -44,6 +44,7 @@ export interface EcMember {
   university: string;
   year: number;
   is_current: boolean;
+  is_convening: boolean;
   photo_url: string;
 }
 

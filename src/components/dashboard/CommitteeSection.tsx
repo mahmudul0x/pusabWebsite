@@ -15,7 +15,7 @@ import {
   inputCls,
 } from "./primitives";
 import { ImageUpload } from "./ImageUpload";
-import { Check, ChevronDown, Crown, Gavel, ShieldCheck, X } from "lucide-react";
+import { Check, ChevronDown, Crown, Gavel, ShieldCheck, Star, X } from "lucide-react";
 
 const ROLES = [
   "President",
@@ -28,6 +28,7 @@ const ROLES = [
   "Convenor",
   "Member Secretary",
   "Executive Member",
+  "Member",
 ];
 
 interface Form {
@@ -36,6 +37,7 @@ interface Form {
   university: string;
   year: string;
   is_current: boolean;
+  is_convening: boolean;
   photo_url: string;
 }
 
@@ -45,6 +47,7 @@ const empty: Form = {
   university: "",
   year: String(new Date().getFullYear()),
   is_current: true,
+  is_convening: false,
   photo_url: "",
 };
 
@@ -343,8 +346,75 @@ function HonorBoardView({
   );
 }
 
+// ── Convening Committee view ─────────────────────────────────────────────────
+function ConveningView({
+  items,
+  loading,
+  onEdit,
+  onDelete,
+}: {
+  items: EcMember[];
+  loading: boolean;
+  onEdit: (m: EcMember) => void;
+  onDelete: (m: EcMember) => void;
+}) {
+  if (loading) return <ListSkeleton />;
+
+  const list = items.filter((m) => m.is_convening);
+  if (list.length === 0) {
+    return (
+      <EmptyState label='No convening committee members yet. Add members and check "Convening Committee" to list them here.' />
+    );
+  }
+
+  const sorted = [...list].sort((a, b) => {
+    const rank = (r: string) =>
+      /convenor/i.test(r) ? 0 : /member secretary/i.test(r) ? 1 : 2;
+    return rank(a.role) - rank(b.role) || a.name.localeCompare(b.name);
+  });
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-(--color-surface)">
+      <div className="flex items-center gap-3 border-b border-border bg-[color-mix(in_oklab,var(--color-accent-2)_5%,transparent)] px-4 py-3">
+        <div className="grid h-7 w-7 place-items-center rounded-lg bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-white">
+          <Star size={13} />
+        </div>
+        <span className="font-display font-bold">Convening Committee 2014</span>
+        <span className="ml-auto text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+          30 Jul – 27 Sep 2014
+        </span>
+      </div>
+      {sorted.map((member, idx) => (
+        <div
+          key={member.id}
+          className={"flex items-center gap-3 p-3 " + (idx > 0 ? "border-t border-border" : "")}
+        >
+          <Avatar m={member} />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <Star size={11} className="text-(--color-accent-2) shrink-0" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-(--color-accent-2)">
+                {member.role}
+              </span>
+            </div>
+            <div className="font-semibold leading-tight">{member.name}</div>
+            {member.university && (
+              <div className="truncate text-xs text-muted-foreground">{member.university}</div>
+            )}
+          </div>
+          <CardActions onEdit={() => onEdit(member)} onDelete={() => onDelete(member)} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Main export ──────────────────────────────────────────────────────────────
-export function CommitteeSection({ view }: { view: "executive-committee" | "honor-board" }) {
+export function CommitteeSection({
+  view,
+}: {
+  view: "executive-committee" | "honor-board" | "convening-committee";
+}) {
   const { items, loading, reload } = useResource(committeeApi);
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -358,9 +428,16 @@ export function CommitteeSection({ view }: { view: "executive-committee" | "hono
 
   function startNew() {
     setEditId(null);
-    setForm({ ...empty, is_current: view === "executive-committee" });
+    setForm({
+      ...empty,
+      is_current: view === "executive-committee",
+      is_convening: view === "convening-committee",
+      year: view === "convening-committee" ? "2014" : String(new Date().getFullYear()),
+      role: view === "convening-committee" ? "Convenor" : "President",
+    });
     setOpen(true);
   }
+
   function startEdit(it: EcMember) {
     setEditId(it.id);
     setForm({
@@ -369,6 +446,7 @@ export function CommitteeSection({ view }: { view: "executive-committee" | "hono
       university: it.university,
       year: String(it.year),
       is_current: it.is_current,
+      is_convening: it.is_convening,
       photo_url: it.photo_url,
     });
     setOpen(true);
@@ -384,6 +462,7 @@ export function CommitteeSection({ view }: { view: "executive-committee" | "hono
         university: form.university,
         year: Number(form.year),
         is_current: form.is_current,
+        is_convening: form.is_convening,
         photo_url: form.photo_url,
       };
       if (editId == null) await committeeApi.create(payload);
@@ -409,25 +488,43 @@ export function CommitteeSection({ view }: { view: "executive-committee" | "hono
     }
   }
 
-  const isEC = view === "executive-committee";
-  const Icon = isEC ? ShieldCheck : Crown;
-  const title = isEC ? "Executive Committee" : "Honor Board";
-  const subtitle = isEC
-    ? "Current session members — drives the Leadership page."
-    : "Past Presidents & General Secretaries — drives the Honor Board page.";
-  const newLabel = isEC ? "Add member" : "Add past leader";
+  const META = {
+    "executive-committee": {
+      Icon: ShieldCheck,
+      title: "Executive Committee",
+      subtitle: "Current session members — drives the Leadership page.",
+      newLabel: "Add member",
+    },
+    "honor-board": {
+      Icon: Crown,
+      title: "Honor Board",
+      subtitle: "Past Presidents & General Secretaries — drives the Honor Board page.",
+      newLabel: "Add past leader",
+    },
+    "convening-committee": {
+      Icon: Star,
+      title: "Convening Committee",
+      subtitle: "Founding committee members (2014) — drives the Convening Committee page.",
+      newLabel: "Add founder",
+    },
+  } as const;
+
+  const { Icon, title, subtitle, newLabel } = META[view];
+  const isConvening = view === "convening-committee";
 
   return (
     <div>
       <SectionHeader
         title={title}
         subtitle={subtitle}
-        count={items.length}
+        count={items.filter((m) =>
+          isConvening ? m.is_convening : view === "honor-board" ? !m.is_current : m.is_current
+        ).length}
         onNew={startNew}
         newLabel={newLabel}
       />
 
-      {isEC ? (
+      {view === "executive-committee" && (
         <ExecutiveCommitteeView
           items={items}
           loading={loading}
@@ -438,13 +535,12 @@ export function CommitteeSection({ view }: { view: "executive-committee" | "hono
           onEdit={startEdit}
           onDelete={remove}
         />
-      ) : (
-        <HonorBoardView
-          items={items}
-          loading={loading}
-          onEdit={startEdit}
-          onDelete={remove}
-        />
+      )}
+      {view === "honor-board" && (
+        <HonorBoardView items={items} loading={loading} onEdit={startEdit} onDelete={remove} />
+      )}
+      {view === "convening-committee" && (
+        <ConveningView items={items} loading={loading} onEdit={startEdit} onDelete={remove} />
       )}
 
       <Modal
@@ -452,7 +548,7 @@ export function CommitteeSection({ view }: { view: "executive-committee" | "hono
         onClose={() => setOpen(false)}
         onSubmit={save}
         saving={saving}
-        title={editId == null ? `Add ${isEC ? "member" : "past leader"}` : "Edit"}
+        title={editId == null ? `Add ${newLabel.toLowerCase()}` : "Edit member"}
       >
         <Field label="Photo" full>
           <ImageUpload value={form.photo_url} onChange={(u) => set("photo_url", u)} folder="committee" />
@@ -469,14 +565,26 @@ export function CommitteeSection({ view }: { view: "executive-committee" | "hono
         <Field label="Session year">
           <input type="number" value={form.year} onChange={(e) => set("year", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Current session?">
+        {!isConvening && (
+          <Field label="Current session?">
+            <label className="mt-2 flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.is_current}
+                onChange={(e) => set("is_current", e.target.checked)}
+              />
+              This is the current session
+            </label>
+          </Field>
+        )}
+        <Field label="Convening Committee?" full>
           <label className="mt-2 flex items-center gap-2 text-sm">
             <input
               type="checkbox"
-              checked={form.is_current}
-              onChange={(e) => set("is_current", e.target.checked)}
+              checked={form.is_convening}
+              onChange={(e) => set("is_convening", e.target.checked)}
             />
-            This is the current session
+            This member is part of the 2014 Convening Committee
           </label>
         </Field>
       </Modal>

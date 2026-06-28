@@ -38,6 +38,7 @@ import {
   TrendingUp,
   Clock,
   Plus,
+  Star,
 } from "lucide-react";
 import logoPusab from "@/assets/logo-pusab.png";
 import { StatCard } from "@/components/dashboard/primitives";
@@ -194,6 +195,7 @@ const NAV = [
   { key: "publicity", label: "Publicity", Icon: Newspaper, group: "content" },
   { key: "executive-committee", label: "Executive Committee", Icon: ShieldCheck, group: "content" },
   { key: "honor-board", label: "Honor Board", Icon: Crown, group: "content" },
+  { key: "convening-committee", label: "Convening Committee", Icon: Star, group: "content" },
   { key: "programs", label: "Programs", Icon: CalendarRange, group: "content" },
   { key: "felicitation", label: "Felicitation", Icon: Award, group: "content" },
   { key: "messages", label: "Messages", Icon: MessageSquare, group: "system" },
@@ -412,6 +414,7 @@ function DashboardShell() {
           {section === "publicity" && <PublicitySection />}
           {section === "executive-committee" && <CommitteeSection view="executive-committee" />}
           {section === "honor-board" && <CommitteeSection view="honor-board" />}
+          {section === "convening-committee" && <CommitteeSection view="convening-committee" />}
           {section === "programs" && <ProgramsSection />}
           {section === "felicitation" && <FelicitationSection />}
           {section === "messages" && <MessagesSection />}

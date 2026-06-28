@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ConveningCommitteeRouteImport } from './routes/convening-committee'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SecretaryMessageRouteImport } from './routes/secretary-message'
 import { Route as SayorRouteImport } from './routes/sayor'
@@ -27,6 +28,11 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
+const ConveningCommitteeRoute = ConveningCommitteeRouteImport.update({
+  id: '/convening-committee',
+  path: '/convening-committee',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/convening-committee': typeof ConveningCommitteeRoute
   '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
   '/honor-board': typeof HonorBoardRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/convening-committee': typeof ConveningCommitteeRoute
   '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
   '/honor-board': typeof HonorBoardRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/convening-committee': typeof ConveningCommitteeRoute
   '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
   '/honor-board': typeof HonorBoardRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/convening-committee'
     | '/dashboard'
     | '/felicitation'
     | '/honor-board'
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/convening-committee'
     | '/dashboard'
     | '/felicitation'
     | '/honor-board'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/convening-committee'
     | '/dashboard'
     | '/felicitation'
     | '/honor-board'
@@ -232,6 +244,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
+  ConveningCommitteeRoute: typeof ConveningCommitteeRoute
   DashboardRoute: typeof DashboardRoute
   FelicitationRoute: typeof FelicitationRoute
   HonorBoardRoute: typeof HonorBoardRoute
@@ -331,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/convening-committee': {
+      id: '/convening-committee'
+      path: '/convening-committee'
+      fullPath: '/convening-committee'
+      preLoaderRoute: typeof ConveningCommitteeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -386,6 +406,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
+  ConveningCommitteeRoute: ConveningCommitteeRoute,
   DashboardRoute: DashboardRoute,
   FelicitationRoute: FelicitationRoute,
   HonorBoardRoute: HonorBoardRoute,
