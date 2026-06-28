@@ -65,7 +65,7 @@ function LeadershipMenu({
           "children" in item && item.children ? item.children : [];
 
         return (
-          <div key={item.to + item.label} className="mb-1">
+          <div key={item.to + item.label} className="mb-1.5 border-b border-border pb-1.5">
             <p className="px-3.5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-accent-1)]">
               {item.label}
             </p>
@@ -74,13 +74,17 @@ function LeadershipMenu({
               if (!gHasChildren)
                 return <div key={g.to + g.label}>{itemLink(g, "px-3.5", true)}</div>;
 
-              // Previous EC — inline accordion of sessions
+              // Previous EC — inline accordion of sessions (expands on hover)
               const sessions: readonly NavChild[] = "children" in g && g.children ? g.children : [];
               const key = g.label;
               const open = expanded.includes(key);
 
               return (
-                <div key={g.to + g.label}>
+                <div
+                  key={g.to + g.label}
+                  onMouseEnter={() => setExpanded([...expanded.filter((k) => k !== key), key])}
+                  onMouseLeave={() => setExpanded(expanded.filter((k) => k !== key))}
+                >
                   <button
                     type="button"
                     onClick={() => toggle(key)}
