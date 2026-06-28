@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Menu, X, ChevronDown, Heart } from "lucide-react";
+import { Menu, X, ChevronDown, ChevronRight, Heart } from "lucide-react";
 import { NAV_LINKS, SITE } from "@/lib/site-content";
 import { committeeApi } from "@/lib/api";
 import { ecOrdinal } from "@/routes/ec.$year";
@@ -11,10 +11,10 @@ type NavChild = { to: string; label: string; children?: readonly NavChild[] };
 type NavItem = { to: string; label: string; children?: readonly NavChild[] };
 
 /**
- * Leadership dropdown — a single fixed-width panel that never spawns
- * sideways flyouts (which overflowed the viewport). Nested groups expand
- * inline as accordions: Executive Committee is a labelled group with
- * Present EC + Previous EC; Previous EC expands its sessions in place.
+ * Leadership dropdown — items with children open a flyout panel to the
+ * right. Each panel measures itself; if it would overflow the viewport's
+ * right edge it flips to open on the left instead, so nested levels never
+ * spill off-screen. A shared hover timer bridges the gap between panels.
  */
 function LeadershipMenu({
   items,
@@ -29,92 +29,132 @@ function LeadershipMenu({
   pathname: string;
   onClose: () => void;
 }) {
-  const toggle = (key: string) =>
-    setExpanded(expanded.includes(key) ? expanded.filter((k) => k !== key) : [...expanded, key]);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancel = () => {
+    if (timer.current) clearTimeout(timer.current);
+  };
+  // Open this exact branch path (replacing siblings at the same depth).
+  const openBranch = (path: string[]) => {
+    cancel();
+    setExpanded(path);
+  };
+  const scheduleClose = (path: string[]) => {
+    cancel();
+    timer.current = setTimeout(() => setExpanded(path), 160);
+  };
 
-  const itemLink = (item: NavChild, pad: string, accent = false) => {
-    const active = pathname.startsWith(item.to);
+  function Panel({
+    list,
+    depth,
+    parentPath,
+  }: {
+    list: readonly NavChild[];
+    depth: number;
+    parentPath: string[];
+  }) {
     return (
-      <Link
-        to={item.to}
-        onClick={onClose}
+      <ul
         className={
-          "block rounded-xl py-2.5 text-sm font-medium transition-colors " +
-          pad +
-          " " +
-          (active
-            ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
-            : (accent ? "text-foreground/75" : "text-foreground/70") +
-              " hover:bg-[var(--color-surface-2)] hover:text-foreground")
+          "min-w-[230px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)] " +
+          (depth > 0 ? "max-h-[60vh] overflow-y-auto" : "")
         }
+        onMouseEnter={cancel}
       >
-        {item.label}
-      </Link>
-    );
-  };
+        {list.map((item) => {
+          const hasChildren = "children" in item && item.children && item.children.length > 0;
+          const active = pathname.startsWith(item.to);
+          const itemPath = [...parentPath, item.label];
 
-  // Recursive accordion node. Leaves render as links; branches render a
-  // hover-expandable header that reveals their children inline (no sideways
-  // flyouts). `keyPath` keeps each level's open-key unique across depths.
-  const renderNode = (item: NavChild, depth: number, keyPath: string): React.ReactElement => {
-    const hasChildren = "children" in item && item.children && item.children.length > 0;
-    const pad = depth === 0 ? "px-3.5" : "px-3";
-
-    if (!hasChildren) {
-      return <div key={item.to + item.label}>{itemLink(item, pad, depth > 0)}</div>;
-    }
-
-    const subItems: readonly NavChild[] = "children" in item && item.children ? item.children : [];
-    const key = keyPath + "/" + item.label;
-    const open = expanded.includes(key);
-
-    return (
-      <div
-        key={item.to + item.label}
-        onMouseEnter={() => setExpanded([...expanded.filter((k) => k !== key), key])}
-        onMouseLeave={() => setExpanded(expanded.filter((k) => k !== key))}
-      >
-        <button
-          type="button"
-          onClick={() => toggle(key)}
-          className={
-            "flex w-full items-center justify-between rounded-xl py-2.5 text-sm font-medium transition-colors " +
-            pad +
-            " " +
-            (open
-              ? "bg-[var(--color-surface-2)] text-foreground"
-              : "text-foreground/80 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+          if (!hasChildren) {
+            return (
+              <li key={item.to + item.label}>
+                <Link
+                  to={item.to}
+                  onClick={onClose}
+                  onMouseEnter={() => openBranch(parentPath)}
+                  className={
+                    "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                    (active
+                      ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
+                      : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+                  }
+                >
+                  {item.label}
+                </Link>
+              </li>
+            );
           }
-        >
-          {item.label}
-          <ChevronDown
-            size={14}
-            className={"opacity-50 transition-transform duration-200 " + (open ? "rotate-180" : "")}
-          />
-        </button>
-        <AnimatePresence initial={false}>
-          {open && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="overflow-hidden"
+
+          const subItems: readonly NavChild[] =
+            "children" in item && item.children ? item.children : [];
+          // openBranch matches up to this depth
+          const branchOpen = expanded[depth] === item.label;
+
+          return (
+            <li
+              key={item.to + item.label}
+              className="relative"
+              onMouseEnter={() => openBranch(itemPath)}
+              onMouseLeave={() => scheduleClose(parentPath)}
             >
-              <div className="ml-3.5 mt-0.5 max-h-[40vh] space-y-0.5 overflow-y-auto border-l border-border pl-2 pr-0.5">
-                {subItems.map((s) => renderNode(s, depth + 1, key))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+              <button
+                type="button"
+                className={
+                  "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                  (branchOpen || active
+                    ? "bg-[var(--color-surface-2)] text-foreground"
+                    : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+                }
+              >
+                {item.label}
+                <ChevronRight size={14} className="opacity-50" />
+              </button>
+
+              <AnimatePresence>
+                {branchOpen && (
+                  <FlyoutWrapper>
+                    <Panel list={subItems} depth={depth + 1} parentPath={itemPath} />
+                  </FlyoutWrapper>
+                )}
+              </AnimatePresence>
+            </li>
+          );
+        })}
+      </ul>
     );
-  };
+  }
+
+  return <Panel list={items} depth={0} parentPath={[]} />;
+}
+
+/**
+ * Positions a flyout to the right of its parent, flipping to the left when
+ * there isn't enough room before the viewport edge. Measures after mount.
+ */
+function FlyoutWrapper({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [side, setSide] = useState<"right" | "left">("right");
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    // If the right-opening panel would overflow, flip left.
+    if (rect.right > window.innerWidth - 12) setSide("left");
+    else setSide("right");
+  }, []);
 
   return (
-    <div className="w-[260px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
-      {items.map((item) => renderNode(item, 0, ""))}
-    </div>
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, x: side === "right" ? -6 : 6 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: side === "right" ? -6 : 6 }}
+      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+      className={"absolute top-0 " + (side === "right" ? "left-full pl-2" : "right-full pr-2")}
+    >
+      {children}
+    </motion.div>
   );
 }
 
