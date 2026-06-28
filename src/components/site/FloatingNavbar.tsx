@@ -10,7 +10,7 @@ import logoPusab from "@/assets/logo-pusab.png";
 type NavChild = { to: string; label: string; children?: readonly NavChild[] };
 type NavItem = { to: string; label: string; children?: readonly NavChild[] };
 
-/* ── Leadership mega-menu (2-column panel) ── */
+/* ── Leadership dropdown: flat list with EC having a nested hover-panel ── */
 function LeadershipMegaMenu({
   children,
   pathname,
@@ -24,125 +24,196 @@ function LeadershipMegaMenu({
   openSubMenu: string | null;
   setOpenSubMenu: (k: string | null) => void;
 }) {
-  // children = [ExecutiveCommittee, HonorBoard, President's Message, Secretary's Message]
-  const ecItem = children.find((c) => c.label === "Executive Committee");
-  const rest = children.filter((c) => c.label !== "Executive Committee");
+  const subTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // EC children = [Present EC, Previous EC{children:[...]}]
-  const ecRaw = ecItem && "children" in ecItem ? ecItem.children : undefined;
-  const ecChildren: readonly NavChild[] = ecRaw ?? [];
-  const presentEc = ecChildren.find((c) => c.label === "Present EC") ?? null;
-  const previousEc = ecChildren.find((c) => c.label === "Previous EC") ?? null;
-  const prevEcChildren: readonly NavChild[] = previousEc && "children" in previousEc && previousEc.children ? previousEc.children : [];
-  const prevOpen = openSubMenu === "prev-ec";
+  function schedSub(key: string | null, delay = 80) {
+    if (subTimer.current) clearTimeout(subTimer.current);
+    subTimer.current = setTimeout(() => setOpenSubMenu(key), delay);
+  }
 
   return (
-    <div className="flex rounded-2xl border border-border bg-[var(--color-surface)] shadow-[0_32px_64px_-24px_rgba(15,23,42,0.5)] overflow-hidden">
-      {/* Left column — EC */}
-      <div className="w-[220px] border-r border-border p-3 flex flex-col gap-0.5">
-        <p className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-accent-1)]">
-          Executive Committee
-        </p>
+    <div className="relative min-w-[200px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
+      {children.map((c) => {
+        const hasChildren = "children" in c && c.children && c.children.length > 0;
+        const cActive = pathname.startsWith(c.to);
+        const subKey = c.label;
+        const subOpen = openSubMenu === subKey;
 
-        {/* Present EC */}
-        {presentEc && (
-          <Link
-            to={presentEc.to}
-            onClick={onClose}
-            className={
-              "block rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors " +
-              (pathname === presentEc.to || pathname === "/leadership"
-                ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
-                : "text-foreground hover:bg-[var(--color-surface-2)]")
-            }
-          >
-            Present EC
-          </Link>
-        )}
-
-        {/* Previous EC toggle */}
-        {previousEc && (
-          <button
-            type="button"
-            onClick={() => setOpenSubMenu(prevOpen ? null : "prev-ec")}
-            className={
-              "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors " +
-              (prevOpen
-                ? "bg-[var(--color-surface-2)] text-foreground"
-                : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
-            }
-          >
-            Previous EC
-            <ChevronRight
-              size={13}
-              className={"opacity-40 transition-transform duration-200 " + (prevOpen ? "rotate-90" : "")}
-            />
-          </button>
-        )}
-
-        <div className="my-1 h-px bg-border" />
-
-        {/* Honor Board, Messages */}
-        {rest.map((c) => {
-          const cActive = pathname.startsWith(c.to);
+        if (!hasChildren) {
           return (
             <Link
               key={c.to + c.label}
               to={c.to}
               onClick={onClose}
               className={
-                "block rounded-xl px-3 py-2.5 text-sm font-medium transition-colors " +
+                "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
                 (cActive
                   ? "bg-[var(--color-surface-2)] text-foreground"
-                  : "text-foreground/70 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+                  : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
               }
             >
               {c.label}
             </Link>
           );
-        })}
-      </div>
+        }
 
-      {/* Right panel — Previous EC sessions (slides in) */}
-      <AnimatePresence initial={false}>
-        {prevOpen && prevEcChildren.length > 0 && (
-          <motion.div
-            key="prev-ec-panel"
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: 220 }}
-            exit={{ opacity: 0, width: 0 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
+        // Item with children (Executive Committee) → hover reveals right flyout
+        const ecChildren: readonly NavChild[] = "children" in c && c.children ? c.children : [];
+
+        return (
+          <div
+            key={c.to + c.label}
+            className="relative"
+            onMouseEnter={() => schedSub(subKey, 0)}
+            onMouseLeave={() => schedSub(null, 120)}
           >
-            <div className="w-[220px] p-3 flex flex-col gap-0.5">
-              <p className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-accent-2)]">
-                Past Sessions
-              </p>
-              <div className="max-h-[320px] overflow-y-auto flex flex-col gap-0.5 pr-0.5">
-                {prevEcChildren.map((g) => {
-                  const gActive = pathname.startsWith(g.to);
-                  return (
-                    <Link
-                      key={g.to + g.label}
-                      to={g.to}
-                      onClick={onClose}
-                      className={
-                        "block rounded-xl px-3 py-2.5 text-sm font-medium transition-colors " +
-                        (gActive
-                          ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
-                          : "text-foreground/70 hover:bg-[var(--color-surface-2)] hover:text-foreground")
-                      }
-                    >
-                      {g.label}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <button
+              type="button"
+              className={
+                "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                (cActive
+                  ? "bg-[var(--color-surface-2)] text-foreground"
+                  : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+              }
+            >
+              {c.label}
+              <ChevronRight size={13} className="opacity-40" />
+            </button>
+
+            <AnimatePresence>
+              {subOpen && (
+                <motion.div
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -6 }}
+                  transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                  onMouseEnter={() => schedSub(subKey, 0)}
+                  onMouseLeave={() => schedSub(null, 120)}
+                  className="absolute left-full top-0 ml-2 min-w-[200px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]"
+                >
+                  <EcSubPanel
+                    ecChildren={ecChildren}
+                    pathname={pathname}
+                    onClose={onClose}
+                    openSubMenu={openSubMenu}
+                    setOpenSubMenu={setOpenSubMenu}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
     </div>
+  );
+}
+
+/* EC flyout: Present EC + Previous EC (with sessions panel) */
+function EcSubPanel({
+  ecChildren,
+  pathname,
+  onClose,
+  openSubMenu,
+  setOpenSubMenu,
+}: {
+  ecChildren: readonly NavChild[];
+  pathname: string;
+  onClose: () => void;
+  openSubMenu: string | null;
+  setOpenSubMenu: (k: string | null) => void;
+}) {
+  const subTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function schedSub(key: string | null, delay = 80) {
+    if (subTimer.current) clearTimeout(subTimer.current);
+    subTimer.current = setTimeout(() => setOpenSubMenu(key), delay);
+  }
+
+  return (
+    <>
+      {ecChildren.map((g) => {
+        const hasGrandChildren = "children" in g && g.children && g.children.length > 0;
+        const gActive = pathname.startsWith(g.to);
+        const ggKey = "ec_" + g.label;
+        const ggOpen = openSubMenu === ggKey;
+
+        if (!hasGrandChildren) {
+          return (
+            <Link
+              key={g.to + g.label}
+              to={g.to}
+              onClick={onClose}
+              className={
+                "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                (gActive
+                  ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
+                  : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+              }
+            >
+              {g.label}
+            </Link>
+          );
+        }
+
+        // Previous EC — has session children
+        const sessions: readonly NavChild[] = "children" in g && g.children ? g.children : [];
+
+        return (
+          <div
+            key={g.to + g.label}
+            className="relative"
+            onMouseEnter={() => schedSub(ggKey, 0)}
+            onMouseLeave={() => schedSub(null, 120)}
+          >
+            <button
+              type="button"
+              className={
+                "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                (ggOpen
+                  ? "bg-[var(--color-surface-2)] text-foreground"
+                  : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+              }
+            >
+              {g.label}
+              <ChevronRight size={13} className="opacity-40" />
+            </button>
+
+            <AnimatePresence>
+              {ggOpen && sessions.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -6 }}
+                  transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                  onMouseEnter={() => schedSub(ggKey, 0)}
+                  onMouseLeave={() => schedSub(null, 120)}
+                  className="absolute left-full top-0 ml-2 min-w-[210px] max-h-[320px] overflow-y-auto rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]"
+                >
+                  {sessions.map((s) => {
+                    const sActive = pathname.startsWith(s.to);
+                    return (
+                      <Link
+                        key={s.to + s.label}
+                        to={s.to}
+                        onClick={onClose}
+                        className={
+                          "block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
+                          (sActive
+                            ? "bg-[var(--color-surface-2)] text-[var(--color-accent-1)]"
+                            : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+                        }
+                      >
+                        {s.label}
+                      </Link>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
+    </>
   );
 }
 
