@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
 import { committeeApi, optimizeImage } from "@/lib/api";
-import { Users, GraduationCap, Star } from "lucide-react";
+import { Users, GraduationCap, Star, Landmark } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
 export const Route = createFileRoute("/convening-committee")({
@@ -34,40 +34,134 @@ function initials(name: string) {
   return name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 }
 
-function MemberCard({ m, index }: { m: Member; index: number }) {
-  const isLead = /convenor|member secretary/i.test(m.role);
+const isLead = (m: Member) => /convenor|member secretary/i.test(m.role);
+
+/* ── Lead card (Convenor / Member Secretary) ── */
+function LeadCard({ m, index }: { m: Member; index: number }) {
+  const accent = index === 0 ? "var(--color-accent-1)" : "var(--color-accent-2)";
+  const accent2 = index === 0 ? "var(--color-accent-2)" : "var(--color-accent-1)";
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-30px" }}
-      transition={{ duration: 0.45, delay: Math.min(index, 10) * 0.05, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative flex items-center gap-4 rounded-2xl border border-border bg-[var(--color-surface)] px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] hover:shadow-[0_16px_40px_-28px_rgba(29,78,216,0.4)]"
+      initial={{ opacity: 0, y: 36 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.65, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative flex flex-col overflow-hidden rounded-[28px]"
+      style={{
+        background: "var(--color-surface)",
+        border: `1px solid color-mix(in oklab, ${accent} 22%, transparent)`,
+        boxShadow: `0 28px 72px -36px color-mix(in oklab, ${accent} 50%, transparent)`,
+      }}
     >
-      {/* Photo */}
+      {/* Top gradient bar */}
       <div
-        className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl"
+        className="h-[3px] w-full shrink-0"
+        style={{ background: `linear-gradient(90deg, ${accent}, ${accent2})` }}
+      />
+
+      {/* Corner ambient glow */}
+      <div
+        className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full opacity-[0.1] blur-3xl transition-opacity duration-500 group-hover:opacity-20"
+        style={{ background: `radial-gradient(circle, ${accent}, transparent 70%)` }}
+      />
+
+      <div className="flex flex-col items-center gap-4 px-7 pt-8 pb-6 text-center">
+        {/* Role pill */}
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-white"
+          style={{
+            background: `linear-gradient(120deg, ${accent}, ${accent2})`,
+            boxShadow: `0 8px 20px -8px color-mix(in oklab, ${accent} 70%, transparent)`,
+          }}
+        >
+          <Star size={10} className="fill-white" /> {m.role}
+        </span>
+
+        {/* Photo */}
+        <div
+          className="relative h-36 w-36 overflow-hidden transition-transform duration-500 group-hover:scale-[1.03]"
+          style={{
+            borderRadius: "22px",
+            background: `linear-gradient(135deg, ${accent}, ${accent2})`,
+            boxShadow: `0 18px 48px -20px color-mix(in oklab, ${accent} 60%, transparent)`,
+          }}
+        >
+          {m.photo_url ? (
+            <img
+              src={optimizeImage(m.photo_url, 360)}
+              alt={m.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="grid h-full w-full place-items-center text-4xl font-bold text-white select-none">
+              {initials(m.name)}
+            </span>
+          )}
+          {/* Inset ring */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              borderRadius: "22px",
+              boxShadow: `inset 0 0 0 3px color-mix(in oklab, ${accent} 35%, transparent)`,
+            }}
+          />
+        </div>
+
+        {/* Info */}
+        <div className="space-y-1">
+          <p className="font-display text-xl font-extrabold leading-tight tracking-tight text-foreground">
+            {m.name}
+          </p>
+          {m.university && (
+            <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+              <GraduationCap size={12} /> {m.university}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Footer strip */}
+      <div
+        className="flex items-center gap-2 px-7 py-3"
         style={{
-          background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
-          boxShadow: "0 8px 24px -10px color-mix(in oklab, var(--color-accent-1) 50%, transparent)",
+          borderTop: `1px solid color-mix(in oklab, ${accent} 14%, transparent)`,
+          background: `color-mix(in oklab, ${accent} 5%, transparent)`,
         }}
+      >
+        <Landmark size={12} style={{ color: accent }} className="shrink-0 opacity-70" />
+        <p className="text-[11px] italic text-muted-foreground">
+          Founding member · PUSAB 2014
+        </p>
+      </div>
+    </motion.article>
+  );
+}
+
+/* ── Regular member row ── */
+function MemberRow({ m, index }: { m: Member; index: number }) {
+  return (
+    <motion.li
+      initial={{ opacity: 0, x: -12 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, margin: "-20px" }}
+      transition={{ duration: 0.35, delay: Math.min(index, 10) * 0.04 }}
+      className="group flex items-center gap-4 rounded-2xl border border-transparent px-4 py-3.5 transition-all hover:border-[color-mix(in_oklab,var(--color-accent-2)_20%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-accent-2)_5%,transparent)]"
+    >
+      {/* Avatar */}
+      <div
+        className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl"
+        style={{ background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))" }}
       >
         {m.photo_url ? (
           <img
-            src={optimizeImage(m.photo_url, 160)}
+            src={optimizeImage(m.photo_url, 120)}
             alt={m.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.08]"
           />
         ) : (
-          <span className="grid h-full w-full place-items-center text-sm font-bold text-white select-none">
+          <span className="grid h-full w-full place-items-center text-xs font-bold text-white select-none">
             {initials(m.name)}
           </span>
-        )}
-        {isLead && (
-          <div className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-[var(--color-accent-2)] shadow">
-            <Star size={9} className="text-white fill-white" />
-          </div>
         )}
       </div>
 
@@ -76,7 +170,7 @@ function MemberCard({ m, index }: { m: Member; index: number }) {
         <p className="font-semibold leading-tight text-foreground truncate">{m.name}</p>
         {m.university && (
           <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground truncate">
-            <GraduationCap size={11} className="shrink-0" /> {m.university}
+            <GraduationCap size={10} className="shrink-0" /> {m.university}
           </p>
         )}
       </div>
@@ -85,16 +179,14 @@ function MemberCard({ m, index }: { m: Member; index: number }) {
       <span
         className="shrink-0 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
         style={{
-          background: isLead
-            ? "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))"
-            : "color-mix(in oklab, var(--color-accent-1) 10%, transparent)",
-          color: isLead ? "white" : "var(--color-accent-1)",
-          border: isLead ? "none" : "1px solid color-mix(in oklab, var(--color-accent-1) 25%, transparent)",
+          background: "color-mix(in oklab, var(--color-accent-2) 10%, transparent)",
+          color: "var(--color-accent-2)",
+          border: "1px solid color-mix(in oklab, var(--color-accent-2) 25%, transparent)",
         }}
       >
         {m.role}
       </span>
-    </motion.article>
+    </motion.li>
   );
 }
 
@@ -111,12 +203,16 @@ function ConveningCommitteePage() {
   const loading = members === null;
   const list = members ?? [];
 
-  // Sort: Convenor first, Member Secretary second, then rest alphabetically
-  const sorted = [...list].sort((a, b) => {
-    const rank = (r: string) =>
-      /convenor/i.test(r) ? 0 : /member secretary/i.test(r) ? 1 : 2;
-    return rank(a.role) - rank(b.role) || a.name.localeCompare(b.name);
-  });
+  const leads = list
+    .filter(isLead)
+    .sort((a, b) => {
+      const rank = (r: string) => (/convenor/i.test(r) ? 0 : 1);
+      return rank(a.role) - rank(b.role);
+    });
+
+  const rest = list
+    .filter((m) => !isLead(m))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <>
@@ -134,7 +230,7 @@ function ConveningCommitteePage() {
 
       <section className="py-16 md:py-24">
         <div className="container-page">
-          {/* Heading */}
+          {/* Section heading */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -151,7 +247,8 @@ function ConveningCommitteePage() {
               30 July –{" "}
               <span
                 style={{
-                  background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))",
+                  background:
+                    "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))",
                   WebkitBackgroundClip: "text",
                   backgroundClip: "text",
                   color: "transparent",
@@ -161,17 +258,20 @@ function ConveningCommitteePage() {
               </span>
             </h2>
             <p className="mt-4 leading-relaxed text-muted-foreground">
-              Before any executive committee, there was a convening committee — a group of dedicated
-              students who formally founded PUSAB and laid the groundwork for everything that
-              followed. This page honours their contribution.
+              Before any executive committee, there was a convening committee — a group of
+              dedicated students who formally founded PUSAB and laid the groundwork for
+              everything that followed.
             </p>
           </motion.div>
 
           {loading ? (
-            <div className="space-y-3 max-w-2xl">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-20 animate-pulse rounded-2xl bg-[var(--color-surface)]" />
-              ))}
+            <div className="space-y-8">
+              <div className="grid max-w-2xl gap-6 sm:grid-cols-2">
+                {[0, 1].map((i) => (
+                  <div key={i} className="h-72 animate-pulse rounded-[28px] bg-[var(--color-surface)]" />
+                ))}
+              </div>
+              <div className="h-48 animate-pulse rounded-3xl bg-[var(--color-surface)]" />
             </div>
           ) : list.length === 0 ? (
             <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-border bg-[var(--color-surface)] py-24 text-center">
@@ -181,10 +281,71 @@ function ConveningCommitteePage() {
               </p>
             </div>
           ) : (
-            <div className="max-w-2xl space-y-3">
-              {sorted.map((m, i) => (
-                <MemberCard key={m.id} m={m} index={i} />
-              ))}
+            <div className="space-y-10">
+              {/* Lead cards — Convenor + Member Secretary */}
+              {leads.length > 0 && (
+                <div className={`grid max-w-2xl gap-6 ${leads.length > 1 ? "sm:grid-cols-2" : ""}`}>
+                  {leads.map((m, i) => (
+                    <LeadCard key={m.id} m={m} index={i} />
+                  ))}
+                </div>
+              )}
+
+              {/* Members roster */}
+              {rest.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  className="overflow-hidden rounded-3xl border border-border"
+                  style={{ background: "var(--color-surface)" }}
+                >
+                  {/* Roster header */}
+                  <div
+                    className="flex items-center justify-between gap-4 border-b border-border px-7 py-5"
+                    style={{
+                      background:
+                        "color-mix(in oklab, var(--color-accent-2) 5%, var(--color-surface))",
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="grid h-10 w-10 place-items-center rounded-xl text-white shadow"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
+                        }}
+                      >
+                        <Users size={16} />
+                      </div>
+                      <div>
+                        <p
+                          className="text-[10px] font-bold uppercase tracking-[0.2em]"
+                          style={{ color: "var(--color-accent-2)" }}
+                        >
+                          Founding Members
+                        </p>
+                        <p className="font-display text-lg font-bold tracking-tight text-foreground">
+                          Committee Members
+                        </p>
+                      </div>
+                    </div>
+                    <span className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground">
+                      {rest.length} {rest.length === 1 ? "member" : "members"}
+                    </span>
+                  </div>
+
+                  {/* Member list */}
+                  <div className="px-3 py-3">
+                    <ul className="grid gap-1 sm:grid-cols-2">
+                      {rest.map((m, i) => (
+                        <MemberRow key={m.id} m={m} index={i} />
+                      ))}
+                    </ul>
+                  </div>
+                </motion.div>
+              )}
             </div>
           )}
         </div>
