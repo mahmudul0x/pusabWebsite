@@ -59,91 +59,81 @@ function LeadCard({
       initial={{ opacity: 0, y: 44 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative overflow-hidden rounded-[28px]"
+      className="group relative flex flex-col overflow-hidden rounded-[28px]"
       style={{
         background: "var(--color-surface)",
         border: "1px solid color-mix(in oklab, " + c1 + " 22%, transparent)",
         boxShadow: "0 30px 80px -40px color-mix(in oklab, " + c1 + " 55%, transparent)",
       }}
     >
-      {/* Decorative corner gradient wash */}
+      {/* Top gradient bar */}
       <div
-        className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-[0.12] blur-3xl transition-opacity duration-500 group-hover:opacity-25"
-        style={{ background: "radial-gradient(circle, " + c1 + ", transparent 70%)" }}
-      />
-      {/* Big watermark icon */}
-      <Icon
-        className="pointer-events-none absolute right-4 top-4 opacity-[0.06]"
-        size={84}
-        style={{ color: c1 }}
-        strokeWidth={1.2}
+        className="h-[3px] w-full shrink-0"
+        style={{ background: "linear-gradient(90deg, " + c1 + ", " + c2 + ")" }}
       />
 
-      {/* Photo band */}
-      <div className="relative px-6 pt-6">
+      {/* Photo — full card width */}
+      <div className="relative p-4">
         <div
-          className="relative mx-auto h-44 w-44 overflow-hidden transition-transform duration-500 group-hover:scale-[1.02]"
+          className="relative aspect-square w-full overflow-hidden transition-transform duration-500 group-hover:scale-[1.01]"
           style={{
-            borderRadius: "22px",
-            boxShadow: "0 24px 60px -22px color-mix(in oklab, " + c1 + " 60%, transparent)",
+            borderRadius: "20px",
+            background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")",
+            boxShadow: "0 20px 52px -22px color-mix(in oklab, " + c1 + " 55%, transparent)",
           }}
         >
           {m.photo_url ? (
             <img
-              src={optimizeImage(m.photo_url, 440)}
+              src={optimizeImage(m.photo_url, 560)}
               alt={m.name}
               className="h-full w-full object-cover"
             />
           ) : (
-            <div
-              className="grid h-full w-full place-items-center"
-              style={{ background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")" }}
-            >
-              <span className="text-5xl font-bold text-white select-none">{initials(m.name)}</span>
-            </div>
+            <span className="grid h-full w-full place-items-center text-6xl font-bold text-white select-none">
+              {initials(m.name)}
+            </span>
           )}
-          {/* Subtle gradient ring overlay */}
+          {/* Inset ring */}
           <div
             className="pointer-events-none absolute inset-0"
             style={{
-              borderRadius: "22px",
-              boxShadow: "inset 0 0 0 3px color-mix(in oklab, " + c1 + " 35%, transparent)",
+              borderRadius: "20px",
+              boxShadow: "inset 0 0 0 3px color-mix(in oklab, " + c1 + " 30%, transparent)",
             }}
           />
-        </div>
-
-        {/* Floating role pill overlapping photo bottom */}
-        <div className="relative z-10 -mt-3.5 flex justify-center">
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white"
-            style={{
-              background: "linear-gradient(120deg, " + c1 + ", " + c2 + ")",
-              boxShadow: "0 8px 22px -8px color-mix(in oklab, " + c1 + " 75%, transparent)",
-            }}
-          >
-            <Icon size={11} /> {label}
-          </span>
+          {/* Floating role pill — overlaps photo bottom */}
+          <div className="absolute inset-x-0 bottom-0 flex justify-center pb-3">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white backdrop-blur"
+              style={{
+                background: "linear-gradient(120deg, " + c1 + ", " + c2 + ")",
+                boxShadow: "0 8px 22px -8px color-mix(in oklab, " + c1 + " 80%, transparent)",
+              }}
+            >
+              <Icon size={11} /> {label}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Identity */}
-      <div className="px-6 pb-1 pt-4 text-center">
-        <h3 className="font-display text-xl font-extrabold leading-tight tracking-tight text-foreground">
+      <div className="px-6 pb-5 pt-1 text-center">
+        <h3 className="font-display text-2xl font-extrabold leading-tight tracking-tight text-foreground">
           {m.name}
         </h3>
-        <p className="mt-0.5 text-sm font-semibold" style={{ color: c1 }}>
+        <p className="mt-1 text-sm font-semibold" style={{ color: c1 }}>
           {m.role}
         </p>
         {m.university && (
-          <p className="mt-1.5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <GraduationCap size={11} /> {m.university}
+          <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+            <GraduationCap size={12} /> {m.university}
           </p>
         )}
       </div>
 
       {/* Editorial footer strip */}
       <div
-        className="mt-4 flex items-center gap-2.5 px-6 py-3"
+        className="mt-auto flex items-center gap-2.5 px-6 py-3"
         style={{
           borderTop: "1px solid color-mix(in oklab, " + c1 + " 14%, transparent)",
           background: "color-mix(in oklab, " + c1 + " 5%, transparent)",
