@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
 import { committeeApi, optimizeImage } from "@/lib/api";
-import { Crown, Gavel, GraduationCap, Users, Building2, Quote } from "lucide-react";
+import { Crown, Gavel, GraduationCap, Users, Building2 } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
 export const Route = createFileRoute("/leadership")({
@@ -73,7 +73,7 @@ function LeadCard({
       />
 
       {/* Photo — full card width */}
-      <div className="relative p-4">
+      <div className="relative p-3">
         <div
           className="relative aspect-square w-full overflow-hidden transition-transform duration-500 group-hover:scale-[1.01]"
           style={{
@@ -102,47 +102,33 @@ function LeadCard({
             }}
           />
           {/* Floating role pill — overlaps photo bottom */}
-          <div className="absolute inset-x-0 bottom-0 flex justify-center pb-3">
+          <div className="absolute inset-x-0 bottom-0 flex justify-center pb-2.5">
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white backdrop-blur"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur"
               style={{
                 background: "linear-gradient(120deg, " + c1 + ", " + c2 + ")",
                 boxShadow: "0 8px 22px -8px color-mix(in oklab, " + c1 + " 80%, transparent)",
               }}
             >
-              <Icon size={11} /> {label}
+              <Icon size={10} /> {label}
             </span>
           </div>
         </div>
       </div>
 
       {/* Identity */}
-      <div className="px-6 pb-5 pt-1 text-center">
-        <h3 className="font-display text-2xl font-extrabold leading-tight tracking-tight text-foreground">
+      <div className="px-4 pb-4 pt-0.5 text-center">
+        <h3 className="font-display text-lg font-extrabold leading-tight tracking-tight text-foreground">
           {m.name}
         </h3>
-        <p className="mt-1 text-sm font-semibold" style={{ color: c1 }}>
+        <p className="mt-0.5 text-xs font-semibold" style={{ color: c1 }}>
           {m.role}
         </p>
         {m.university && (
-          <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <GraduationCap size={12} /> {m.university}
+          <p className="mt-1.5 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+            <GraduationCap size={11} /> {m.university}
           </p>
         )}
-      </div>
-
-      {/* Editorial footer strip */}
-      <div
-        className="mt-auto flex items-center gap-2.5 px-6 py-3"
-        style={{
-          borderTop: "1px solid color-mix(in oklab, " + c1 + " 14%, transparent)",
-          background: "color-mix(in oklab, " + c1 + " 5%, transparent)",
-        }}
-      >
-        <Quote size={13} style={{ color: c1 }} className="shrink-0 opacity-70" />
-        <p className="text-[11px] italic leading-snug text-muted-foreground">
-          Serving PUSAB and the community this session.
-        </p>
       </div>
     </motion.article>
   );
@@ -267,15 +253,13 @@ function ExecutiveCommitteePage() {
           </motion.div>
 
           {loading ? (
-            <div className="space-y-8">
-              <div className="grid max-w-3xl gap-6 sm:grid-cols-2">
-                {[0, 1].map((i) => (
-                  <div
-                    key={i}
-                    className="h-80 animate-pulse rounded-[28px] bg-[var(--color-surface)]"
-                  />
-                ))}
-              </div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-72 animate-pulse rounded-[28px] bg-[var(--color-surface)]"
+                />
+              ))}
             </div>
           ) : current.length === 0 ? (
             <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-border bg-[var(--color-surface)] py-28 text-center">
@@ -288,7 +272,7 @@ function ExecutiveCommitteePage() {
             <div className="space-y-12">
               {/* President + GS — premium editorial cards */}
               {(president || gs) && (
-                <div className="grid max-w-3xl gap-6 sm:grid-cols-2">
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {president && (
                     <LeadCard m={president} label="President" Icon={Crown} accent="1" delay={0} />
                   )}
