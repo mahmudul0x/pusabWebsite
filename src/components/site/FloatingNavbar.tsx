@@ -53,77 +53,67 @@ function LeadershipMenu({
     );
   };
 
+  // Recursive accordion node. Leaves render as links; branches render a
+  // hover-expandable header that reveals their children inline (no sideways
+  // flyouts). `keyPath` keeps each level's open-key unique across depths.
+  const renderNode = (item: NavChild, depth: number, keyPath: string): React.ReactElement => {
+    const hasChildren = "children" in item && item.children && item.children.length > 0;
+    const pad = depth === 0 ? "px-3.5" : "px-3";
+
+    if (!hasChildren) {
+      return <div key={item.to + item.label}>{itemLink(item, pad, depth > 0)}</div>;
+    }
+
+    const subItems: readonly NavChild[] = "children" in item && item.children ? item.children : [];
+    const key = keyPath + "/" + item.label;
+    const open = expanded.includes(key);
+
+    return (
+      <div
+        key={item.to + item.label}
+        onMouseEnter={() => setExpanded([...expanded.filter((k) => k !== key), key])}
+        onMouseLeave={() => setExpanded(expanded.filter((k) => k !== key))}
+      >
+        <button
+          type="button"
+          onClick={() => toggle(key)}
+          className={
+            "flex w-full items-center justify-between rounded-xl py-2.5 text-sm font-medium transition-colors " +
+            pad +
+            " " +
+            (open
+              ? "bg-[var(--color-surface-2)] text-foreground"
+              : "text-foreground/80 hover:bg-[var(--color-surface-2)] hover:text-foreground")
+          }
+        >
+          {item.label}
+          <ChevronDown
+            size={14}
+            className={"opacity-50 transition-transform duration-200 " + (open ? "rotate-180" : "")}
+          />
+        </button>
+        <AnimatePresence initial={false}>
+          {open && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="ml-3.5 mt-0.5 max-h-[40vh] space-y-0.5 overflow-y-auto border-l border-border pl-2 pr-0.5">
+                {subItems.map((s) => renderNode(s, depth + 1, key))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
+
   return (
     <div className="w-[260px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
-      {items.map((item) => {
-        const hasChildren = "children" in item && item.children && item.children.length > 0;
-
-        if (!hasChildren) return <div key={item.to + item.label}>{itemLink(item, "px-3.5")}</div>;
-
-        // Executive Committee group
-        const ecChildren: readonly NavChild[] =
-          "children" in item && item.children ? item.children : [];
-
-        return (
-          <div key={item.to + item.label} className="mb-1.5 border-b border-border pb-1.5">
-            <p className="px-3.5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-accent-1)]">
-              {item.label}
-            </p>
-            {ecChildren.map((g) => {
-              const gHasChildren = "children" in g && g.children && g.children.length > 0;
-              if (!gHasChildren)
-                return <div key={g.to + g.label}>{itemLink(g, "px-3.5", true)}</div>;
-
-              // Previous EC — inline accordion of sessions (expands on hover)
-              const sessions: readonly NavChild[] = "children" in g && g.children ? g.children : [];
-              const key = g.label;
-              const open = expanded.includes(key);
-
-              return (
-                <div
-                  key={g.to + g.label}
-                  onMouseEnter={() => setExpanded([...expanded.filter((k) => k !== key), key])}
-                  onMouseLeave={() => setExpanded(expanded.filter((k) => k !== key))}
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggle(key)}
-                    className={
-                      "flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors " +
-                      (open
-                        ? "bg-[var(--color-surface-2)] text-foreground"
-                        : "text-foreground/75 hover:bg-[var(--color-surface-2)] hover:text-foreground")
-                    }
-                  >
-                    {g.label}
-                    <ChevronDown
-                      size={14}
-                      className={
-                        "opacity-50 transition-transform duration-200 " + (open ? "rotate-180" : "")
-                      }
-                    />
-                  </button>
-                  <AnimatePresence initial={false}>
-                    {open && sessions.length > 0 && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                        className="overflow-hidden"
-                      >
-                        <div className="ml-3.5 mt-0.5 max-h-[40vh] space-y-0.5 overflow-y-auto border-l border-border pl-2 pr-0.5">
-                          {sessions.map((s) => itemLink(s, "px-3", true))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </div>
-        );
-      })}
+      {items.map((item) => renderNode(item, 0, ""))}
     </div>
   );
 }
