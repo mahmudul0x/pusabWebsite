@@ -185,22 +185,41 @@ export function FloatingNavbar() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openPath, setOpenPath] = useState<string[]>([]);
   const subMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
+  const [mobileExpanded, setMobileExpanded] = useState<string[]>([]);
+  const toggleMobile = (key: string) =>
+    setMobileExpanded((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
   const [pastYears, setPastYears] = useState<number[]>([]);
 
   // Load past (non-current) session years for the "Previous EC" submenu.
+  // We always list the full history 1st→12th EC (2014–2025); any year that
+  // also exists in the backend gets its real data on its page. The current
+  // session's year is excluded.
   useEffect(() => {
     let alive = true;
+    const FOUNDING_YEAR = 2014;
+    const LATEST_PAST_YEAR = 2025; // 12th EC = 2025
+    const fullRange = Array.from(
+      { length: LATEST_PAST_YEAR - FOUNDING_YEAR + 1 },
+      (_, i) => FOUNDING_YEAR + i,
+    );
+
     committeeApi
       .listAll()
       .then((rows) => {
         if (!alive) return;
-        const years = [...new Set(rows.filter((m) => !m.is_current).map((m) => m.year))]
-          .filter((y) => !Number.isNaN(y))
+        const currentYears = new Set(rows.filter((m) => m.is_current).map((m) => m.year));
+        const backendYears = rows.map((m) => m.year).filter((y) => !Number.isNaN(y));
+        const years = [...new Set([...fullRange, ...backendYears])]
+          .filter((y) => !currentYears.has(y))
           .sort((a, b) => a - b); // oldest first (1st, 2nd, ...)
         setPastYears(years);
       })
-      .catch(() => {});
+      .catch(() => {
+        // Backend unreachable — still show the full known history.
+        if (alive) setPastYears(fullRange);
+      });
     return () => {
       alive = false;
     };
@@ -243,7 +262,7 @@ export function FloatingNavbar() {
     setMobileOpen(false);
     setOpenMenu(null);
     setOpenPath([]);
-    setMobileExpanded(null);
+    setMobileExpanded([]);
   }, [pathname]);
 
   // Lock body scroll while the mobile menu is open.
@@ -605,12 +624,12 @@ export function FloatingNavbar() {
                               }
                               // Item with nested children (e.g. "Executive Committee") — accordion
                               const mKey = c.to + c.label;
-                              const mExpanded = mobileExpanded === mKey;
+                              const mExpanded = mobileExpanded.includes(mKey);
                               return (
                                 <li key={mKey}>
                                   <button
                                     type="button"
-                                    onClick={() => setMobileExpanded(mExpanded ? null : mKey)}
+                                    onClick={() => toggleMobile(mKey)}
                                     className={
                                       "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors " +
                                       (cActive
@@ -652,14 +671,12 @@ export function FloatingNavbar() {
                                         }
                                         // 4th level — "Previous EC" expandable
                                         const ggKey = g.to + g.label;
-                                        const ggExpanded = mobileExpanded === ggKey;
+                                        const ggExpanded = mobileExpanded.includes(ggKey);
                                         return (
                                           <li key={ggKey}>
                                             <button
                                               type="button"
-                                              onClick={() =>
-                                                setMobileExpanded(ggExpanded ? mKey : ggKey)
-                                              }
+                                              onClick={() => toggleMobile(ggKey)}
                                               className={
                                                 "flex w-full items-center justify-between rounded-lg px-3 py-2 text-[13px] font-medium transition-colors " +
                                                 (gActive
