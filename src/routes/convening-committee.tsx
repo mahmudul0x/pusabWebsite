@@ -103,12 +103,12 @@ function LeadCard({ m, index }: { m: Member; index: number }) {
 /* ── Regular member card ── */
 function MemberRow({ m, index }: { m: Member; index: number }) {
   return (
-    <motion.li
+    <motion.article
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-30px" }}
       transition={{ duration: 0.4, delay: Math.min(index, 12) * 0.05, ease: [0.16, 1, 0.3, 1] }}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-[var(--color-background)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-2)_30%,transparent)] hover:shadow-[0_18px_44px_-30px_rgba(29,78,216,0.4)]"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-2)_30%,transparent)] hover:shadow-[0_18px_44px_-30px_rgba(29,78,216,0.4)]"
     >
       {/* Photo — square */}
       <div
@@ -147,7 +147,7 @@ function MemberRow({ m, index }: { m: Member; index: number }) {
           </p>
         )}
       </div>
-    </motion.li>
+    </motion.article>
   );
 }
 
@@ -239,82 +239,16 @@ function ConveningCommitteePage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-10">
-              {/* Lead cards — Convenor + Member Secretary */}
-              {leads.length > 0 && (
-                <div
-                  className={
-                    "grid gap-5 " +
-                    (leads.length === 1
-                      ? "max-w-xs"
-                      : leads.length === 2
-                        ? "max-w-2xl grid-cols-2"
-                        : leads.length === 3
-                          ? "max-w-3xl grid-cols-2 sm:grid-cols-3"
-                          : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4")
-                  }
-                >
-                  {leads.map((m, i) => (
-                    <LeadCard key={m.id} m={m} index={i} />
-                  ))}
-                </div>
-              )}
-
-              {/* Members roster */}
-              {rest.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
-                  className="overflow-hidden rounded-3xl border border-border"
-                  style={{ background: "var(--color-surface)" }}
-                >
-                  {/* Roster header */}
-                  <div
-                    className="flex items-center justify-between gap-4 border-b border-border px-7 py-5"
-                    style={{
-                      background:
-                        "color-mix(in oklab, var(--color-accent-2) 5%, var(--color-surface))",
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="grid h-10 w-10 place-items-center rounded-xl text-white shadow"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
-                        }}
-                      >
-                        <Users size={16} />
-                      </div>
-                      <div>
-                        <p
-                          className="text-[10px] font-bold uppercase tracking-[0.2em]"
-                          style={{ color: "var(--color-accent-2)" }}
-                        >
-                          Founding Members
-                        </p>
-                        <p className="font-display text-lg font-bold tracking-tight text-foreground">
-                          Committee Members
-                        </p>
-                      </div>
-                    </div>
-                    <span className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground">
-                      {rest.length} {rest.length === 1 ? "member" : "members"}
-                    </span>
-                  </div>
-
-                  {/* Member list */}
-                  <div className="p-5">
-                    <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                      {rest.map((m, i) => (
-                        <MemberRow key={m.id} m={m} index={i} />
-                      ))}
-                    </ul>
-                  </div>
-                </motion.div>
-              )}
+            <div className="space-y-8">
+              {/* All founders in one grid — leads first (accent), then members. No gaps. */}
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {leads.map((m, i) => (
+                  <LeadCard key={m.id} m={m} index={i} />
+                ))}
+                {rest.map((m, i) => (
+                  <MemberRow key={m.id} m={m} index={i} />
+                ))}
+              </div>
             </div>
           )}
         </div>
