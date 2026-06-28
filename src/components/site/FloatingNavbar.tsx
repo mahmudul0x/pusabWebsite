@@ -159,7 +159,7 @@ function LeadershipMenu({
                     setExpanded(["/leadership"]);
                   }}
                 >
-                  <ul className="min-w-[230px] rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
+                  <ul className="max-h-[70vh] min-w-[230px] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
                     {ecChildren.map((g) => {
                       const gHasChildren = "children" in g && g.children && g.children.length > 0;
                       if (!gHasChildren) {
