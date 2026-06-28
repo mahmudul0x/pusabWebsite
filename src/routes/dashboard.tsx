@@ -39,6 +39,7 @@ import {
   Clock,
   Plus,
   Star,
+  Quote,
 } from "lucide-react";
 import logoPusab from "@/assets/logo-pusab.png";
 import { StatCard } from "@/components/dashboard/primitives";
@@ -47,6 +48,7 @@ import { PublicitySection } from "@/components/dashboard/PublicitySection";
 import { CommitteeSection } from "@/components/dashboard/CommitteeSection";
 import { ProgramsSection } from "@/components/dashboard/ProgramsSection";
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
+import { LeadershipMessagesSection } from "@/components/dashboard/LeadershipMessagesSection";
 import { UsersSection } from "@/components/dashboard/UsersSection";
 import { SettingsSection } from "@/components/dashboard/SettingsSection";
 import { FelicitationSection } from "@/components/dashboard/FelicitationSection";
@@ -196,6 +198,7 @@ const NAV = [
   { key: "executive-committee", label: "Executive Committee", Icon: ShieldCheck, group: "content" },
   { key: "honor-board", label: "Honor Board", Icon: Crown, group: "content" },
   { key: "convening-committee", label: "Convening Committee", Icon: Star, group: "content" },
+  { key: "leadership-messages", label: "Leadership Messages", Icon: Quote, group: "content" },
   { key: "programs", label: "Programs", Icon: CalendarRange, group: "content" },
   { key: "felicitation", label: "Felicitation", Icon: Award, group: "content" },
   { key: "messages", label: "Messages", Icon: MessageSquare, group: "system" },
@@ -415,6 +418,7 @@ function DashboardShell() {
           {section === "executive-committee" && <CommitteeSection view="executive-committee" />}
           {section === "honor-board" && <CommitteeSection view="honor-board" />}
           {section === "convening-committee" && <CommitteeSection view="convening-committee" />}
+          {section === "leadership-messages" && <LeadershipMessagesSection />}
           {section === "programs" && <ProgramsSection />}
           {section === "felicitation" && <FelicitationSection />}
           {section === "messages" && <MessagesSection />}

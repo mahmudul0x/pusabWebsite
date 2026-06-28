@@ -14,6 +14,7 @@ export {
   usersApi,
   settingsApi,
   felicitationApi,
+  leaderMessageApi,
 } from "./resources";
 export { AuthProvider, useAuth } from "./AuthContext";
 export { uploadImage, isUploadConfigured, optimizeImage } from "./upload";

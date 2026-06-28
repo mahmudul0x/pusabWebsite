@@ -93,6 +93,18 @@ export interface AdminUser {
   date_joined: string;
 }
 
+export interface LeaderMessage {
+  id: number;
+  role: "president" | "secretary";
+  name: string;
+  designation: string;
+  session: string;
+  photo_url: string;
+  quote: string;
+  body: string;
+  updated_at: string;
+}
+
 export interface FelicitationEntry {
   id: number;
   name: string;

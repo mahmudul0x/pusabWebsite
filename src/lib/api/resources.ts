@@ -8,6 +8,7 @@ import type {
   EcMember,
   FelicitationEntry,
   GalleryItem,
+  LeaderMessage,
   Paginated,
   Program,
   PublicityPost,
@@ -51,6 +52,27 @@ export const programsApi = crud<Program>("programs");
 export const contactApi = crud<ContactMessage>("contact");
 export const usersApi = crud<AdminUser>("users");
 export const felicitationApi = crud<FelicitationEntry>("felicitation");
+
+// Leader messages (President / General Secretary) — looked up by role string.
+export const leaderMessageApi = {
+  list: () =>
+    apiFetch<Paginated<LeaderMessage>>("/api/leader-messages/", {}, { auth: false }),
+  listAll: async (): Promise<LeaderMessage[]> => {
+    const page = await apiFetch<Paginated<LeaderMessage>>(
+      "/api/leader-messages/",
+      {},
+      { auth: false },
+    );
+    return page.results;
+  },
+  get: (role: "president" | "secretary") =>
+    apiFetch<LeaderMessage>(`/api/leader-messages/${role}/`, {}, { auth: false }),
+  update: (role: "president" | "secretary", body: Partial<LeaderMessage>) =>
+    apiFetch<LeaderMessage>(`/api/leader-messages/${role}/`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+};
 
 // Site settings is a singleton (no list/id) — read public, update by admins.
 export const settingsApi = {
