@@ -30,7 +30,11 @@ export const NAV_LINKS = [
       {
         to: "/leadership",
         label: "Executive Committee",
-        children: [{ to: "/convening-committee", label: "Convening Committee" }],
+        children: [
+          { to: "/leadership", label: "Present EC" },
+          // "Previous EC" submenu (Convening Committee + past sessions) is
+          // injected at runtime from the backend in FloatingNavbar.
+        ],
       },
       { to: "/honor-board", label: "Honor Board" },
       { to: "/president-message", label: "President's Message" },

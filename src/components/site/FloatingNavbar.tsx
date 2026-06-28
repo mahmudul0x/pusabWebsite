@@ -1,15 +1,62 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Menu, X, ChevronDown, Heart } from "lucide-react";
 import { NAV_LINKS, SITE } from "@/lib/site-content";
+import { committeeApi } from "@/lib/api";
+import { ecOrdinal } from "@/routes/ec.$year";
 import logoPusab from "@/assets/logo-pusab.png";
+
+type NavChild = { to: string; label: string; children?: readonly NavChild[] };
+type NavItem = { to: string; label: string; children?: readonly NavChild[] };
 
 export function FloatingNavbar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [pastYears, setPastYears] = useState<number[]>([]);
+
+  // Load past (non-current) session years for the "Previous EC" submenu.
+  useEffect(() => {
+    let alive = true;
+    committeeApi
+      .listAll()
+      .then((rows) => {
+        if (!alive) return;
+        const years = [...new Set(rows.filter((m) => !m.is_current).map((m) => m.year))]
+          .filter((y) => !Number.isNaN(y))
+          .sort((a, b) => a - b); // oldest first (1st, 2nd, ...)
+        setPastYears(years);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Inject past sessions into the Executive Committee submenu:
+  // Present EC, Convening Committee, then 1st EC, 2nd EC, ... (oldest → newest).
+  const navLinks = useMemo<readonly NavItem[]>(() => {
+    const sessionChildren: NavChild[] = [
+      { to: "/convening-committee", label: "Convening Committee" },
+      ...pastYears.map((y) => ({
+        to: `/ec/${y}`,
+        label: `${ecOrdinal(y)} EC · ${y}-${String((y + 1) % 100).padStart(2, "0")}`,
+      })),
+    ];
+    return NAV_LINKS.map((link) => {
+      if (link.to !== "/leadership" || !("children" in link)) return link;
+      return {
+        ...link,
+        children: link.children.map((c) =>
+          c.label === "Executive Committee"
+            ? { ...c, children: [...(("children" in c && c.children) || []), ...sessionChildren] }
+            : c,
+        ),
+      };
+    });
+  }, [pastYears]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -93,7 +140,7 @@ export function FloatingNavbar() {
 
           {/* Desktop links */}
           <ul className="hidden lg:flex items-center gap-1 mx-auto">
-            {NAV_LINKS.map((link) => {
+            {navLinks.map((link) => {
               const children = "children" in link ? link.children : undefined;
               const childActive = children?.some(
                 (c) =>
@@ -310,7 +357,7 @@ export function FloatingNavbar() {
                   variants={{ show: { transition: { staggerChildren: 0.04, delayChildren: 0.05 } } }}
                   className="space-y-1"
                 >
-                  {NAV_LINKS.map((link) => {
+                  {navLinks.map((link) => {
                     const children = "children" in link ? link.children : undefined;
                     const isActive =
                       link.to === "/" ? pathname === "/" : pathname.startsWith(link.to);

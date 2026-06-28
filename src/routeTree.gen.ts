@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ConveningCommitteeRouteImport } from './routes/convening-committee'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SecretaryMessageRouteImport } from './routes/secretary-message'
 import { Route as SayorRouteImport } from './routes/sayor'
@@ -21,18 +20,15 @@ import { Route as LeadershipRouteImport } from './routes/leadership'
 import { Route as HonorBoardRouteImport } from './routes/honor-board'
 import { Route as FelicitationRouteImport } from './routes/felicitation'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ConveningCommitteeRouteImport } from './routes/convening-committee'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EcYearRouteImport } from './routes/ec.$year'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
-const ConveningCommitteeRoute = ConveningCommitteeRouteImport.update({
-  id: '/convening-committee',
-  path: '/convening-committee',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -88,6 +84,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConveningCommitteeRoute = ConveningCommitteeRouteImport.update({
+  id: '/convening-committee',
+  path: '/convening-committee',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -110,6 +111,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EcYearRoute = EcYearRouteImport.update({
+  id: '/ec/$year',
+  path: '/ec/$year',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/secretary-message': typeof SecretaryMessageRoute
   '/support': typeof SupportRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/ec/$year': typeof EcYearRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/secretary-message': typeof SecretaryMessageRoute
   '/support': typeof SupportRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/ec/$year': typeof EcYearRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/secretary-message': typeof SecretaryMessageRoute
   '/support': typeof SupportRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/ec/$year': typeof EcYearRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/secretary-message'
     | '/support'
     | '/admin'
+    | '/ec/$year'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/secretary-message'
     | '/support'
     | '/admin'
+    | '/ec/$year'
   id:
     | '__root__'
     | '/'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/secretary-message'
     | '/support'
     | '/_authenticated/admin'
+    | '/ec/$year'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -256,6 +268,7 @@ export interface RootRouteChildren {
   SayorRoute: typeof SayorRoute
   SecretaryMessageRoute: typeof SecretaryMessageRoute
   SupportRoute: typeof SupportRoute
+  EcYearRoute: typeof EcYearRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -337,18 +350,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/convening-committee': {
       id: '/convening-committee'
       path: '/convening-committee'
       fullPath: '/convening-committee'
       preLoaderRoute: typeof ConveningCommitteeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -377,6 +390,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ec/$year': {
+      id: '/ec/$year'
+      path: '/ec/$year'
+      fullPath: '/ec/$year'
+      preLoaderRoute: typeof EcYearRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -418,6 +438,7 @@ const rootRouteChildren: RootRouteChildren = {
   SayorRoute: SayorRoute,
   SecretaryMessageRoute: SecretaryMessageRoute,
   SupportRoute: SupportRoute,
+  EcYearRoute: EcYearRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
