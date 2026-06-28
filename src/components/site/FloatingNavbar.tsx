@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Menu, X, ChevronDown, Heart } from "lucide-react";
 import { NAV_LINKS, SITE } from "@/lib/site-content";
 import { committeeApi } from "@/lib/api";
@@ -16,8 +16,14 @@ export function FloatingNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
+  const subMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [pastYears, setPastYears] = useState<number[]>([]);
+
+  function scheduleSubMenu(key: string | null, delay = 80) {
+    if (subMenuTimer.current) clearTimeout(subMenuTimer.current);
+    subMenuTimer.current = setTimeout(() => setOpenSubMenu(key), delay);
+  }
 
   // Load past (non-current) session years for the "Previous EC" submenu.
   useEffect(() => {
@@ -89,11 +95,14 @@ export function FloatingNavbar() {
     }
   }, [mobileOpen]);
 
+  // Cleanup submenu timer on unmount.
+  useEffect(() => () => { if (subMenuTimer.current) clearTimeout(subMenuTimer.current); }, []);
+
   // Close any open dropdown on outside click or Escape.
   useEffect(() => {
     if (!openMenu) return;
-    const close = () => setOpenMenu(null);
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpenMenu(null);
+    const close = () => { setOpenMenu(null); setOpenSubMenu(null); };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
     document.addEventListener("click", close);
     document.addEventListener("keydown", onKey);
     return () => {
@@ -241,15 +250,15 @@ export function FloatingNavbar() {
                               );
                             }
                             // Item with nested children (e.g. "Executive Committee" or "Previous EC")
-                            // → show as a flyout submenu on hover
+                            // → flyout submenu; delay on open/close prevents accidental dismissal
                             const subKey = c.to + c.label;
-                            const subOpen = openSubMenu === subKey;
+                            const subOpen = openSubMenu === subKey || openSubMenu?.startsWith(subKey + "_");
                             return (
                               <li
                                 key={subKey}
                                 className="relative"
-                                onMouseEnter={() => setOpenSubMenu(subKey)}
-                                onMouseLeave={() => setOpenSubMenu(null)}
+                                onMouseEnter={() => scheduleSubMenu(subKey, 0)}
+                                onMouseLeave={() => scheduleSubMenu(null, 120)}
                               >
                                 <button
                                   type="button"
@@ -273,6 +282,8 @@ export function FloatingNavbar() {
                                       animate={{ opacity: 1, x: 0 }}
                                       exit={{ opacity: 0, x: -6 }}
                                       transition={{ duration: 0.14 }}
+                                      onMouseEnter={() => scheduleSubMenu(subKey, 0)}
+                                      onMouseLeave={() => scheduleSubMenu(null, 120)}
                                       className="absolute left-full top-0 ml-1.5 min-w-[220px] max-h-[70vh] overflow-y-auto rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]"
                                     >
                                       {grandchildren.map((g) => {
@@ -297,14 +308,14 @@ export function FloatingNavbar() {
                                           );
                                         }
                                         // 4th level (Previous EC's children)
-                                        const ggKey = g.to + g.label;
-                                        const ggOpen = openSubMenu === ggKey + "_gg";
+                                        const ggKey = subKey + "_" + g.to + g.label;
+                                        const ggOpen = openSubMenu === ggKey;
                                         return (
                                           <li
                                             key={ggKey}
                                             className="relative"
-                                            onMouseEnter={(e) => { e.stopPropagation(); setOpenSubMenu(ggKey + "_gg"); }}
-                                            onMouseLeave={(e) => { e.stopPropagation(); setOpenSubMenu(subKey); }}
+                                            onMouseEnter={(e) => { e.stopPropagation(); scheduleSubMenu(ggKey, 0); }}
+                                            onMouseLeave={(e) => { e.stopPropagation(); scheduleSubMenu(subKey, 120); }}
                                           >
                                             <button
                                               type="button"
@@ -325,6 +336,8 @@ export function FloatingNavbar() {
                                                   animate={{ opacity: 1, x: 0 }}
                                                   exit={{ opacity: 0, x: -6 }}
                                                   transition={{ duration: 0.14 }}
+                                                  onMouseEnter={(e) => { e.stopPropagation(); scheduleSubMenu(ggKey, 0); }}
+                                                  onMouseLeave={(e) => { e.stopPropagation(); scheduleSubMenu(subKey, 120); }}
                                                   className="absolute left-full top-0 ml-1.5 min-w-[220px] max-h-[70vh] overflow-y-auto rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]"
                                                 >
                                                   {ggChildren.map((item) => {
