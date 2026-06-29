@@ -227,7 +227,7 @@ function NavList({
 }) {
   let lastGroup = "";
   return (
-    <nav className="space-y-0.5">
+    <nav className="space-y-0.5 px-2">
       {NAV.map(({ key, label, Icon, group }) => {
         const isNewGroup = group !== lastGroup;
         const showLabel = isNewGroup && GROUP_LABELS[group];
@@ -237,28 +237,42 @@ function NavList({
         return (
           <div key={key}>
             {showLabel && (
-              <p className="mb-1 mt-4 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
-                {GROUP_LABELS[group]}
-              </p>
+              <div className="flex items-center gap-2 mb-1 mt-5 px-2">
+                <span className="text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground/40">
+                  {GROUP_LABELS[group]}
+                </span>
+                <div className="flex-1 h-px bg-border/50" />
+              </div>
             )}
             <button
               onClick={() => onPick(key)}
               className={
-                "flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-all " +
+                "group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 " +
                 (active
-                  ? "bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] text-white shadow-[0_8px_20px_-10px_rgba(29,78,216,0.8)]"
-                  : "text-foreground/65 hover:bg-[var(--color-background)] hover:text-foreground")
+                  ? "bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] text-white shadow-lg shadow-[color-mix(in_oklab,var(--color-accent-1)_35%,transparent)]"
+                  : "text-foreground/60 hover:bg-[color-mix(in_oklab,var(--color-accent-1)_6%,var(--color-background))] hover:text-foreground")
               }
             >
-              <Icon size={16} className="shrink-0" />
-              <span className="flex-1 text-left">{label}</span>
+              {/* Active indicator bar */}
+              {active && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-white/50" />
+              )}
+              <span className={
+                "grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-all " +
+                (active
+                  ? "bg-white/20"
+                  : "bg-[color-mix(in_oklab,var(--color-accent-1)_8%,transparent)] group-hover:bg-[color-mix(in_oklab,var(--color-accent-1)_14%,transparent)]")
+              }>
+                <Icon size={14} className="shrink-0" />
+              </span>
+              <span className="flex-1 text-left text-[13px]">{label}</span>
               {badge ? (
-                <span
-                  className={
-                    "rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums " +
-                    (active ? "bg-white/25 text-white" : "bg-[var(--color-accent-1)] text-white")
-                  }
-                >
+                <span className={
+                  "rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums " +
+                  (active
+                    ? "bg-white/25 text-white"
+                    : "bg-[var(--color-accent-1)] text-white")
+                }>
                   {badge}
                 </span>
               ) : null}
@@ -271,26 +285,26 @@ function NavList({
 }
 
 function UserFooter({ email, onSignOut }: { email: string; onSignOut: () => void }) {
+  const initials = email.slice(0, 2).toUpperCase();
   return (
-    <div
-      className="rounded-2xl border border-border p-3"
-      style={{ background: "var(--color-background)" }}
-    >
-      <div className="mb-2.5 flex items-center gap-3">
-        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-xs font-bold text-white shadow">
-          {email.slice(0, 2).toUpperCase()}
+    <div className="mx-2 rounded-2xl border border-border/60 bg-[var(--color-background)] p-3">
+      <div className="flex items-center gap-3">
+        <div className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-xs font-bold text-white shadow-md">
+          {initials}
+          <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--color-background)] bg-emerald-500" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold leading-tight">{email}</p>
-          <p className="text-[10px] text-muted-foreground">Administrator</p>
+          <p className="truncate text-xs font-semibold leading-tight text-foreground">{email}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">Administrator</p>
         </div>
+        <button
+          onClick={onSignOut}
+          title="Sign out"
+          className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-500"
+        >
+          <LogOut size={13} />
+        </button>
       </div>
-      <button
-        onClick={onSignOut}
-        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-[var(--color-surface)] hover:text-foreground"
-      >
-        <LogOut size={13} /> Sign out
-      </button>
     </div>
   );
 }
@@ -320,26 +334,30 @@ function DashboardShell() {
       {/* ── Desktop sidebar ───────────────────────────────────── */}
       <aside
         className={
-          "sticky top-0 hidden h-screen w-64 shrink-0 flex-col gap-4 border-r border-border bg-[var(--color-surface)] p-4 " +
+          "sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border/70 bg-[var(--color-surface)] " +
           (sidebarOpen ? "lg:flex" : "lg:hidden")
         }
+        style={{ background: "color-mix(in oklab, var(--color-surface) 97%, var(--color-accent-1))" }}
       >
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors hover:bg-[var(--color-background)]">
-          <img src={logoPusab} alt="PUSAB" className="h-8 w-8 object-contain" />
-          <div>
-            <span className="font-display text-base font-bold tracking-tight leading-tight block">PUSAB</span>
-            <span className="text-[10px] text-muted-foreground leading-none">Admin Panel</span>
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-border/50">
+          <div className="relative">
+            <img src={logoPusab} alt="PUSAB" className="h-9 w-9 object-contain drop-shadow-sm" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-[var(--color-surface)]" />
           </div>
-        </Link>
+          <div>
+            <span className="font-display text-[15px] font-extrabold tracking-tight leading-tight block">PUSAB</span>
+            <span className="text-[10px] text-muted-foreground/70 leading-none font-medium tracking-wide">Admin Dashboard</span>
+          </div>
+        </div>
 
-        <div className="h-px bg-border" />
-
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto py-3 scrollbar-thin">
           <NavList section={section} onPick={pick} badges={{ messages: unread }} />
         </div>
 
-        <UserFooter email={email} onSignOut={signOut} />
+        <div className="border-t border-border/50 py-3">
+          <UserFooter email={email} onSignOut={signOut} />
+        </div>
       </aside>
 
       {/* ── Mobile drawer ─────────────────────────────────────── */}
@@ -358,25 +376,30 @@ function DashboardShell() {
               exit={{ x: -300 }}
               transition={{ type: "spring", stiffness: 320, damping: 34 }}
               onClick={(e) => e.stopPropagation()}
-              className="flex h-full w-72 flex-col gap-4 border-r border-border bg-[var(--color-surface)] p-4"
+              className="flex h-full w-72 flex-col border-r border-border/70 bg-[var(--color-surface)]"
+              style={{ background: "color-mix(in oklab, var(--color-surface) 97%, var(--color-accent-1))" }}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <img src={logoPusab} alt="PUSAB" className="h-8 w-8 object-contain" />
-                  <span className="font-display text-base font-bold tracking-tight">PUSAB Admin</span>
+              <div className="flex items-center justify-between px-5 py-5 border-b border-border/50">
+                <div className="flex items-center gap-3">
+                  <img src={logoPusab} alt="PUSAB" className="h-9 w-9 object-contain" />
+                  <div>
+                    <span className="font-display text-[15px] font-extrabold tracking-tight leading-tight block">PUSAB</span>
+                    <span className="text-[10px] text-muted-foreground/70 leading-none">Admin Dashboard</span>
+                  </div>
                 </div>
                 <button
                   onClick={() => setDrawer(false)}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-[var(--color-background)] hover:text-foreground"
+                  className="grid h-8 w-8 place-items-center rounded-xl border border-border text-muted-foreground hover:text-foreground"
                 >
-                  <X size={16} />
+                  <X size={15} />
                 </button>
               </div>
-              <div className="h-px bg-border" />
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto py-3">
                 <NavList section={section} onPick={pick} badges={{ messages: unread }} />
               </div>
-              <UserFooter email={email} onSignOut={signOut} />
+              <div className="border-t border-border/50 py-3">
+                <UserFooter email={email} onSignOut={signOut} />
+              </div>
             </motion.aside>
           </motion.div>
         )}
