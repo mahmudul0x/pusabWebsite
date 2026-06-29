@@ -26,6 +26,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HonorBoardIndexRouteImport } from './routes/honor-board/index'
 import { Route as HonorBoardYearRouteImport } from './routes/honor-board/$year'
 import { Route as EcYearRouteImport } from './routes/ec.$year'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -114,6 +115,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HonorBoardIndexRoute = HonorBoardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => HonorBoardRoute,
+} as any)
 const HonorBoardYearRoute = HonorBoardYearRouteImport.update({
   id: '/$year',
   path: '/$year',
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/ec/$year': typeof EcYearRoute
   '/honor-board/$year': typeof HonorBoardYearRoute
+  '/honor-board/': typeof HonorBoardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -159,7 +166,6 @@ export interface FileRoutesByTo {
   '/convening-committee': typeof ConveningCommitteeRoute
   '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
-  '/honor-board': typeof HonorBoardRouteWithChildren
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/president-message': typeof PresidentMessageRoute
@@ -171,6 +177,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/ec/$year': typeof EcYearRoute
   '/honor-board/$year': typeof HonorBoardYearRoute
+  '/honor-board': typeof HonorBoardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -194,6 +201,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/ec/$year': typeof EcYearRoute
   '/honor-board/$year': typeof HonorBoardYearRoute
+  '/honor-board/': typeof HonorBoardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -217,6 +225,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ec/$year'
     | '/honor-board/$year'
+    | '/honor-board/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -226,7 +235,6 @@ export interface FileRouteTypes {
     | '/convening-committee'
     | '/dashboard'
     | '/felicitation'
-    | '/honor-board'
     | '/leadership'
     | '/moments'
     | '/president-message'
@@ -238,6 +246,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ec/$year'
     | '/honor-board/$year'
+    | '/honor-board'
   id:
     | '__root__'
     | '/'
@@ -260,6 +269,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/ec/$year'
     | '/honor-board/$year'
+    | '/honor-board/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -404,6 +414,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/honor-board/': {
+      id: '/honor-board/'
+      path: '/'
+      fullPath: '/honor-board/'
+      preLoaderRoute: typeof HonorBoardIndexRouteImport
+      parentRoute: typeof HonorBoardRoute
+    }
     '/honor-board/$year': {
       id: '/honor-board/$year'
       path: '/$year'
@@ -441,10 +458,12 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface HonorBoardRouteChildren {
   HonorBoardYearRoute: typeof HonorBoardYearRoute
+  HonorBoardIndexRoute: typeof HonorBoardIndexRoute
 }
 
 const HonorBoardRouteChildren: HonorBoardRouteChildren = {
   HonorBoardYearRoute: HonorBoardYearRoute,
+  HonorBoardIndexRoute: HonorBoardIndexRoute,
 }
 
 const HonorBoardRouteWithChildren = HonorBoardRoute._addFileChildren(
