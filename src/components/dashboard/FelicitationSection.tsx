@@ -143,23 +143,23 @@ export function FelicitationSection() {
           {filtered.map((it, idx) => (
             <div
               key={it.id}
-              className={"flex items-center gap-3 p-3 " + (idx > 0 ? "border-t border-border" : "")}
+              className={"group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)] " + (idx > 0 ? "border-t border-border" : "")}
             >
-              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))]">
+              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl" style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}>
                 {it.image_url ? (
                   <img src={it.image_url} alt={it.name} className="h-full w-full object-cover" />
                 ) : (
-                  <span className="grid h-full w-full place-items-center text-xs font-semibold text-white">
+                  <span className="grid h-full w-full place-items-center text-xs font-bold text-white">
                     {it.name.slice(0, 2).toUpperCase()}
                   </span>
                 )}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="truncate font-medium leading-tight">{it.name}</span>
+                  <span className="truncate text-sm font-semibold leading-tight">{it.name}</span>
                   <span
                     className={
-                      "shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide " +
+                      "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide " +
                       (it.category === "achiever"
                         ? "bg-[color-mix(in_oklab,var(--color-accent-1)_14%,transparent)] text-[var(--color-accent-1)]"
                         : "bg-[color-mix(in_oklab,var(--color-accent-3)_16%,transparent)] text-[var(--color-accent-3)]")
@@ -168,7 +168,7 @@ export function FelicitationSection() {
                     {CAT_LABEL[it.category]}
                   </span>
                 </div>
-                <div className="truncate text-xs text-muted-foreground">
+                <div className="mt-0.5 truncate text-xs text-muted-foreground">
                   {it.year}
                   {it.title && <span> · {it.title}</span>}
                 </div>

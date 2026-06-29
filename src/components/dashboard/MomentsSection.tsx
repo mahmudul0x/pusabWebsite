@@ -135,19 +135,19 @@ export function MomentsSection() {
           {filtered.map((it, idx) => (
             <div
               key={it.id}
-              className={"flex items-center gap-4 p-3 sm:px-4 " + (idx > 0 ? "border-t border-border" : "")}
+              className={"group flex items-center gap-4 px-4 py-3 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)] " + (idx > 0 ? "border-t border-border" : "")}
             >
-              <div className="h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-[var(--color-background)]">
+              <div className="h-12 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--color-background)] border border-border">
                 <img src={it.image_url} alt={it.title} className="h-full w-full object-cover" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate font-medium leading-tight">{it.title || "Untitled"}</div>
-                <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-                  <span className="rounded bg-[var(--color-background)] px-1.5 py-0.5 uppercase tracking-wide">
+                <p className="truncate text-sm font-semibold leading-tight">{it.title || "Untitled"}</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="rounded-full border border-border bg-[var(--color-background)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                     {it.category}
                   </span>
-                  <span>{it.year ?? "—"}</span>
-                  {it.caption && <span className="truncate">· {it.caption}</span>}
+                  {it.year && <span className="text-[11px] text-muted-foreground">{it.year}</span>}
+                  {it.caption && <span className="truncate text-[11px] text-muted-foreground">· {it.caption}</span>}
                 </div>
               </div>
               <CardActions onEdit={() => startEdit(it)} onDelete={() => remove(it)} />

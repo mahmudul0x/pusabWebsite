@@ -84,41 +84,39 @@ export function LeadershipMessagesSection() {
 
   return (
     <div className="max-w-3xl">
-      <div className="mb-6">
-        <h2 className="font-display text-2xl font-bold tracking-tight">Leadership messages</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          The President's & General Secretary's messages shown on the public site. Update these
-          each session — no code needed.
+      <div className="mb-8">
+        <h2 className="font-display text-2xl font-extrabold tracking-tight">Leadership messages</h2>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          The President's &amp; General Secretary's messages shown on the public site. Update each session — no code needed.
         </p>
       </div>
 
       {/* Role tabs */}
       <div className="mb-5 inline-flex rounded-xl border border-border bg-[var(--color-surface)] p-1">
-        {(
-          [
-            { key: "president" as Role, label: "President", Icon: Crown },
-            { key: "secretary" as Role, label: "General Secretary", Icon: Gavel },
-          ]
-        ).map(({ key, label, Icon }) => (
+        {([
+          { key: "president" as Role, label: "President", Icon: Crown },
+          { key: "secretary" as Role, label: "General Secretary", Icon: Gavel },
+        ]).map(({ key, label, Icon }) => (
           <button
             key={key}
             type="button"
             onClick={() => setRole(key)}
             className={
-              "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all " +
+              "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all " +
               (role === key
-                ? "bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] text-white shadow"
-                : "text-foreground/65 hover:text-foreground")
+                ? "text-white shadow"
+                : "text-foreground/60 hover:text-foreground")
             }
+            style={role === key ? { background: "linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))" } : undefined}
           >
-            <Icon size={15} /> {label}
+            <Icon size={14} /> {label}
           </button>
         ))}
       </div>
 
       <form
         onSubmit={save}
-        className="grid gap-5 rounded-2xl border border-border bg-[var(--color-surface)] p-6 sm:grid-cols-2"
+        className="grid gap-5 overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-6 sm:grid-cols-2"
       >
         <Field label="Photo" full>
           <ImageUpload
@@ -172,12 +170,14 @@ export function LeadershipMessagesSection() {
           />
         </Field>
 
-        <div className="sm:col-span-2">
+        <div className="sm:col-span-2 flex justify-end">
           <button
+            type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg disabled:opacity-50 active:scale-[0.98]"
+            style={{ background: "linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))" }}
           >
-            <Save size={16} /> {saving ? "Saving…" : "Save message"}
+            <Save size={14} /> {saving ? "Saving…" : "Save message"}
           </button>
         </div>
       </form>

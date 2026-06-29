@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { ShieldCheck, Trash2, UserPlus } from "lucide-react";
+import { ShieldCheck, ShieldOff, Trash2, UserPlus, Users } from "lucide-react";
 import { usersApi, register, useAuth, type AdminUser } from "@/lib/api";
 import { useResource, errMessage } from "./useResource";
-import { Field, Modal, SectionHeader, EmptyState, Toolbar, useConfirm, inputCls } from "./primitives";
+import { Field, Modal, SectionHeader, EmptyState, Toolbar, ListSkeleton, useConfirm, inputCls } from "./primitives";
 
 interface Form {
   email: string;
@@ -48,14 +48,10 @@ export function UsersSection() {
 
   async function createUser() {
     if (!form.email || form.password.length < 8)
-      return toast.error("Email and an 8+ char password are required");
+      return toast.error("Email and an 8+ character password are required");
     setSaving(true);
     try {
-      const created = await register({
-        email: form.email,
-        password: form.password,
-        full_name: form.full_name,
-      });
+      const created = await register({ email: form.email, password: form.password, full_name: form.full_name });
       if (form.is_admin) await usersApi.update(created.id, { is_admin: true } as Partial<AdminUser>);
       toast.success("User created");
       setOpen(false);
@@ -79,63 +75,81 @@ export function UsersSection() {
         title="Users"
         subtitle="Who can sign in to this dashboard, and who has admin access."
         count={items.length}
-        onNew={() => {
-          setForm(empty);
-          setOpen(true);
-        }}
+        onNew={() => { setForm(empty); setOpen(true); }}
         newLabel="Add user"
       />
 
-      <Toolbar query={query} onQuery={setQuery} placeholder="Search users…" />
+      <Toolbar query={query} onQuery={setQuery} placeholder="Search by name or email…" />
 
       {loading ? (
-        <div className="space-y-3">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-16 animate-pulse rounded-2xl border border-border bg-[var(--color-surface)]" />
-          ))}
-        </div>
+        <ListSkeleton rows={3} />
       ) : filtered.length === 0 ? (
-        <EmptyState label="No users found." />
+        <EmptyState
+          icon={<Users size={22} className="text-muted-foreground/40" />}
+          label="No users found."
+        />
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-2.5">
           {filtered.map((u) => {
             const isSelf = me?.email === u.email;
             return (
               <li
                 key={u.id}
-                className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-[var(--color-surface)] p-4"
+                className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-[var(--color-surface)] p-4 transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_20%,transparent)]"
               >
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-xs font-bold text-white">
-                  {u.email.slice(0, 2).toUpperCase()}
+                {/* Avatar */}
+                <div
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-sm font-bold text-white"
+                  style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}
+                >
+                  {(u.full_name || u.email).slice(0, 2).toUpperCase()}
                 </div>
+
+                {/* Info */}
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate font-medium">{u.full_name || u.email}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="truncate font-semibold text-sm">{u.full_name || u.email}</span>
                     {u.is_admin && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[color-mix(in_oklab,var(--color-accent-1)_14%,transparent)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--color-accent-1)]">
-                        <ShieldCheck size={10} /> Admin
+                      <span
+                        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
+                        style={{ background: "linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))" }}
+                      >
+                        <ShieldCheck size={9} /> Admin
                       </span>
                     )}
-                    {isSelf && <span className="text-[10px] text-muted-foreground">(you)</span>}
+                    {isSelf && (
+                      <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">
+                        you
+                      </span>
+                    )}
                   </div>
-                  <p className="truncate text-xs text-muted-foreground">{u.email}</p>
+                  <p className="truncate text-xs text-muted-foreground mt-0.5">{u.email}</p>
                 </div>
-                <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    checked={u.is_admin}
-                    disabled={isSelf}
-                    onChange={() => toggleAdmin(u)}
-                  />
-                  Admin
-                </label>
+
+                {/* Toggle admin */}
+                <button
+                  onClick={() => toggleAdmin(u)}
+                  disabled={isSelf}
+                  title={u.is_admin ? "Remove admin" : "Make admin"}
+                  className={
+                    "inline-flex h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-semibold transition-all disabled:opacity-40 " +
+                    (u.is_admin
+                      ? "border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] bg-[color-mix(in_oklab,var(--color-accent-1)_8%,transparent)] text-[var(--color-accent-1)] hover:bg-[color-mix(in_oklab,var(--color-accent-1)_14%,transparent)]"
+                      : "border-border text-muted-foreground hover:border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] hover:text-[var(--color-accent-1)]")
+                  }
+                >
+                  {u.is_admin ? <ShieldCheck size={12} /> : <ShieldOff size={12} />}
+                  {u.is_admin ? "Admin" : "User"}
+                </button>
+
+                {/* Delete */}
                 <button
                   onClick={() => remove(u)}
                   disabled={isSelf}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-red-500 hover:text-red-500 disabled:opacity-40"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border text-muted-foreground transition-all hover:border-red-400 hover:bg-red-500/10 hover:text-red-500 disabled:opacity-40"
                   aria-label="Delete user"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={13} />
                 </button>
               </li>
             );
@@ -152,37 +166,32 @@ export function UsersSection() {
         submitLabel="Create user"
       >
         <Field label="Email" full>
-          <input
-            type="email"
-            value={form.email}
-            onChange={(e) => set("email", e.target.value)}
-            className={inputCls}
-          />
+          <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className={inputCls} />
         </Field>
         <Field label="Full name" full>
-          <input
-            value={form.full_name}
-            onChange={(e) => set("full_name", e.target.value)}
-            className={inputCls}
-          />
+          <input value={form.full_name} onChange={(e) => set("full_name", e.target.value)} className={inputCls} />
         </Field>
         <Field label="Temporary password" full hint="At least 8 characters. Share it with the user.">
-          <input
-            type="text"
-            value={form.password}
-            onChange={(e) => set("password", e.target.value)}
-            className={inputCls}
-          />
+          <input type="text" value={form.password} onChange={(e) => set("password", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Admin access">
-          <label className="mt-2 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={form.is_admin}
-              onChange={(e) => set("is_admin", e.target.checked)}
-            />
-            <span className="inline-flex items-center gap-1">
-              <UserPlus size={14} /> Make this user an admin
+        <Field label="Admin access" full>
+          <label className="mt-3 flex items-center gap-2.5 text-sm cursor-pointer select-none">
+            <div
+              className={
+                "relative h-5 w-9 rounded-full transition-colors cursor-pointer " +
+                (form.is_admin ? "bg-[var(--color-accent-1)]" : "bg-border")
+              }
+              onClick={() => set("is_admin", !form.is_admin)}
+            >
+              <div
+                className={
+                  "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform " +
+                  (form.is_admin ? "translate-x-4" : "translate-x-0.5")
+                }
+              />
+            </div>
+            <span className="inline-flex items-center gap-1.5 font-medium">
+              <UserPlus size={13} /> Grant admin access
             </span>
           </label>
         </Field>
