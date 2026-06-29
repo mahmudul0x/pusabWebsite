@@ -32,10 +32,16 @@ function crud<T, Body = Partial<T>>(resource: string) {
   const base = `/api/${resource}/`;
   return {
     list: (params?: Query) => apiFetch<Paginated<T>>(`${base}${qs(params)}`, {}, { auth: false }),
-    /** Convenience: fetch all results (handles the paginated wrapper). */
+    /** Convenience: fetch all results, following pagination until exhausted. */
     listAll: async (params?: Query): Promise<T[]> => {
-      const page = await apiFetch<Paginated<T>>(`${base}${qs(params)}`, {}, { auth: false });
-      return page.results;
+      const results: T[] = [];
+      let url: string | null = `${base}${qs({ ...params, page_size: 200 })}`;
+      while (url) {
+        const page = await apiFetch<Paginated<T>>(url, {}, { auth: false });
+        results.push(...page.results);
+        url = page.next;
+      }
+      return results;
     },
     get: (id: number) => apiFetch<T>(`${base}${id}/`, {}, { auth: false }),
     create: (body: Body) => apiFetch<T>(base, { method: "POST", body: JSON.stringify(body) }),
