@@ -167,6 +167,8 @@ function Avatar({ m, size = "sm" }: { m: EcMember; size?: "sm" | "lg" }) {
   );
 }
 
+const SESSIONS_PER_PAGE = 3;
+
 // ── Executive Committee view ─────────────────────────────────────────────────
 function ExecutiveCommitteeView({
   items,
@@ -187,6 +189,8 @@ function ExecutiveCommitteeView({
   onEdit: (m: EcMember) => void;
   onDelete: (m: EcMember) => void;
 }) {
+  const [page, setPage] = useState(1);
+
   const allYears = [...new Set(items.map((m) => m.year))].sort((a, b) => b - a);
   const filtered = items.filter((m) => {
     const q = query.trim().toLowerCase();
@@ -205,7 +209,17 @@ function ExecutiveCommitteeView({
     list.push(m);
     byYear.set(m.year, list);
   }
-  const years = [...byYear.keys()].sort((a, b) => b - a);
+  const allFilteredYears = [...byYear.keys()].sort((a, b) => b - a);
+
+  // Paginate sessions when showing all (single session = show all members)
+  const paginateYears = yearFilter === "all";
+  const totalPages = paginateYears ? Math.ceil(allFilteredYears.length / SESSIONS_PER_PAGE) : 1;
+  const years = paginateYears
+    ? allFilteredYears.slice((page - 1) * SESSIONS_PER_PAGE, page * SESSIONS_PER_PAGE)
+    : allFilteredYears;
+
+  // Reset to page 1 when filter/search changes
+  useEffect(() => { setPage(1); }, [yearFilter, query]);
 
   if (loading) return <ListSkeleton />;
   return (
@@ -223,41 +237,81 @@ function ExecutiveCommitteeView({
       {filtered.length === 0 ? (
         <EmptyState label={items.length === 0 ? "No members yet." : "No matches."} />
       ) : (
-        <div className="space-y-8">
-          {years.map((year) => (
-            <div key={year}>
-              <div className="mb-3 flex items-center gap-3">
-                <h3 className="font-display text-lg font-bold">Session {year}</h3>
-                {byYear.get(year)!.some((m) => m.is_current) && (
-                  <span className="rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
-                    Current
+        <>
+          <div className="space-y-8">
+            {years.map((year) => (
+              <div key={year}>
+                <div className="mb-3 flex items-center gap-3">
+                  <h3 className="font-display text-lg font-bold">Session {year}</h3>
+                  {byYear.get(year)!.some((m) => m.is_current) && (
+                    <span className="rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                      Current
+                    </span>
+                  )}
+                  <span className="text-xs text-muted-foreground">
+                    {byYear.get(year)!.length} members
                   </span>
-                )}
-                <span className="text-xs text-muted-foreground">
-                  {byYear.get(year)!.length} members
-                </span>
-              </div>
-              <div className="overflow-hidden rounded-xl border border-border bg-(--color-surface)">
-                {byYear.get(year)!.map((it, idx) => (
-                  <div
-                    key={it.id}
-                    className={"flex items-center gap-3 px-4 py-3.5 " + (idx > 0 ? "border-t border-border" : "")}
-                  >
-                    <Avatar m={it} />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate font-medium leading-tight">{it.name}</div>
-                      <div className="truncate text-xs text-muted-foreground">
-                        <span className="text-(--color-accent-1)">{it.role}</span>
-                        {it.university && <span> · {it.university}</span>}
+                </div>
+                <div className="overflow-hidden rounded-xl border border-border bg-(--color-surface)">
+                  {byYear.get(year)!.map((it, idx) => (
+                    <div
+                      key={it.id}
+                      className={"flex items-center gap-3 px-4 py-3.5 " + (idx > 0 ? "border-t border-border" : "")}
+                    >
+                      <Avatar m={it} />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate font-medium leading-tight">{it.name}</div>
+                        <div className="truncate text-xs text-muted-foreground">
+                          <span className="text-(--color-accent-1)">{it.role}</span>
+                          {it.university && <span> · {it.university}</span>}
+                        </div>
                       </div>
+                      <CardActions onEdit={() => onEdit(it)} onDelete={() => onDelete(it)} />
                     </div>
-                    <CardActions onEdit={() => onEdit(it)} onDelete={() => onDelete(it)} />
-                  </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {paginateYears && totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-between gap-2 border-t border-border pt-4">
+              <span className="text-xs text-muted-foreground">
+                Sessions {(page - 1) * SESSIONS_PER_PAGE + 1}–{Math.min(page * SESSIONS_PER_PAGE, allFilteredYears.length)} of {allFilteredYears.length}
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium disabled:opacity-40 hover:bg-(--color-surface-2) transition-colors"
+                >
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={
+                      "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors " +
+                      (p === page
+                        ? "bg-(--color-accent-1) text-white"
+                        : "border border-border hover:bg-(--color-surface-2)")
+                    }
+                  >
+                    {p}
+                  </button>
                 ))}
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium disabled:opacity-40 hover:bg-(--color-surface-2) transition-colors"
+                >
+                  Next
+                </button>
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </>
   );
