@@ -28,23 +28,33 @@ function qs(params?: Query): string {
   return s ? `?${s}` : "";
 }
 
-function crud<T, Body = Partial<T>>(resource: string) {
+function crud<T, Body = Partial<T>>(resource: string, requiresAuth = false) {
   const base = `/api/${resource}/`;
   return {
-    list: (params?: Query) => apiFetch<Paginated<T>>(`${base}${qs(params)}`, {}, { auth: false }),
+    list: (params?: Query) =>
+      apiFetch<Paginated<T>>(`${base}${qs(params)}`, {}, { auth: requiresAuth }),
     /** Convenience: fetch all results, following pagination until exhausted. */
     listAll: async (params?: Query): Promise<T[]> => {
       const results: T[] = [];
-      // Use a full URL for the first request; subsequent pages use the absolute
-      // `next` URL returned by the API directly (bypassing apiFetch's prefix).
-      let nextUrl: string | null =
-        `${API_URL}${base}${qs({ ...params, page_size: 200 })}`;
-      while (nextUrl) {
-        const res = await fetch(nextUrl, { headers: { Accept: "application/json" } });
+      // First page via apiFetch so the auth token is attached when needed.
+      let page = await apiFetch<Paginated<T>>(
+        `${base}${qs({ ...params, page_size: 200 })}`,
+        {},
+        { auth: requiresAuth },
+      );
+      results.push(...page.results);
+      // Subsequent pages: the `next` field is an absolute URL, so fetch
+      // directly but keep the auth header if required.
+      while (page.next) {
+        const headers: Record<string, string> = { Accept: "application/json" };
+        if (requiresAuth) {
+          const { tokenStore } = await import("./client");
+          if (tokenStore.access) headers["Authorization"] = `Bearer ${tokenStore.access}`;
+        }
+        const res = await fetch(page.next, { headers });
         if (!res.ok) throw new Error(`API error ${res.status}`);
-        const page: Paginated<T> = await res.json();
+        page = await res.json();
         results.push(...page.results);
-        nextUrl = page.next;
       }
       return results;
     },
@@ -60,8 +70,8 @@ export const galleryApi = crud<GalleryItem>("gallery");
 export const publicityApi = crud<PublicityPost>("publicity");
 export const committeeApi = crud<EcMember>("committee");
 export const programsApi = crud<Program>("programs");
-export const contactApi = crud<ContactMessage>("contact");
-export const usersApi = crud<AdminUser>("users");
+export const contactApi = crud<ContactMessage>("contact", true); // admin-only read
+export const usersApi = crud<AdminUser>("users", true);
 export const felicitationApi = crud<FelicitationEntry>("felicitation");
 
 // Leader messages (President / General Secretary) — looked up by role string.
