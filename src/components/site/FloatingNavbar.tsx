@@ -225,7 +225,7 @@ export function FloatingNavbar() {
     };
   }, []);
 
-  // Inject past sessions as children of "Previous EC" inside Executive Committee.
+  // Inject past sessions into "Previous EC" and "Ex President & GS" submenus.
   const navLinks = useMemo<readonly NavItem[]>(() => {
     const previousEcChildren: NavChild[] = [
       { to: "/convening-committee", label: "Convening Committee" },
@@ -234,18 +234,38 @@ export function FloatingNavbar() {
         label: `${ecOrdinal(y)} EC · ${y}-${String((y + 1) % 100).padStart(2, "0")}`,
       })),
     ];
+
+    const exPresidentChildren: NavChild[] = pastYears.map((y) => ({
+      to: `/honor-board#year-${y}`,
+      label: `${ecOrdinal(y)} EC · ${y}-${String((y + 1) % 100).padStart(2, "0")}`,
+    }));
+
     return NAV_LINKS.map((link) => {
       if (link.to !== "/leadership" || !("children" in link)) return link;
       return {
         ...link,
         children: link.children.map((c) => {
-          if (c.label !== "Executive Committee" || !("children" in c)) return c;
-          return {
-            ...c,
-            children: c.children.map((gc) =>
-              gc.label === "Previous EC" ? { ...gc, children: previousEcChildren } : gc,
-            ),
-          };
+          // Executive Committee → inject Previous EC children
+          if (c.label === "Executive Committee" && "children" in c) {
+            return {
+              ...c,
+              children: c.children.map((gc) =>
+                gc.label === "Previous EC" ? { ...gc, children: previousEcChildren } : gc,
+              ),
+            };
+          }
+          // Honor Board → inject Ex President & GS children
+          if (c.label === "Honor Board" && "children" in c) {
+            return {
+              ...c,
+              children: c.children.map((gc) =>
+                gc.label === "Ex President & GS"
+                  ? { ...gc, children: exPresidentChildren }
+                  : gc,
+              ),
+            };
+          }
+          return c;
         }),
       };
     });

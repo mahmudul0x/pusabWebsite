@@ -160,7 +160,8 @@ function YearSection({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, delay: Math.min(idx, 5) * 0.05 }}
-      className="overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)]"
+      id={`year-${year}`}
+      className="overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] scroll-mt-28"
     >
       {/* Year header — clickable to collapse */}
       <button

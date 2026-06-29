@@ -41,7 +41,20 @@ export const NAV_LINKS = [
           },
         ],
       },
-      { to: "/honor-board", label: "Honor Board" },
+      {
+        to: "/honor-board",
+        label: "Honor Board",
+        children: [
+          { to: "/convening-committee", label: "Ex Convenor & Member Secretary" },
+          {
+            to: "/honor-board",
+            label: "Ex President & GS",
+            children: [
+              // Per-session links injected at runtime in FloatingNavbar.
+            ],
+          },
+        ],
+      },
       { to: "/president-message", label: "President's Message" },
       { to: "/secretary-message", label: "Secretary's Message" },
     ],
