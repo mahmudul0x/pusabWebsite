@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
-import { committeeApi, optimizeImage } from "@/lib/api";
+import { optimizeImage } from "@/lib/api";
+import { useMembersByYear } from "@/lib/useCommittee";
 import { Crown, Gavel, Award, GraduationCap } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 import { ecOrdinal, sessionSpan } from "@/routes/ec.$year";
@@ -126,18 +126,10 @@ function HonorBoardYearPage() {
   const label = valid ? `${ecOrdinal(yearNum)} Executive Committee` : "Executive Committee";
   const span = valid ? sessionSpan(yearNum) : "";
 
-  const [members, setMembers] = useState<Member[] | null>(null);
+  const { data, isLoading } = useMembersByYear(yearNum);
 
-  useEffect(() => {
-    if (!valid) return;
-    committeeApi
-      .listAll({ year: yearNum })
-      .then((rows) => setMembers(rows.map((m) => ({ ...m, id: String(m.id) }))))
-      .catch(() => setMembers([]));
-  }, [yearNum, valid]);
-
-  const loading = members === null;
-  const list = members ?? [];
+  const loading = isLoading || !valid;
+  const list = (data ?? []).map((m) => ({ ...m, id: String(m.id) }));
   const president = list.find(isPresident) ?? null;
   const gs = list.find(isGS) ?? null;
 

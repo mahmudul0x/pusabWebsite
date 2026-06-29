@@ -179,14 +179,24 @@ function RootComponent() {
   const bare = ["/dashboard", "/admin", "/auth"].some((p) => pathname.startsWith(p));
   const [flipbookOpen, setFlipbookOpen] = useState(false);
 
-  // Wake up the Render backend on first load so it's ready by the time the
-  // user navigates to a page that needs data (Render free tier sleeps after inactivity).
+  // Prefetch all committee data on first load so every page gets it from cache.
+  // Also wakes up the Render backend immediately (free tier cold start).
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL ?? ""}/api/committee/?page_size=1`, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-    }).catch(() => {});
-  }, []);
+    queryClient.prefetchQuery({
+      queryKey: ["committee", "all"],
+      queryFn: () =>
+        import("@/lib/api").then(({ committeeApi }) => committeeApi.listAll()),
+      staleTime: 5 * 60 * 1000,
+    });
+    queryClient.prefetchQuery({
+      queryKey: ["committee", "current"],
+      queryFn: () =>
+        import("@/lib/api").then(({ committeeApi }) =>
+          committeeApi.listAll({ current: true }),
+        ),
+      staleTime: 5 * 60 * 1000,
+    });
+  }, [queryClient]);
 
   return (
     <FlipbookContext value={{ isOpen: flipbookOpen, setIsOpen: setFlipbookOpen }}>

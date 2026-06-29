@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
-import { committeeApi, optimizeImage } from "@/lib/api";
+import { optimizeImage } from "@/lib/api";
+import { useAllMembers } from "@/lib/useCommittee";
 import { Crown, Gavel, Award, ChevronDown, GraduationCap } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
@@ -247,19 +248,11 @@ function YearSection({
 }
 
 function HonorBoardPage() {
-  const [members, setMembers] = useState<Member[] | null>(null);
-
-  useEffect(() => {
-    committeeApi
-      .listAll()
-      .then((rows) =>
-        setMembers(rows.map((m) => ({ ...m, id: String(m.id) })))
-      )
-      .catch(() => setMembers([]));
-  }, []);
+  const { data, isLoading } = useAllMembers();
+  const members = data ?? [];
 
   // Only past (non-current) members
-  const past = (members ?? []).filter((m) => !m.is_current);
+  const past = members.map((m) => ({ ...m, id: String(m.id) })).filter((m) => !m.is_current);
 
   // Group by year, newest first
   const byYear: Record<number, Member[]> = {};
@@ -268,7 +261,7 @@ function HonorBoardPage() {
     .map(Number)
     .sort((a, b) => b - a);
 
-  const loading = members === null;
+  const loading = isLoading;
 
   return (
     <>

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { committeeApi, optimizeImage } from "@/lib/api";
+import { optimizeImage } from "@/lib/api";
+import { useCurrentMembers, useMembersByYear } from "@/lib/useCommittee";
 import { Crown, Gavel, GraduationCap, Users, Building2 } from "lucide-react";
 
 type Member = {
@@ -144,18 +144,12 @@ export function CommitteeView({
   eyebrow?: string;
   blurb?: string;
 }) {
-  const [members, setMembers] = useState<Member[] | null>(null);
+  const yearQuery = useMembersByYear(year!);
+  const currentQuery = useCurrentMembers();
+  const { data, isLoading } = year != null ? yearQuery : currentQuery;
 
-  useEffect(() => {
-    const params = year ? { year } : { current: true };
-    committeeApi
-      .listAll(params)
-      .then((rows) => setMembers(rows.map((m) => ({ ...m, id: String(m.id) }))))
-      .catch(() => setMembers([]));
-  }, [year]);
-
-  const loading = members === null;
-  const list = members ?? [];
+  const loading = isLoading;
+  const list = (data ?? []).map((m) => ({ ...m, id: String(m.id) }));
   const sessionYear = year ?? (list.length > 0 ? Math.max(...list.map((m) => m.year)) : null);
   const sessionMembers = sessionYear ? list.filter((m) => m.year === sessionYear) : list;
   const president = sessionMembers.find(isPresident) ?? null;
