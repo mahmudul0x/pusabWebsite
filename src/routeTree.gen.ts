@@ -17,6 +17,7 @@ import { Route as ProgramsRouteImport } from './routes/programs'
 import { Route as PresidentMessageRouteImport } from './routes/president-message'
 import { Route as MomentsRouteImport } from './routes/moments'
 import { Route as LeadershipRouteImport } from './routes/leadership'
+import { Route as JoinRouteImport } from './routes/join'
 import { Route as HonorBoardRouteImport } from './routes/honor-board'
 import { Route as FelicitationRouteImport } from './routes/felicitation'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -69,6 +70,11 @@ const MomentsRoute = MomentsRouteImport.update({
 const LeadershipRoute = LeadershipRouteImport.update({
   id: '/leadership',
   path: '/leadership',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinRoute = JoinRouteImport.update({
+  id: '/join',
+  path: '/join',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HonorBoardRoute = HonorBoardRouteImport.update({
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
   '/honor-board': typeof HonorBoardRouteWithChildren
+  '/join': typeof JoinRoute
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/president-message': typeof PresidentMessageRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/convening-committee': typeof ConveningCommitteeRoute
   '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
+  '/join': typeof JoinRoute
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/president-message': typeof PresidentMessageRoute
@@ -190,6 +198,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
   '/honor-board': typeof HonorBoardRouteWithChildren
+  '/join': typeof JoinRoute
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/president-message': typeof PresidentMessageRoute
@@ -214,6 +223,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/felicitation'
     | '/honor-board'
+    | '/join'
     | '/leadership'
     | '/moments'
     | '/president-message'
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
     | '/convening-committee'
     | '/dashboard'
     | '/felicitation'
+    | '/join'
     | '/leadership'
     | '/moments'
     | '/president-message'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/felicitation'
     | '/honor-board'
+    | '/join'
     | '/leadership'
     | '/moments'
     | '/president-message'
@@ -282,6 +294,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   FelicitationRoute: typeof FelicitationRoute
   HonorBoardRoute: typeof HonorBoardRouteWithChildren
+  JoinRoute: typeof JoinRoute
   LeadershipRoute: typeof LeadershipRoute
   MomentsRoute: typeof MomentsRoute
   PresidentMessageRoute: typeof PresidentMessageRoute
@@ -349,6 +362,13 @@ declare module '@tanstack/react-router' {
       path: '/leadership'
       fullPath: '/leadership'
       preLoaderRoute: typeof LeadershipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join': {
+      id: '/join'
+      path: '/join'
+      fullPath: '/join'
+      preLoaderRoute: typeof JoinRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/honor-board': {
@@ -480,6 +500,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   FelicitationRoute: FelicitationRoute,
   HonorBoardRoute: HonorBoardRouteWithChildren,
+  JoinRoute: JoinRoute,
   LeadershipRoute: LeadershipRoute,
   MomentsRoute: MomentsRoute,
   PresidentMessageRoute: PresidentMessageRoute,

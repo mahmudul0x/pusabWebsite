@@ -498,7 +498,7 @@ export function FloatingNavbar() {
             >
               <Heart size={14} className="text-[var(--color-accent-1)]" /> Support
             </Link>
-            <Link to="/contact" className="formal-cta group">
+            <Link to="/join" className="formal-cta group">
               <span>Join PUSAB</span>
             </Link>
           </div>
@@ -764,7 +764,7 @@ export function FloatingNavbar() {
                     <Heart size={15} className="text-[var(--color-accent-1)]" /> Support
                   </Link>
                   <Link
-                    to="/contact"
+                    to="/join"
                     onClick={() => setMobileOpen(false)}
                     className="formal-cta flex-1 justify-center"
                   >
