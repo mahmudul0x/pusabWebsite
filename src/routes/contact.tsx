@@ -267,6 +267,7 @@ function ContactBody() {
       await contactApi.create({
         name, phone, subject, university, session,
         union_name: unionName, village, school, college, message,
+        email: "",
       });
       toast.success("আবেদন পাঠানো হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।");
       resetForm();
