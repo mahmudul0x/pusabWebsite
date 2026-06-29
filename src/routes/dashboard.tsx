@@ -48,6 +48,7 @@ import { PublicitySection } from "@/components/dashboard/PublicitySection";
 import { CommitteeSection } from "@/components/dashboard/CommitteeSection";
 import { ProgramsSection } from "@/components/dashboard/ProgramsSection";
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
+import { JoinApplicationsSection } from "@/components/dashboard/JoinApplicationsSection";
 import { LeadershipMessagesSection } from "@/components/dashboard/LeadershipMessagesSection";
 import { UsersSection } from "@/components/dashboard/UsersSection";
 import { SettingsSection } from "@/components/dashboard/SettingsSection";
@@ -202,6 +203,7 @@ const NAV = [
   { key: "programs", label: "Programs", Icon: CalendarRange, group: "content" },
   { key: "felicitation", label: "Felicitation", Icon: Award, group: "content" },
   { key: "messages", label: "Messages", Icon: MessageSquare, group: "system" },
+  { key: "join-applications", label: "Join Applications", Icon: Users, group: "system" },
   { key: "users", label: "Users", Icon: UserCog, group: "system" },
   { key: "settings", label: "Settings", Icon: SettingsIcon, group: "system" },
 ] as const;
@@ -422,6 +424,7 @@ function DashboardShell() {
           {section === "programs" && <ProgramsSection />}
           {section === "felicitation" && <FelicitationSection />}
           {section === "messages" && <MessagesSection />}
+          {section === "join-applications" && <JoinApplicationsSection />}
           {section === "users" && <UsersSection />}
           {section === "settings" && <SettingsSection />}
         </main>
