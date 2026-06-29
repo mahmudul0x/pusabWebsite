@@ -489,8 +489,6 @@ function DashboardShell() {
               View site <ExternalLink size={11} />
             </Link>
 
-            {/* User menu */}
-            <TopbarUser email={email} onSignOut={signOut} />
           </div>
         </header>
 
