@@ -229,16 +229,9 @@ function HeroSlider() {
 
 function ContactBody() {
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
-  const [university, setUniversity] = useState("");
-  const [session, setSession] = useState("");
-  const [unionName, setUnionName] = useState("");
-  const [village, setVillage] = useState("");
-  const [school, setSchool] = useState("");
-  const [college, setCollege] = useState("");
   const [message, setMessage] = useState("");
-  const [honeypot, setHoneypot] = useState(""); // bot trap — must stay empty
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -250,32 +243,16 @@ function ContactBody() {
     setTimeout(() => setCopied((c) => (c === key ? null : c)), 1600);
   }
 
-  function resetForm() {
-    setName(""); setPhone(""); setSubject(""); setUniversity("");
-    setSession(""); setUnionName(""); setVillage(""); setSchool("");
-    setCollege(""); setMessage("");
-  }
-
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
-    if (honeypot) return; // bot filled the hidden field — silently drop
-    if (!name.trim() || !phone.trim()) {
-      toast.error("Name and phone number are required.");
-      return;
-    }
     setBusy(true);
     try {
-      await contactApi.create({
-        name, phone, subject, university, session,
-        union_name: unionName, village, school, college, message,
-        email: "",
-        website: honeypot, // backend also checks this
-      } as never);
-      toast.success("Application submitted! We will be in touch soon.");
-      resetForm();
+      await contactApi.create({ name, email, subject, message, phone: "" });
+      toast.success("Message sent — we'll get back to you soon.");
+      setName(""); setEmail(""); setSubject(""); setMessage("");
     } catch {
-      toast.error("Could not submit. Please try again.");
+      toast.error("Couldn't send your message. Please check the fields and try again.");
     } finally {
       setBusy(false);
     }
@@ -287,15 +264,12 @@ function ContactBody() {
       <section className="pb-16 md:pb-24">
         <div className="container-page">
           <div className="mb-8">
-            <p className="text-label mb-2 text-[var(--color-accent-1)]">Join PUSAB</p>
-            <h2 className="text-3xl md:text-5xl font-display tracking-tight">Membership Inquiry</h2>
-            <p className="mt-3 text-muted-foreground max-w-xl">
-              Recently got admitted to a public university? Fill in the form below and we will add you to the PUSAB family.
-            </p>
+            <p className="text-label mb-2 text-[var(--color-accent-1)]">Write to us</p>
+            <h2 className="text-3xl md:text-5xl font-display tracking-tight">Share your inquiry</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
-            {/* Form — large tile */}
+            {/* Form */}
             <motion.form
               onSubmit={submit}
               initial={{ opacity: 0, y: 16 }}
@@ -304,47 +278,15 @@ function ContactBody() {
               transition={{ duration: 0.5, ease: "easeOut" }}
               className="md:col-span-8 rounded-3xl border border-border bg-[var(--color-surface)] p-6 md:p-10 space-y-4 shadow-sm"
             >
-              {/* Personal info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Name *" value={name} onChange={setName} />
-                <Field label="Phone *" type="tel" value={phone} onChange={setPhone} />
+                <Field label="Name" value={name} onChange={setName} />
+                <Field label="Email" type="email" value={email} onChange={setEmail} />
               </div>
-
-              {/* University info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="University" value={university} onChange={setUniversity} />
-                <Field label="Session (e.g. 2023-24)" value={session} onChange={setSession} />
-              </div>
-
-              <Field label="Subject / Department" value={subject} onChange={setSubject} />
-
-              {/* Home info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Union" value={unionName} onChange={setUnionName} />
-                <Field label="Village" value={village} onChange={setVillage} />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="School" value={school} onChange={setSchool} />
-                <Field label="College" value={college} onChange={setCollege} />
-              </div>
-
-              {/* Honeypot — invisible to humans, bots fill it automatically */}
-              <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }}>
-                <input
-                  type="text"
-                  name="website"
-                  value={honeypot}
-                  onChange={(e) => setHoneypot(e.target.value)}
-                  autoComplete="off"
-                  tabIndex={-1}
-                />
-              </div>
-
-              <Field label="Message (optional)" value={message} onChange={setMessage} textarea />
-
+              <Field label="Subject" value={subject} onChange={setSubject} />
+              <Field label="Message" value={message} onChange={setMessage} textarea />
               <div className="pt-4 flex items-center justify-between gap-4 flex-wrap">
-                <p className="text-xs text-muted-foreground">* Required fields.</p>
-                <GradientButton type="submit">{busy ? "Sending…" : "Submit Application"}</GradientButton>
+                <p className="text-xs text-muted-foreground">We aim to respond within 48 hours.</p>
+                <GradientButton type="submit">{busy ? "Sending…" : "Send Message"}</GradientButton>
               </div>
             </motion.form>
 
@@ -407,10 +349,7 @@ function ContactBody() {
                   {c.href && c.key !== "hours" && (
                     <button
                       type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        copyValue(c.key, c.value);
-                      }}
+                      onClick={(ev) => { ev.preventDefault(); copyValue(c.key, c.value); }}
                       className="shrink-0 text-muted-foreground hover:text-[var(--color-accent-1)] transition-colors"
                       aria-label={`Copy ${c.label}`}
                     >
@@ -452,7 +391,6 @@ function ContactBody() {
             className="rounded-3xl border border-border overflow-hidden bg-[var(--color-surface)] shadow-sm"
           >
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px]">
-              {/* Map */}
               <div className="relative">
                 <iframe
                   title="PUSAB — Bishwambarpur, Sunamganj"
@@ -463,7 +401,6 @@ function ContactBody() {
                 />
               </div>
 
-              {/* Sidebar readout */}
               <div className="border-t lg:border-t-0 lg:border-l border-border p-6 md:p-8 space-y-6 bg-background/30">
                 <div>
                   <p className="text-label mb-2">Our location</p>
@@ -493,10 +430,7 @@ function ContactBody() {
                     className="flex items-center justify-between text-sm group hover:text-[var(--color-accent-1)] transition-colors"
                   >
                     <span>Open in Google Maps</span>
-                    <ArrowUpRight
-                      size={14}
-                      className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
-                    />
+                    <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </a>
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${COORDS.lat},${COORDS.lng}`}
@@ -505,10 +439,7 @@ function ContactBody() {
                     className="flex items-center justify-between text-sm group hover:text-[var(--color-accent-1)] transition-colors"
                   >
                     <span>Get directions</span>
-                    <ArrowUpRight
-                      size={14}
-                      className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
-                    />
+                    <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </a>
                 </div>
               </div>
