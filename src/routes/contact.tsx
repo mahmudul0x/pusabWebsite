@@ -229,8 +229,14 @@ function HeroSlider() {
 
 function ContactBody() {
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [subject, setSubject] = useState("");
+  const [university, setUniversity] = useState("");
+  const [session, setSession] = useState("");
+  const [unionName, setUnionName] = useState("");
+  const [village, setVillage] = useState("");
+  const [school, setSchool] = useState("");
+  const [college, setCollege] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
@@ -243,19 +249,29 @@ function ContactBody() {
     setTimeout(() => setCopied((c) => (c === key ? null : c)), 1600);
   }
 
+  function resetForm() {
+    setName(""); setPhone(""); setSubject(""); setUniversity("");
+    setSession(""); setUnionName(""); setVillage(""); setSchool("");
+    setCollege(""); setMessage("");
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
+    if (!name.trim() || !phone.trim()) {
+      toast.error("Name and phone number are required.");
+      return;
+    }
     setBusy(true);
     try {
-      await contactApi.create({ name, email, subject, message });
-      toast.success("Message sent — we'll get back to you soon.");
-      setName("");
-      setEmail("");
-      setSubject("");
-      setMessage("");
+      await contactApi.create({
+        name, phone, subject, university, session,
+        union_name: unionName, village, school, college, message,
+      });
+      toast.success("আবেদন পাঠানো হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।");
+      resetForm();
     } catch {
-      toast.error("Couldn't send your message. Please check the fields and try again.");
+      toast.error("পাঠানো যায়নি। আবার চেষ্টা করুন।");
     } finally {
       setBusy(false);
     }
@@ -267,8 +283,11 @@ function ContactBody() {
       <section className="pb-16 md:pb-24">
         <div className="container-page">
           <div className="mb-8">
-            <p className="text-label mb-2 text-[var(--color-accent-1)]">Write to us</p>
-            <h2 className="text-3xl md:text-5xl font-display tracking-tight">Share your inquiry</h2>
+            <p className="text-label mb-2 text-[var(--color-accent-1)]">Join PUSAB</p>
+            <h2 className="text-3xl md:text-5xl font-display tracking-tight">Membership Inquiry</h2>
+            <p className="mt-3 text-muted-foreground max-w-xl">
+              নতুন পাবলিক বিশ্ববিদ্যালয়ে ভর্তি হয়েছ? নিচের ফর্মটি পূরণ করো — আমরা তোমাকে PUSAB পরিবারে যোগ করে নেব।
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
@@ -281,15 +300,35 @@ function ContactBody() {
               transition={{ duration: 0.5, ease: "easeOut" }}
               className="md:col-span-8 rounded-3xl border border-border bg-[var(--color-surface)] p-6 md:p-10 space-y-4 shadow-sm"
             >
+              {/* Personal info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Name" value={name} onChange={setName} />
-                <Field label="Email" type="email" value={email} onChange={setEmail} />
+                <Field label="Name · নাম *" value={name} onChange={setName} />
+                <Field label="Phone · মোবাইল নম্বর *" type="tel" value={phone} onChange={setPhone} />
               </div>
-              <Field label="Subject" value={subject} onChange={setSubject} />
-              <Field label="Message" value={message} onChange={setMessage} textarea />
+
+              {/* University info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field label="University · বিশ্ববিদ্যালয়" value={university} onChange={setUniversity} />
+                <Field label="Session · সেশন (e.g. 2023-24)" value={session} onChange={setSession} />
+              </div>
+
+              <Field label="Subject · বিষয় / বিভাগ" value={subject} onChange={setSubject} />
+
+              {/* Home info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field label="Union · ইউনিয়ন" value={unionName} onChange={setUnionName} />
+                <Field label="Village · গ্রাম" value={village} onChange={setVillage} />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field label="School · স্কুল" value={school} onChange={setSchool} />
+                <Field label="College · কলেজ" value={college} onChange={setCollege} />
+              </div>
+
+              <Field label="Message · বার্তা (optional)" value={message} onChange={setMessage} textarea />
+
               <div className="pt-4 flex items-center justify-between gap-4 flex-wrap">
-                <p className="text-xs text-muted-foreground">We aim to respond within 48 hours.</p>
-                <GradientButton type="submit">{busy ? "Sending…" : "Send Message"}</GradientButton>
+                <p className="text-xs text-muted-foreground">* চিহ্নিত তথ্য অবশ্যই দিতে হবে।</p>
+                <GradientButton type="submit">{busy ? "পাঠানো হচ্ছে…" : "Submit Application"}</GradientButton>
               </div>
             </motion.form>
 

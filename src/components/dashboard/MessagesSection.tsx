@@ -1,9 +1,19 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Mail, MailOpen, Phone, Trash2 } from "lucide-react";
+import { Mail, MailOpen, Phone, Trash2, GraduationCap, MapPin, School, BookOpen } from "lucide-react";
 import { contactApi, type ContactMessage } from "@/lib/api";
 import { useResource, errMessage } from "./useResource";
 import { SectionHeader, EmptyState, Toolbar, FilterSelect, useConfirm } from "./primitives";
+
+function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-1.5 text-muted-foreground">
+      <span className="shrink-0 text-(--color-accent-1)">{icon}</span>
+      <span className="text-xs font-medium text-foreground/60">{label}:</span>
+      <span className="text-xs truncate">{value}</span>
+    </div>
+  );
+}
 
 export function MessagesSection() {
   const { items, loading, reload } = useResource(contactApi);
@@ -36,7 +46,10 @@ export function MessagesSection() {
     const matchesQ =
       !q ||
       m.name.toLowerCase().includes(q) ||
-      m.email.toLowerCase().includes(q) ||
+      m.phone.toLowerCase().includes(q) ||
+      (m.email && m.email.toLowerCase().includes(q)) ||
+      (m.university && m.university.toLowerCase().includes(q)) ||
+      (m.village && m.village.toLowerCase().includes(q)) ||
       m.message.toLowerCase().includes(q);
     const matchesF =
       filter === "all" || (filter === "unread" ? !m.is_read : m.is_read);
@@ -89,32 +102,61 @@ export function MessagesSection() {
                   : "border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)]")
               }
             >
+              {/* Header row */}
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     {!m.is_read && (
                       <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--color-accent-1)]" />
                     )}
-                    <span className="font-semibold">{m.name}</span>
+                    <span className="font-semibold text-base">{m.name}</span>
                     <a
-                      href={`mailto:${m.email}`}
-                      className="text-sm text-[var(--color-accent-1)] hover:underline"
+                      href={`tel:${m.phone}`}
+                      className="inline-flex items-center gap-1 text-sm text-(--color-accent-1) hover:underline"
                     >
-                      {m.email}
+                      <Phone size={12} /> {m.phone}
                     </a>
-                    {m.phone && (
-                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                        <Phone size={11} /> {m.phone}
-                      </span>
+                    {m.email && (
+                      <a href={`mailto:${m.email}`} className="text-xs text-muted-foreground hover:underline">
+                        {m.email}
+                      </a>
                     )}
                   </div>
                   {m.subject && <p className="mt-1 text-sm font-medium">{m.subject}</p>}
                 </div>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-muted-foreground shrink-0">
                   {new Date(m.created_at).toLocaleString()}
                 </span>
               </div>
-              <p className="mt-3 whitespace-pre-line text-sm text-foreground/85">{m.message}</p>
+
+              {/* Info grid */}
+              <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-1.5 text-sm">
+                {m.university && (
+                  <InfoRow icon={<GraduationCap size={12} />} label="University" value={m.university} />
+                )}
+                {m.session && (
+                  <InfoRow icon={<BookOpen size={12} />} label="Session" value={m.session} />
+                )}
+                {m.union_name && (
+                  <InfoRow icon={<MapPin size={12} />} label="Union" value={m.union_name} />
+                )}
+                {m.village && (
+                  <InfoRow icon={<MapPin size={12} />} label="Village" value={m.village} />
+                )}
+                {m.school && (
+                  <InfoRow icon={<School size={12} />} label="School" value={m.school} />
+                )}
+                {m.college && (
+                  <InfoRow icon={<School size={12} />} label="College" value={m.college} />
+                )}
+              </div>
+
+              {m.message && (
+                <p className="mt-3 whitespace-pre-line text-sm text-foreground/80 border-t border-border pt-3">
+                  {m.message}
+                </p>
+              )}
+
               <div className="mt-4 flex items-center gap-2">
                 <button
                   onClick={() => toggleRead(m)}
@@ -123,12 +165,14 @@ export function MessagesSection() {
                   {m.is_read ? <Mail size={13} /> : <MailOpen size={13} />}
                   {m.is_read ? "Mark unread" : "Mark read"}
                 </button>
-                <a
-                  href={`mailto:${m.email}?subject=Re: ${encodeURIComponent(m.subject || "Your message to PUSAB")}`}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
-                >
-                  <Mail size={13} /> Reply
-                </a>
+                {m.email && (
+                  <a
+                    href={`mailto:${m.email}?subject=Re: ${encodeURIComponent(m.subject || "Your message to PUSAB")}`}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+                  >
+                    <Mail size={13} /> Reply
+                  </a>
+                )}
                 <button
                   onClick={() => remove(m)}
                   className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-red-500 hover:text-red-500"
