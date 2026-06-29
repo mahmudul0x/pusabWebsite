@@ -19,7 +19,7 @@ function initials(name: string) {
 
 const isPresident = (m: Member) => /president/i.test(m.role) && !/vice/i.test(m.role);
 const isGS = (m: Member) =>
-  /general secretary/i.test(m.role) || /^gs\b/i.test(m.role.trim());
+  /^general secretary$/i.test(m.role.trim()) || /^gs$/i.test(m.role.trim());
 
 /* ── Lead card (President / GS) ── */
 function LeadCard({
