@@ -26,6 +26,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HonorBoardYearRouteImport } from './routes/honor-board.$year'
 import { Route as EcYearRouteImport } from './routes/ec.$year'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
@@ -113,6 +114,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HonorBoardYearRoute = HonorBoardYearRouteImport.update({
+  id: '/$year',
+  path: '/$year',
+  getParentRoute: () => HonorBoardRoute,
+} as any)
 const EcYearRoute = EcYearRouteImport.update({
   id: '/ec/$year',
   path: '/ec/$year',
@@ -132,7 +138,7 @@ export interface FileRoutesByFullPath {
   '/convening-committee': typeof ConveningCommitteeRoute
   '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
-  '/honor-board': typeof HonorBoardRoute
+  '/honor-board': typeof HonorBoardRouteWithChildren
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/president-message': typeof PresidentMessageRoute
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/ec/$year': typeof EcYearRoute
+  '/honor-board/$year': typeof HonorBoardYearRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -152,7 +159,7 @@ export interface FileRoutesByTo {
   '/convening-committee': typeof ConveningCommitteeRoute
   '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
-  '/honor-board': typeof HonorBoardRoute
+  '/honor-board': typeof HonorBoardRouteWithChildren
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/president-message': typeof PresidentMessageRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/ec/$year': typeof EcYearRoute
+  '/honor-board/$year': typeof HonorBoardYearRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -174,7 +182,7 @@ export interface FileRoutesById {
   '/convening-committee': typeof ConveningCommitteeRoute
   '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
-  '/honor-board': typeof HonorBoardRoute
+  '/honor-board': typeof HonorBoardRouteWithChildren
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/president-message': typeof PresidentMessageRoute
@@ -185,6 +193,7 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/ec/$year': typeof EcYearRoute
+  '/honor-board/$year': typeof HonorBoardYearRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -207,6 +216,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/admin'
     | '/ec/$year'
+    | '/honor-board/$year'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/admin'
     | '/ec/$year'
+    | '/honor-board/$year'
   id:
     | '__root__'
     | '/'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/_authenticated/admin'
     | '/ec/$year'
+    | '/honor-board/$year'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -259,7 +271,7 @@ export interface RootRouteChildren {
   ConveningCommitteeRoute: typeof ConveningCommitteeRoute
   DashboardRoute: typeof DashboardRoute
   FelicitationRoute: typeof FelicitationRoute
-  HonorBoardRoute: typeof HonorBoardRoute
+  HonorBoardRoute: typeof HonorBoardRouteWithChildren
   LeadershipRoute: typeof LeadershipRoute
   MomentsRoute: typeof MomentsRoute
   PresidentMessageRoute: typeof PresidentMessageRoute
@@ -392,6 +404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/honor-board/$year': {
+      id: '/honor-board/$year'
+      path: '/$year'
+      fullPath: '/honor-board/$year'
+      preLoaderRoute: typeof HonorBoardYearRouteImport
+      parentRoute: typeof HonorBoardRoute
+    }
     '/ec/$year': {
       id: '/ec/$year'
       path: '/ec/$year'
@@ -420,6 +439,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface HonorBoardRouteChildren {
+  HonorBoardYearRoute: typeof HonorBoardYearRoute
+}
+
+const HonorBoardRouteChildren: HonorBoardRouteChildren = {
+  HonorBoardYearRoute: HonorBoardYearRoute,
+}
+
+const HonorBoardRouteWithChildren = HonorBoardRoute._addFileChildren(
+  HonorBoardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -429,7 +460,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConveningCommitteeRoute: ConveningCommitteeRoute,
   DashboardRoute: DashboardRoute,
   FelicitationRoute: FelicitationRoute,
-  HonorBoardRoute: HonorBoardRoute,
+  HonorBoardRoute: HonorBoardRouteWithChildren,
   LeadershipRoute: LeadershipRoute,
   MomentsRoute: MomentsRoute,
   PresidentMessageRoute: PresidentMessageRoute,

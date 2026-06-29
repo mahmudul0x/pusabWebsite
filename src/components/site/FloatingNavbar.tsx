@@ -237,7 +237,7 @@ export function FloatingNavbar() {
     ];
 
     const exPresidentChildren: NavChild[] = pastYears.map((y) => ({
-      to: `/honor-board#year-${y}`,
+      to: `/honor-board/${y}`,
       label: `${ecOrdinal(y)} EC · ${y}-${String((y + 1) % 100).padStart(2, "0")}`,
     }));
 
