@@ -238,6 +238,7 @@ function ContactBody() {
   const [school, setSchool] = useState("");
   const [college, setCollege] = useState("");
   const [message, setMessage] = useState("");
+  const [honeypot, setHoneypot] = useState(""); // bot trap — must stay empty
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -258,6 +259,7 @@ function ContactBody() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
+    if (honeypot) return; // bot filled the hidden field — silently drop
     if (!name.trim() || !phone.trim()) {
       toast.error("Name and phone number are required.");
       return;
@@ -268,7 +270,8 @@ function ContactBody() {
         name, phone, subject, university, session,
         union_name: unionName, village, school, college, message,
         email: "",
-      });
+        website: honeypot, // backend also checks this
+      } as never);
       toast.success("Application submitted! We will be in touch soon.");
       resetForm();
     } catch {
@@ -323,6 +326,18 @@ function ContactBody() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="School" value={school} onChange={setSchool} />
                 <Field label="College" value={college} onChange={setCollege} />
+              </div>
+
+              {/* Honeypot — invisible to humans, bots fill it automatically */}
+              <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }}>
+                <input
+                  type="text"
+                  name="website"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  autoComplete="off"
+                  tabIndex={-1}
+                />
               </div>
 
               <Field label="Message (optional)" value={message} onChange={setMessage} textarea />
