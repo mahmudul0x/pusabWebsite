@@ -179,6 +179,15 @@ function RootComponent() {
   const bare = ["/dashboard", "/admin", "/auth"].some((p) => pathname.startsWith(p));
   const [flipbookOpen, setFlipbookOpen] = useState(false);
 
+  // Wake up the Render backend on first load so it's ready by the time the
+  // user navigates to a page that needs data (Render free tier sleeps after inactivity).
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL ?? ""}/api/committee/?page_size=1`, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    }).catch(() => {});
+  }, []);
+
   return (
     <FlipbookContext value={{ isOpen: flipbookOpen, setIsOpen: setFlipbookOpen }}>
     <QueryClientProvider client={queryClient}>
