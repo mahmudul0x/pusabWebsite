@@ -1,7 +1,7 @@
 // Typed CRUD helpers for each API resource. Reads are public; writes need an
 // admin token (handled automatically by apiFetch).
 
-import { apiFetch } from "./client";
+import { apiFetch, API_URL } from "./client";
 import type {
   AdminUser,
   ContactMessage,
@@ -35,11 +35,16 @@ function crud<T, Body = Partial<T>>(resource: string) {
     /** Convenience: fetch all results, following pagination until exhausted. */
     listAll: async (params?: Query): Promise<T[]> => {
       const results: T[] = [];
-      let url: string | null = `${base}${qs({ ...params, page_size: 200 })}`;
-      while (url) {
-        const page = await apiFetch<Paginated<T>>(url, {}, { auth: false });
+      // Use a full URL for the first request; subsequent pages use the absolute
+      // `next` URL returned by the API directly (bypassing apiFetch's prefix).
+      let nextUrl: string | null =
+        `${API_URL}${base}${qs({ ...params, page_size: 200 })}`;
+      while (nextUrl) {
+        const res = await fetch(nextUrl, { headers: { Accept: "application/json" } });
+        if (!res.ok) throw new Error(`API error ${res.status}`);
+        const page: Paginated<T> = await res.json();
         results.push(...page.results);
-        url = page.next;
+        nextUrl = page.next;
       }
       return results;
     },
