@@ -63,15 +63,15 @@ function LeadershipMenu({
   };
 
   // A group rendered INSIDE the flyout that expands its children downward.
-  const InlineGroup = ({ group }: { group: NavChild }) => {
+  const InlineGroup = ({ group, parentTo }: { group: NavChild; parentTo: string }) => {
     const sessions: readonly NavChild[] =
       "children" in group && group.children ? group.children : [];
     const key = "sub:" + group.label;
     const open = expanded.includes(key);
     return (
       <li
-        onMouseEnter={() => setExpanded(["/leadership", key])}
-        onMouseLeave={() => setExpanded(["/leadership"])}
+        onMouseEnter={() => setExpanded([parentTo, key])}
+        onMouseLeave={() => setExpanded([parentTo])}
       >
         <button
           type="button"
@@ -121,14 +121,15 @@ function LeadershipMenu({
           return <li key={item.to + item.label}>{leaf(item, "px-3.5")}</li>;
         }
 
-        // Executive Committee → right-side flyout containing its children
+        // Any item with children → right-side flyout
         const ecChildren: readonly NavChild[] =
           "children" in item && item.children ? item.children : [];
         const branchOpen = expanded[0] === item.to;
+        const itemKey = item.to + item.label;
 
         return (
           <li
-            key={item.to + item.label}
+            key={itemKey}
             className="relative"
             onMouseEnter={() => openKey(item.to)}
             onMouseLeave={scheduleClose}
@@ -156,7 +157,7 @@ function LeadershipMenu({
                   className="absolute left-full top-0 pl-2"
                   onMouseEnter={() => {
                     cancel();
-                    setExpanded(["/leadership"]);
+                    setExpanded([item.to]);
                   }}
                 >
                   <ul className="max-h-[70vh] min-w-[230px] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.45)]">
@@ -165,7 +166,7 @@ function LeadershipMenu({
                       if (!gHasChildren) {
                         return <li key={g.to + g.label}>{leaf(g, "px-3.5")}</li>;
                       }
-                      return <InlineGroup key={g.to + g.label} group={g} />;
+                      return <InlineGroup key={g.to + g.label} group={g} parentTo={item.to} />;
                     })}
                   </ul>
                 </motion.div>
