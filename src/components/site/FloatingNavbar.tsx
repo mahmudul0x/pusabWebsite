@@ -496,7 +496,7 @@ export function FloatingNavbar() {
               to="/support"
               className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-2 text-sm font-semibold text-foreground/80 transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] hover:text-foreground"
             >
-              <Heart size={14} className="text-[var(--color-accent-1)]" /> Support
+              <Heart size={14} className="text-[var(--color-accent-1)]" /> Donation
             </Link>
             <Link to="/join" className="formal-cta group">
               <span>Join PUSAB</span>
@@ -761,7 +761,7 @@ export function FloatingNavbar() {
                     onClick={() => setMobileOpen(false)}
                     className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-3 text-sm font-semibold"
                   >
-                    <Heart size={15} className="text-[var(--color-accent-1)]" /> Support
+                    <Heart size={15} className="text-[var(--color-accent-1)]" /> Donation
                   </Link>
                   <Link
                     to="/join"

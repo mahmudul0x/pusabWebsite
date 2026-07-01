@@ -6,7 +6,8 @@ export const SITE = {
   members: "300+",
   email: "info.pusab@gmail.com",
   phone: "01948223639",
-  facebook: "https://www.facebook.com/Public-University-Students-Association-of-Bishwambharpur",
+  facebook: "https://www.facebook.com/info.pusab/",
+  youtube: "https://www.youtube.com/@info.pusab1",
   location: "Bishwambarpur Upazila, Sunamganj, Bangladesh",
 };
 

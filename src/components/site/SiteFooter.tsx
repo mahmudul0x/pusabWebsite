@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, Mail, MapPin, Phone } from "lucide-react";
+import { Facebook, Mail, MapPin, Phone, Youtube } from "lucide-react";
 import { NAV_LINKS, PROGRAMS, SITE } from "@/lib/site-content";
 import logoPusab from "@/assets/logo-pusab.png";
 
@@ -70,14 +70,22 @@ export function SiteFooter() {
                 <MapPin size={15} className="mt-0.5 shrink-0 text-[var(--color-accent-1)]" />
                 Bishwambarpur, Sunamganj
               </li>
-              <li>
+              <li className="flex flex-wrap gap-2 mt-1">
                 <a
                   href={SITE.facebook}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-1 inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] hover:text-foreground"
+                  className="inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] hover:text-foreground"
                 >
                   <Facebook size={14} className="text-[var(--color-accent-1)]" /> Facebook
+                </a>
+                <a
+                  href={SITE.youtube}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:border-red-500/50 hover:text-foreground"
+                >
+                  <Youtube size={14} className="text-red-500" /> YouTube
                 </a>
               </li>
             </ul>
