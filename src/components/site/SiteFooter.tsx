@@ -64,7 +64,10 @@ export function SiteFooter() {
               </li>
               <li className="flex items-start gap-2.5">
                 <Phone size={15} className="mt-0.5 shrink-0 text-[var(--color-accent-1)]" />
-                {SITE.phone}
+                <div className="space-y-0.5">
+                  <a href={`tel:${SITE.phonePresident}`} className="block hover:underline">{SITE.phonePresident} <span className="text-muted-foreground">(President)</span></a>
+                  <a href={`tel:${SITE.phoneGS}`} className="block hover:underline">{SITE.phoneGS} <span className="text-muted-foreground">(GS)</span></a>
+                </div>
               </li>
               <li className="flex items-start gap-2.5">
                 <MapPin size={15} className="mt-0.5 shrink-0 text-[var(--color-accent-1)]" />

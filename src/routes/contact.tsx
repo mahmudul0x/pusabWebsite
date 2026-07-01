@@ -291,6 +291,7 @@ function ContactBody() {
             </motion.form>
 
             {/* Direct channel cards */}
+            {/* Email */}
             {[
               {
                 key: "email",
@@ -300,17 +301,10 @@ function ContactBody() {
                 href: `mailto:${SITE.email}`,
               },
               {
-                key: "phone",
-                icon: Phone,
-                label: "Phone",
-                value: SITE.phone,
-                href: `tel:${SITE.phone}`,
-              },
-              {
                 key: "social",
                 icon: Facebook,
                 label: "Facebook",
-                value: "facebook.com/PUSAB",
+                value: "facebook.com/info.pusab",
                 href: SITE.facebook,
               },
               {
@@ -359,6 +353,43 @@ function ContactBody() {
                 </div>
               </motion.div>
             ))}
+
+            {/* Phone card — two numbers */}
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.45, delay: 0.06, ease: "easeOut" }}
+              className="md:col-span-4 group rounded-3xl border border-border bg-[var(--color-surface)] p-6 hover:border-[var(--color-accent-1)]/40 transition-colors shadow-sm"
+            >
+              <div className="h-10 w-10 rounded-xl bg-[var(--color-accent-1)]/10 border border-[var(--color-accent-1)]/20 flex items-center justify-center text-[var(--color-accent-1)]">
+                <Phone size={18} />
+              </div>
+              <p className="text-label mt-5">Phone</p>
+              <div className="mt-1 space-y-1.5">
+                {[
+                  { key: "phone-p", value: SITE.phonePresident, label: "President" },
+                  { key: "phone-gs", value: SITE.phoneGS, label: "GS" },
+                ].map((p) => (
+                  <div key={p.key} className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <a href={`tel:${p.value}`} className="text-sm font-medium hover:text-[var(--color-accent-1)] transition-colors">
+                        {p.value}
+                      </a>
+                      <span className="ml-1.5 text-xs text-muted-foreground">({p.label})</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyValue(p.key, p.value)}
+                      className="shrink-0 text-muted-foreground hover:text-[var(--color-accent-1)] transition-colors"
+                      aria-label={`Copy ${p.label} number`}
+                    >
+                      {copied === p.key ? <Check size={14} /> : <Copy size={14} />}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
