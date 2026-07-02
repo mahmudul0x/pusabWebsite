@@ -36,62 +36,47 @@ function initials(name: string) {
 
 const isLead = (m: Member) => /convenor|member secretary/i.test(m.role);
 
-/* ── Lead card (Convenor / Member Secretary) ── */
+/* ── Lead card (Convenor / Member Secretary) — wide, matches Leadership page style ── */
 function LeadCard({ m, index }: { m: Member; index: number }) {
   const accent = index === 0 ? "var(--color-accent-1)" : "var(--color-accent-2)";
   const accent2 = index === 0 ? "var(--color-accent-2)" : "var(--color-accent-1)";
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 36 }}
+      initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.65, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative flex flex-col overflow-hidden rounded-2xl"
-      style={{
-        background: "var(--color-surface)",
-        border: `1px solid color-mix(in oklab, ${accent} 30%, transparent)`,
-        boxShadow: `0 20px 52px -34px color-mix(in oklab, ${accent} 55%, transparent)`,
-      }}
+      transition={{ duration: 0.6, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
+      className="group flex min-w-0 flex-1 items-center gap-5 rounded-2xl border border-border bg-[color-mix(in_oklab,var(--color-surface)_60%,transparent)] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] hover:shadow-[0_24px_56px_-36px_rgba(29,78,216,0.45)] sm:p-5"
     >
-      {/* Top gradient bar */}
       <div
-        className="h-[3px] w-full shrink-0"
-        style={{ background: `linear-gradient(90deg, ${accent}, ${accent2})` }}
-      />
-
-      {/* Photo */}
-      <div
-        className="relative aspect-square w-full overflow-hidden"
+        className="relative aspect-[3/4] w-24 shrink-0 overflow-hidden rounded-xl sm:w-32"
         style={{ background: `linear-gradient(135deg, ${accent}, ${accent2})` }}
       >
         {m.photo_url ? (
           <img
-            src={optimizeImage(m.photo_url, 480)}
+            src={optimizeImage(m.photo_url, 320)}
             alt={m.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
           />
         ) : (
-          <span className="grid h-full w-full place-items-center text-4xl font-bold text-white select-none">
+          <span className="grid h-full w-full place-items-center text-3xl font-bold text-white select-none">
             {initials(m.name)}
           </span>
         )}
-        {/* Role badge — floating on photo */}
+      </div>
+      <div className="min-w-0">
         <span
-          className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.14em] text-white backdrop-blur"
+          className="inline-flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white"
           style={{ background: `linear-gradient(120deg, ${accent}, ${accent2})` }}
         >
-          <Star size={9} className="fill-white" /> {m.role}
+          <Star size={11} className="fill-white" /> {m.role}
         </span>
-      </div>
-
-      {/* Info */}
-      <div className="p-3 text-center">
-        <p className="font-display text-sm font-bold leading-tight text-foreground truncate">
+        <p className="mt-2.5 truncate font-display text-xl font-bold leading-tight tracking-tight text-foreground sm:text-2xl">
           {m.name}
         </p>
         {m.university && (
-          <p className="mt-1 flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
-            <GraduationCap size={10} className="shrink-0" />
+          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <GraduationCap size={13} className="shrink-0" />
             <span className="truncate">{m.university}</span>
           </p>
         )}
@@ -226,10 +211,17 @@ function ConveningCommitteePage() {
           </motion.div>
 
           {loading ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="aspect-[3/4] animate-pulse rounded-2xl bg-[var(--color-surface)]" />
-              ))}
+            <div className="space-y-8">
+              <div className="grid gap-5 sm:grid-cols-2">
+                {[0, 1].map((i) => (
+                  <div key={i} className="h-40 animate-pulse rounded-2xl bg-[var(--color-surface)]" />
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="aspect-[3/4] animate-pulse rounded-2xl bg-[var(--color-surface)]" />
+                ))}
+              </div>
             </div>
           ) : list.length === 0 ? (
             <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-border bg-[var(--color-surface)] py-24 text-center">
@@ -239,16 +231,24 @@ function ConveningCommitteePage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-8">
-              {/* All founders in one grid — leads first (accent), then members. No gaps. */}
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {leads.map((m, i) => (
-                  <LeadCard key={m.id} m={m} index={i} />
-                ))}
-                {rest.map((m, i) => (
-                  <MemberRow key={m.id} m={m} index={i} />
-                ))}
-              </div>
+            <div className="space-y-10">
+              {/* Convenor & Member Secretary — wide lead cards */}
+              {leads.length > 0 && (
+                <div className="grid gap-5 sm:grid-cols-2">
+                  {leads.map((m, i) => (
+                    <LeadCard key={m.id} m={m} index={i} />
+                  ))}
+                </div>
+              )}
+
+              {/* Remaining founders — square photo grid */}
+              {rest.length > 0 && (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                  {rest.map((m, i) => (
+                    <MemberRow key={m.id} m={m} index={i} />
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -43,46 +43,37 @@ function LeadCard({
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative flex flex-col overflow-hidden rounded-2xl"
-      style={{
-        background: "var(--color-surface)",
-        border: "1px solid color-mix(in oklab, " + c1 + " 30%, transparent)",
-        boxShadow: "0 20px 52px -34px color-mix(in oklab, " + c1 + " 55%, transparent)",
-      }}
+      className="group flex min-w-0 flex-1 items-center gap-5 rounded-2xl border border-border bg-[color-mix(in_oklab,var(--color-surface)_60%,transparent)] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] hover:shadow-[0_24px_56px_-36px_rgba(29,78,216,0.45)] sm:p-5"
     >
       <div
-        className="h-[3px] w-full shrink-0"
-        style={{ background: "linear-gradient(90deg, " + c1 + ", " + c2 + ")" }}
-      />
-      <div
-        className="relative aspect-square w-full overflow-hidden"
+        className="relative aspect-[3/4] w-24 shrink-0 overflow-hidden rounded-xl sm:w-32"
         style={{ background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")" }}
       >
         {m.photo_url ? (
           <img
             src={optimizeImage(m.photo_url, 320)}
             alt={m.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
           />
         ) : (
-          <span className="grid h-full w-full place-items-center text-4xl font-bold text-white select-none">
+          <span className="grid h-full w-full place-items-center text-3xl font-bold text-white select-none">
             {initials(m.name)}
           </span>
         )}
+      </div>
+      <div className="min-w-0">
         <span
-          className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.14em] text-white backdrop-blur"
+          className="inline-flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white"
           style={{ background: "linear-gradient(120deg, " + c1 + ", " + c2 + ")" }}
         >
-          <Icon size={9} /> {label}
+          <Icon size={11} /> {label}
         </span>
-      </div>
-      <div className="p-3 text-center">
-        <p className="font-display text-sm font-bold leading-tight text-foreground truncate">
+        <p className="mt-2.5 truncate font-display text-xl font-bold leading-tight tracking-tight text-foreground sm:text-2xl">
           {m.name}
         </p>
         {m.university && (
-          <p className="mt-1 flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
-            <GraduationCap size={10} className="shrink-0" />
+          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <GraduationCap size={13} className="shrink-0" />
             <span className="truncate">{m.university}</span>
           </p>
         )}
@@ -99,26 +90,28 @@ function MemberRow({ m, index }: { m: Member; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-20px" }}
       transition={{ duration: 0.3, delay: Math.min(index, 12) * 0.03 }}
-      className="group flex items-center gap-4 rounded-2xl px-4 py-3.5 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_6%,transparent)]"
+      className="group flex flex-col gap-3 rounded-2xl border border-transparent p-4 transition-all duration-200 hover:border-[color-mix(in_oklab,var(--color-accent-1)_20%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)] hover:shadow-[0_16px_36px_-28px_rgba(29,78,216,0.5)] sm:flex-row sm:items-center"
     >
-      <span
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
-        style={{
-          background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
-        }}
-      >
-        {index + 1}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="font-semibold leading-tight text-foreground truncate">{m.name}</p>
-        {m.university && (
-          <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground truncate">
-            <Building2 size={10} /> {m.university}
-          </p>
-        )}
+      <div className="flex min-w-0 flex-1 items-center gap-3.5">
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm"
+          style={{
+            background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
+          }}
+        >
+          {index + 1}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-display font-bold leading-tight text-foreground">{m.name}</p>
+          {m.university && (
+            <p className="mt-1 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+              <Building2 size={11} className="shrink-0" /> {m.university}
+            </p>
+          )}
+        </div>
       </div>
       <span
-        className="shrink-0 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
+        className="ml-12 inline-flex w-fit shrink-0 items-center rounded-full px-3 py-1 text-[10px] font-bold uppercase leading-relaxed tracking-[0.1em] sm:ml-0"
         style={{
           background: "color-mix(in oklab, var(--color-accent-1) 10%, transparent)",
           color: "var(--color-accent-1)",
@@ -199,9 +192,9 @@ export function CommitteeView({
         </motion.div>
 
         {loading ? (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-72 animate-pulse rounded-[28px] bg-[var(--color-surface)]" />
+          <div className="grid gap-5 sm:grid-cols-2">
+            {[0, 1].map((i) => (
+              <div key={i} className="h-40 animate-pulse rounded-2xl bg-[var(--color-surface)]" />
             ))}
           </div>
         ) : sessionMembers.length === 0 ? (
@@ -214,7 +207,7 @@ export function CommitteeView({
         ) : (
           <div className="space-y-12">
             {(president || gs) && (
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid gap-5 sm:grid-cols-2">
                 {president && (
                   <LeadCard m={president} label="President" Icon={Crown} accent="1" delay={0} />
                 )}
@@ -230,7 +223,7 @@ export function CommitteeView({
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
-                className="overflow-hidden rounded-3xl border border-border"
+                className="overflow-hidden rounded-3xl border border-border shadow-[0_32px_64px_-48px_rgba(29,78,216,0.35)]"
                 style={{ background: "var(--color-surface)" }}
               >
                 <div
@@ -266,8 +259,8 @@ export function CommitteeView({
                     {roster.length} {roster.length === 1 ? "member" : "members"}
                   </span>
                 </div>
-                <div className="px-3 py-3">
-                  <ul className="grid gap-1 sm:grid-cols-2">
+                <div className="px-3 py-4">
+                  <ul className="grid gap-2 sm:grid-cols-2">
                     {roster.map((m, i) => (
                       <MemberRow key={m.id} m={m} index={i} />
                     ))}

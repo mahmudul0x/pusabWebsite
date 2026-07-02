@@ -209,33 +209,6 @@ export function LeaderMessageView({
                           </motion.p>
                         ))}
                       </div>
-
-                      {/* Signature */}
-                      <div className="mt-10 flex items-center gap-4 border-t border-border pt-8">
-                        <div
-                          className="h-10 w-10 overflow-hidden rounded-full"
-                          style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
-                        >
-                          {msg?.photo_url ? (
-                            <img
-                              src={optimizeImage(msg.photo_url, 80)}
-                              alt={name}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <span className="grid h-full w-full place-items-center text-sm font-bold text-white">
-                              {letter}
-                            </span>
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-display font-bold">{name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {designation}
-                            {session ? ` — ${session}` : ""}
-                          </p>
-                        </div>
-                      </div>
                     </>
                   )}
                 </div>

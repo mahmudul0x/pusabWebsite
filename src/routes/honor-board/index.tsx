@@ -192,12 +192,12 @@ function HonorBoardPage() {
   // Only past (non-current) members
   const past = members.map((m) => ({ ...m, id: String(m.id) })).filter((m) => !m.is_current);
 
-  // Group by year, newest first
+  // Group by year, oldest first
   const byYear: Record<number, Member[]> = {};
   past.forEach((m) => (byYear[m.year] ||= []).push(m));
   const years = Object.keys(byYear)
     .map(Number)
-    .sort((a, b) => b - a);
+    .sort((a, b) => a - b);
 
   const loading = isLoading;
 
