@@ -52,6 +52,20 @@ function sessionLabel(year: number) {
   return `${year}-${next}`;
 }
 
+const FOUNDING_YEAR = 2014;
+
+const ORDINAL_WORDS = [
+  "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth",
+  "Ninth", "Tenth", "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth",
+];
+
+/** "2014" -> "First EC (Session 2014-15)" */
+function ecSessionLabel(year: number) {
+  const n = year - FOUNDING_YEAR + 1;
+  const word = ORDINAL_WORDS[n - 1] ?? `${n}th`;
+  return `${word} EC (Session ${sessionLabel(year)})`;
+}
+
 const isPresident = (m: Member) =>
   /president/i.test(m.role) && !/vice/i.test(m.role);
 
@@ -152,13 +166,13 @@ function SessionRow({
     >
       <div className="mb-6 flex items-center gap-3">
         <span
-          className="inline-flex w-fit items-center rounded-lg border-2 px-3 py-1.5 font-display text-base font-extrabold tracking-tight sm:text-lg"
+          className="inline-flex w-fit items-center rounded-lg border-2 px-3 py-1.5 font-display text-sm font-extrabold uppercase tracking-tight sm:text-base"
           style={{
             borderColor: "var(--color-accent-1)",
             color: "var(--color-accent-1)",
           }}
         >
-          Session {sessionLabel(year)}
+          {ecSessionLabel(year)}
         </span>
         <span className="h-px flex-1 bg-border" />
       </div>
