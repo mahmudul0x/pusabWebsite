@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
 import { optimizeImage } from "@/lib/api";
 import { useAllMembers } from "@/lib/useCommittee";
-import { Crown, Gavel, Award, ChevronDown, GraduationCap } from "lucide-react";
+import { Crown, Gavel, Award, GraduationCap } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
 export const Route = createFileRoute("/honor-board/")({
@@ -59,33 +58,25 @@ const isPresident = (m: Member) =>
 const isGS = (m: Member) =>
   /general secretary/i.test(m.role) || /^gs\b/i.test(m.role.trim());
 
-function LeaderCard({
+/* One office-bearer photo + name — large, premium card treatment. */
+function LeaderMini({
   m,
   label,
   Icon,
   accent,
-  index,
 }: {
   m: Member;
   label: string;
   Icon: typeof Crown;
   accent: "1" | "2";
-  index: number;
 }) {
   const c1 = accent === "1" ? "var(--color-accent-1)" : "var(--color-accent-2)";
   const c2 = accent === "1" ? "var(--color-accent-2)" : "var(--color-accent-1)";
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative flex gap-5 rounded-2xl border border-border bg-[var(--color-surface)] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] hover:shadow-[0_24px_56px_-36px_rgba(29,78,216,0.45)]"
-    >
-      {/* Photo — fixed portrait, consistent across all members */}
+    <div className="group flex min-w-0 flex-1 items-center gap-5 rounded-2xl border border-border bg-[color-mix(in_oklab,var(--color-surface)_60%,transparent)] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] hover:shadow-[0_24px_56px_-36px_rgba(29,78,216,0.45)] sm:p-5">
       <div
-        className="relative aspect-[3/4] w-28 shrink-0 overflow-hidden rounded-xl sm:w-32"
+        className="relative aspect-[3/4] w-24 shrink-0 overflow-hidden rounded-xl sm:w-32"
         style={{ background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")" }}
       >
         {m.photo_url ? (
@@ -100,16 +91,14 @@ function LeaderCard({
           </span>
         )}
       </div>
-
-      {/* Info */}
-      <div className="flex min-w-0 flex-1 flex-col justify-center">
+      <div className="min-w-0">
         <span
           className="inline-flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white"
           style={{ background: "linear-gradient(120deg, " + c1 + ", " + c2 + ")" }}
         >
           <Icon size={11} /> {label}
         </span>
-        <p className="mt-2.5 font-display text-xl font-bold leading-tight tracking-tight text-foreground sm:text-2xl">
+        <p className="mt-2.5 truncate font-display text-xl font-bold leading-tight tracking-tight text-foreground sm:text-2xl">
           {m.name}
         </p>
         {m.university && (
@@ -119,18 +108,17 @@ function LeaderCard({
           </p>
         )}
       </div>
-    </motion.article>
+    </div>
   );
 }
 
-/* Subtle placeholder so a lone card never leaves the row lopsided. */
-function MissingSlot({ label }: { label: string }) {
+function MissingMini({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-5 rounded-2xl border border-dashed border-border/70 bg-[color-mix(in_oklab,var(--color-surface)_60%,transparent)] p-5">
-      <div className="grid aspect-[3/4] w-28 shrink-0 place-items-center rounded-xl border border-dashed border-border/60 sm:w-32">
-        <Award size={28} className="opacity-15" style={{ color: "var(--color-accent-1)" }} />
+    <div className="flex min-w-0 flex-1 items-center gap-5 rounded-2xl border border-dashed border-border/70 bg-[color-mix(in_oklab,var(--color-surface)_50%,transparent)] p-4 sm:p-5">
+      <div className="grid aspect-[3/4] w-24 shrink-0 place-items-center rounded-xl border border-dashed border-border/60 sm:w-32">
+        <Award size={26} className="opacity-15" style={{ color: "var(--color-accent-1)" }} />
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0">
         <span className="inline-flex w-fit items-center rounded-md border border-dashed border-border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
           {label}
         </span>
@@ -142,7 +130,7 @@ function MissingSlot({ label }: { label: string }) {
   );
 }
 
-function YearSection({
+function SessionRow({
   year,
   president,
   gs,
@@ -153,96 +141,46 @@ function YearSection({
   gs: Member | null;
   idx: number;
 }) {
-  const [open, setOpen] = useState(idx === 0);
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.5, delay: Math.min(idx, 5) * 0.05 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.4, delay: Math.min(idx, 8) * 0.04, ease: [0.16, 1, 0.3, 1] }}
       id={`year-${year}`}
-      className="overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] scroll-mt-28"
+      className="rounded-3xl border border-border bg-[var(--color-surface)] p-6 scroll-mt-28 sm:p-8"
     >
-      {/* Year header — clickable to collapse */}
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-4 px-6 py-5 sm:px-8 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)]"
-      >
-        <div className="flex items-center gap-4">
-          <div
-            className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-white shadow"
-            style={{
-              background:
-                "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
-            }}
-          >
-            <Award size={20} />
-          </div>
-          <div className="text-left">
-            <p
-              className="text-[10px] font-bold uppercase tracking-[0.22em]"
-              style={{ color: "var(--color-accent-1)" }}
-            >
-              Past Office-Bearers
-            </p>
-            <p className="font-display text-2xl font-extrabold leading-none tracking-tight">
-              Session {sessionLabel(year)}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Ex President &amp; General Secretary
-            </p>
-          </div>
-        </div>
-        <div
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors"
+      <div className="mb-6 flex items-center gap-3">
+        <span
+          className="inline-flex w-fit items-center rounded-lg border-2 px-3 py-1.5 font-display text-base font-extrabold tracking-tight sm:text-lg"
           style={{
-            background: open
-              ? "color-mix(in oklab, var(--color-accent-1) 12%, transparent)"
-              : "color-mix(in oklab, var(--color-accent-1) 6%, transparent)",
+            borderColor: "var(--color-accent-1)",
+            color: "var(--color-accent-1)",
           }}
         >
-          <ChevronDown
-            size={17}
-            className={"transition-transform duration-300 " + (open ? "rotate-180" : "")}
-            style={{ color: "var(--color-accent-1)" }}
-          />
-        </div>
-      </button>
+          Session {sessionLabel(year)}
+        </span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
 
-      {/* Cards */}
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="border-t border-border px-6 pb-7 pt-6 sm:px-8">
-              {president || gs ? (
-                <div className="grid gap-5 sm:grid-cols-2">
-                  {president && (
-                    <LeaderCard m={president} label="President" Icon={Crown} accent="1" index={0} />
-                  )}
-                  {gs && (
-                    <LeaderCard m={gs} label="General Secretary" Icon={Gavel} accent="2" index={1} />
-                  )}
-                  {/* Placeholder when one office-bearer is missing — keeps the row balanced */}
-                  {(!president || !gs) && (
-                    <MissingSlot label={!president ? "President" : "General Secretary"} />
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Records for this session are being verified.
-                </p>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {president || gs ? (
+        <div className="grid gap-6 sm:grid-cols-2">
+          {president ? (
+            <LeaderMini m={president} label="President" Icon={Crown} accent="1" />
+          ) : (
+            <MissingMini label="President" />
+          )}
+          {gs ? (
+            <LeaderMini m={gs} label="General Secretary" Icon={Gavel} accent="2" />
+          ) : (
+            <MissingMini label="General Secretary" />
+          )}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Records for this session are being verified.
+        </p>
+      )}
     </motion.div>
   );
 }
@@ -313,13 +251,13 @@ function HonorBoardPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {years.map((year, idx) => {
                 const list = byYear[year];
                 const president = list.find(isPresident) ?? null;
                 const gs = list.find(isGS) ?? null;
                 return (
-                  <YearSection
+                  <SessionRow
                     key={year}
                     year={year}
                     president={president}
