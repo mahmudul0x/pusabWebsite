@@ -318,6 +318,20 @@ function ExecutiveCommitteeView({
 }
 
 // ── Honor Board view ─────────────────────────────────────────────────────────
+const FOUNDING_YEAR = 2014;
+const ORDINAL_WORDS = [
+  "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth",
+  "Ninth", "Tenth", "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth",
+];
+function ecLabel(year: number) {
+  const n = year - FOUNDING_YEAR + 1;
+  const word = n >= 1 ? (ORDINAL_WORDS[n - 1] ?? `${n}th`) : null;
+  const span = `${year}-${String((year + 1) % 100).padStart(2, "0")}`;
+  return word ? `${word} EC (${span})` : `Session ${span}`;
+}
+
+const HONOR_SESSIONS_PER_PAGE = 5;
+
 function HonorBoardView({
   items,
   loading,
@@ -329,72 +343,173 @@ function HonorBoardView({
   onEdit: (m: EcMember) => void;
   onDelete: (m: EcMember) => void;
 }) {
-  if (loading) return <ListSkeleton />;
+  const [query, setQuery] = useState("");
+  const [yearFilter, setYearFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
   const past = items.filter((m) => !m.is_current);
+  const allYears = [...new Set(past.map((m) => m.year))].sort((a, b) => a - b);
+
+  const q = query.trim().toLowerCase();
+  const filtered = past.filter((m) => {
+    const matchesQ =
+      !q ||
+      m.name.toLowerCase().includes(q) ||
+      m.role.toLowerCase().includes(q) ||
+      m.university.toLowerCase().includes(q);
+    const matchesYear = yearFilter === "all" || String(m.year) === yearFilter;
+    return matchesQ && matchesYear;
+  });
+
   const byYear = new Map<number, EcMember[]>();
-  for (const m of past) {
+  for (const m of filtered) {
     const list = byYear.get(m.year) ?? [];
     list.push(m);
     byYear.set(m.year, list);
   }
-  const years = [...byYear.keys()].sort((a, b) => b - a);
+  // Only sessions that actually have a President or GS among the matches.
+  const allFilteredYears = [...byYear.keys()]
+    .filter((y) => byYear.get(y)!.some((m) => isPresident(m) || isGS(m)))
+    .sort((a, b) => a - b);
 
-  if (years.length === 0) {
+  const paginate = yearFilter === "all";
+  const totalPages = paginate ? Math.max(1, Math.ceil(allFilteredYears.length / HONOR_SESSIONS_PER_PAGE)) : 1;
+  const years = paginate
+    ? allFilteredYears.slice((page - 1) * HONOR_SESSIONS_PER_PAGE, page * HONOR_SESSIONS_PER_PAGE)
+    : allFilteredYears;
+
+  useEffect(() => { setPage(1); }, [yearFilter, query]);
+
+  if (loading) return <ListSkeleton />;
+
+  if (allYears.length === 0) {
     return (
       <EmptyState label='No past office-bearers yet. Uncheck "Current session" on past members to list them here.' />
     );
   }
 
   return (
-    <div className="space-y-5">
-      {years.map((year) => {
-        const list = byYear.get(year)!;
-        const president = list.find(isPresident);
-        const gs = list.find(isGS);
-        if (!president && !gs) return null;
-        return (
-          <div key={year} className="overflow-hidden rounded-xl border border-border bg-(--color-surface)">
-            {/* Year header */}
-            <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
-              <Crown size={15} className="text-(--color-accent-1)" />
-              <span className="font-display font-bold">Session {year}</span>
-              <span className="ml-auto text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                Ex President &amp; General Secretary
-              </span>
-            </div>
+    <>
+      <Toolbar query={query} onQuery={setQuery} placeholder="Search by name, role, university…">
+        <FilterSelect
+          value={yearFilter}
+          onChange={setYearFilter}
+          options={[
+            { value: "all", label: "All sessions" },
+            ...allYears.map((y) => ({ value: String(y), label: ecLabel(y) })),
+          ]}
+        />
+      </Toolbar>
 
-            {/* President + GS */}
-            {[
-              { member: president, label: "President", Icon: Crown },
-              { member: gs, label: "General Secretary", Icon: Gavel },
-            ]
-              .filter((row) => row.member)
-              .map(({ member, label, Icon }, idx) => (
-                <div
-                  key={label}
-                  className={"flex items-center gap-3 px-4 py-3.5 " + (idx > 0 ? "border-t border-border" : "")}
-                >
-                  <Avatar m={member!} size="lg" />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <Icon size={12} className="text-(--color-accent-1) shrink-0" />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-(--color-accent-1)">
-                        {label}
-                      </span>
-                    </div>
-                    <div className="font-semibold leading-tight">{member!.name}</div>
-                    {member!.university && (
-                      <div className="truncate text-xs text-muted-foreground">{member!.university}</div>
-                    )}
+      {years.length === 0 ? (
+        <EmptyState label="No matches." />
+      ) : (
+        <>
+          <div className="space-y-5">
+            {years.map((year) => {
+              const list = byYear.get(year)!;
+              const president = list.find(isPresident);
+              const gs = list.find(isGS);
+              return (
+                <div key={year} className="overflow-hidden rounded-xl border border-border bg-(--color-surface)">
+                  {/* Session header */}
+                  <div className="flex items-center gap-2.5 border-b border-border bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)] px-4 py-3">
+                    <Crown size={15} className="text-(--color-accent-1) shrink-0" />
+                    <span className="font-display font-bold">{ecLabel(year)}</span>
+                    <span className="ml-auto text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                      President &amp; GS
+                    </span>
                   </div>
-                  <CardActions onEdit={() => onEdit(member!)} onDelete={() => onDelete(member!)} />
+
+                  {/* President + GS */}
+                  {[
+                    { member: president, label: "President", Icon: Crown },
+                    { member: gs, label: "General Secretary", Icon: Gavel },
+                  ].map(({ member, label, Icon }, idx) => (
+                    <div
+                      key={label}
+                      className={"flex items-center gap-3 px-4 py-3.5 " + (idx > 0 ? "border-t border-border" : "")}
+                    >
+                      {member ? (
+                        <>
+                          <Avatar m={member} size="lg" />
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-0.5 flex items-center gap-1.5">
+                              <Icon size={12} className="text-(--color-accent-1) shrink-0" />
+                              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-(--color-accent-1)">
+                                {label}
+                              </span>
+                            </div>
+                            <div className="font-semibold leading-tight">{member.name}</div>
+                            {member.university && (
+                              <div className="truncate text-xs text-muted-foreground">{member.university}</div>
+                            )}
+                          </div>
+                          <CardActions onEdit={() => onEdit(member)} onDelete={() => onDelete(member)} />
+                        </>
+                      ) : (
+                        <>
+                          <div className="grid h-16 w-16 shrink-0 place-items-center rounded-xl border border-dashed border-border/70">
+                            <Icon size={18} className="opacity-25 text-(--color-accent-1)" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-0.5 flex items-center gap-1.5">
+                              <Icon size={12} className="text-muted-foreground shrink-0" />
+                              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                                {label}
+                              </span>
+                            </div>
+                            <div className="text-sm italic text-muted-foreground">Not recorded</div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              );
+            })}
           </div>
-        );
-      })}
-    </div>
+
+          {paginate && totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-between gap-2 border-t border-border pt-4">
+              <span className="text-xs text-muted-foreground">
+                Sessions {(page - 1) * HONOR_SESSIONS_PER_PAGE + 1}–{Math.min(page * HONOR_SESSIONS_PER_PAGE, allFilteredYears.length)} of {allFilteredYears.length}
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-(--color-surface-2) disabled:opacity-40"
+                >
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={
+                      "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors " +
+                      (p === page
+                        ? "bg-(--color-accent-1) text-white"
+                        : "border border-border hover:bg-(--color-surface-2)")
+                    }
+                  >
+                    {p}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-(--color-surface-2) disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </>
   );
 }
 
