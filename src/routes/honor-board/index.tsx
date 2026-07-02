@@ -59,11 +59,11 @@ const ORDINAL_WORDS = [
   "Ninth", "Tenth", "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth",
 ];
 
-/** "2014" -> "First EC (Session 2014-15)" */
+/** "2014" -> "First EC (2014-15)" */
 function ecSessionLabel(year: number) {
   const n = year - FOUNDING_YEAR + 1;
   const word = ORDINAL_WORDS[n - 1] ?? `${n}th`;
-  return `${word} EC (Session ${sessionLabel(year)})`;
+  return `${word} EC (${sessionLabel(year)})`;
 }
 
 const isPresident = (m: Member) =>
