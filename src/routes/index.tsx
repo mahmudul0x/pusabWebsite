@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   GraduationCap,
   HeartHandshake,
   BookOpen,
@@ -18,12 +20,11 @@ import { GradientButton } from "@/components/site/GradientButton";
 import { StatCounter } from "@/components/site/StatCounter";
 import { GlowCard } from "@/components/site/GlowCard";
 import { SITE, STATS } from "@/lib/site-content";
-import homeHero1 from "@/assets/home-hero-1.jpg";
-import homeHero2 from "@/assets/home-hero-2.jpg";
-import homeHero3 from "@/assets/home-hero-3.jpg";
+import homeHero1 from "@/assets/home-hero-1.png";
+import homeHero2 from "@/assets/home-hero-2.png";
 import sayorHome from "@/assets/sayor-home.png";
 
-const HERO_SLIDES = [homeHero1, homeHero2, homeHero3];
+const HERO_SLIDES = [homeHero1, homeHero2];
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -349,6 +350,8 @@ function HeroSlideshow() {
     const id = setInterval(() => setI((v) => (v + 1) % HERO_SLIDES.length), 6000);
     return () => clearInterval(id);
   }, []);
+  const prev = () => setI((v) => (v - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+  const next = () => setI((v) => (v + 1) % HERO_SLIDES.length);
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       <AnimatePresence>
@@ -366,11 +369,28 @@ function HeroSlideshow() {
           className="absolute inset-0 w-full h-full object-cover"
         />
       </AnimatePresence>
-      {/* Cinematic scrim — darkens the photo just enough for crisp white text. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/55 via-slate-950/45 to-slate-950/80" />
+      {/* Cinematic scrim — darkens just enough for crisp white text, lets the photo read elsewhere. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/25 via-slate-950/35 to-slate-950/70" />
       {/* Center focus + faint brand tint. */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(2,6,23,0.30),transparent_72%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(124,58,237,0.18),transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(2,6,23,0.22),transparent_65%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(124,58,237,0.14),transparent_55%)]" />
+
+      {/* Prev / next arrows */}
+      <button
+        onClick={prev}
+        aria-label="Previous slide"
+        className="absolute left-3 top-1/2 z-10 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/35 md:left-6 md:h-12 md:w-12"
+      >
+        <ChevronLeft size={20} />
+      </button>
+      <button
+        onClick={next}
+        aria-label="Next slide"
+        className="absolute right-3 top-1/2 z-10 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/35 md:right-6 md:h-12 md:w-12"
+      >
+        <ChevronRight size={20} />
+      </button>
+
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
         {HERO_SLIDES.map((_, idx) => (
           <button
