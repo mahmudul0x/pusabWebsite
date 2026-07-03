@@ -28,6 +28,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HonorBoardIndexRouteImport } from './routes/honor-board/index'
+import { Route as ProgramsSlugRouteImport } from './routes/programs.$slug'
 import { Route as HonorBoardYearRouteImport } from './routes/honor-board/$year'
 import { Route as EcYearRouteImport } from './routes/ec.$year'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -126,6 +127,11 @@ const HonorBoardIndexRoute = HonorBoardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => HonorBoardRoute,
 } as any)
+const ProgramsSlugRoute = ProgramsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ProgramsRoute,
+} as any)
 const HonorBoardYearRoute = HonorBoardYearRouteImport.update({
   id: '/$year',
   path: '/$year',
@@ -155,7 +161,7 @@ export interface FileRoutesByFullPath {
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/president-message': typeof PresidentMessageRoute
-  '/programs': typeof ProgramsRoute
+  '/programs': typeof ProgramsRouteWithChildren
   '/publicity': typeof PublicityRoute
   '/sayor': typeof SayorRoute
   '/secretary-message': typeof SecretaryMessageRoute
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/ec/$year': typeof EcYearRoute
   '/honor-board/$year': typeof HonorBoardYearRoute
+  '/programs/$slug': typeof ProgramsSlugRoute
   '/honor-board/': typeof HonorBoardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -177,7 +184,7 @@ export interface FileRoutesByTo {
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/president-message': typeof PresidentMessageRoute
-  '/programs': typeof ProgramsRoute
+  '/programs': typeof ProgramsRouteWithChildren
   '/publicity': typeof PublicityRoute
   '/sayor': typeof SayorRoute
   '/secretary-message': typeof SecretaryMessageRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/ec/$year': typeof EcYearRoute
   '/honor-board/$year': typeof HonorBoardYearRoute
+  '/programs/$slug': typeof ProgramsSlugRoute
   '/honor-board': typeof HonorBoardIndexRoute
 }
 export interface FileRoutesById {
@@ -202,7 +210,7 @@ export interface FileRoutesById {
   '/leadership': typeof LeadershipRoute
   '/moments': typeof MomentsRoute
   '/president-message': typeof PresidentMessageRoute
-  '/programs': typeof ProgramsRoute
+  '/programs': typeof ProgramsRouteWithChildren
   '/publicity': typeof PublicityRoute
   '/sayor': typeof SayorRoute
   '/secretary-message': typeof SecretaryMessageRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/ec/$year': typeof EcYearRoute
   '/honor-board/$year': typeof HonorBoardYearRoute
+  '/programs/$slug': typeof ProgramsSlugRoute
   '/honor-board/': typeof HonorBoardIndexRoute
 }
 export interface FileRouteTypes {
@@ -235,6 +244,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ec/$year'
     | '/honor-board/$year'
+    | '/programs/$slug'
     | '/honor-board/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ec/$year'
     | '/honor-board/$year'
+    | '/programs/$slug'
     | '/honor-board'
   id:
     | '__root__'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/ec/$year'
     | '/honor-board/$year'
+    | '/programs/$slug'
     | '/honor-board/'
   fileRoutesById: FileRoutesById
 }
@@ -298,7 +310,7 @@ export interface RootRouteChildren {
   LeadershipRoute: typeof LeadershipRoute
   MomentsRoute: typeof MomentsRoute
   PresidentMessageRoute: typeof PresidentMessageRoute
-  ProgramsRoute: typeof ProgramsRoute
+  ProgramsRoute: typeof ProgramsRouteWithChildren
   PublicityRoute: typeof PublicityRoute
   SayorRoute: typeof SayorRoute
   SecretaryMessageRoute: typeof SecretaryMessageRoute
@@ -441,6 +453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HonorBoardIndexRouteImport
       parentRoute: typeof HonorBoardRoute
     }
+    '/programs/$slug': {
+      id: '/programs/$slug'
+      path: '/$slug'
+      fullPath: '/programs/$slug'
+      preLoaderRoute: typeof ProgramsSlugRouteImport
+      parentRoute: typeof ProgramsRoute
+    }
     '/honor-board/$year': {
       id: '/honor-board/$year'
       path: '/$year'
@@ -490,6 +509,18 @@ const HonorBoardRouteWithChildren = HonorBoardRoute._addFileChildren(
   HonorBoardRouteChildren,
 )
 
+interface ProgramsRouteChildren {
+  ProgramsSlugRoute: typeof ProgramsSlugRoute
+}
+
+const ProgramsRouteChildren: ProgramsRouteChildren = {
+  ProgramsSlugRoute: ProgramsSlugRoute,
+}
+
+const ProgramsRouteWithChildren = ProgramsRoute._addFileChildren(
+  ProgramsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -504,7 +535,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeadershipRoute: LeadershipRoute,
   MomentsRoute: MomentsRoute,
   PresidentMessageRoute: PresidentMessageRoute,
-  ProgramsRoute: ProgramsRoute,
+  ProgramsRoute: ProgramsRouteWithChildren,
   PublicityRoute: PublicityRoute,
   SayorRoute: SayorRoute,
   SecretaryMessageRoute: SecretaryMessageRoute,

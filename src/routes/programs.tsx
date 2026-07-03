@@ -1,24 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useMemo, useState, type ComponentType } from "react";
+import { useMemo, useState } from "react";
 import { PageHero } from "@/components/site/PageHero";
 import { GradientButton } from "@/components/site/GradientButton";
-import { programsApi, optimizeImage } from "@/lib/api";
-import {
-  Users,
-  GraduationCap,
-  HeartHandshake,
-  Trees,
-  Stethoscope,
-  Radio,
-  BookOpen,
-  Sparkles,
-  ArrowUpRight,
-  CalendarClock,
-  CheckCircle2,
-  Clock,
-  MapPin,
-} from "lucide-react";
+import { useProgramEvents, statusOf, type IconType, type Status } from "@/lib/usePrograms";
+import { ArrowUpRight, CalendarClock, CheckCircle2, Clock, MapPin } from "lucide-react";
 import heroPrograms from "@/assets/hero-programs.jpg";
 
 // Drop a photo named by the event id into src/assets/programs (e.g.
@@ -35,153 +21,6 @@ function imageFor(id: string): string | undefined {
   }
   return undefined;
 }
-
-type IconType = ComponentType<{ size?: number; className?: string }>;
-type Status = "upcoming" | "ongoing" | "completed";
-
-type ProgramEvent = {
-  id: string;
-  title: string;
-  category: string;
-  Icon: IconType;
-  /** ISO date — drives the computed status. Omit for always-on programs. */
-  date?: string;
-  /** Always-on / recurring programs are surfaced as "ongoing". */
-  ongoing?: boolean;
-  recurrence?: string;
-  location: string;
-  desc: string;
-  /** Cloudinary/remote image (from the API). Falls back to a repo asset by id. */
-  image?: string;
-};
-
-// Map an API program's category to an icon for the card.
-const CATEGORY_ICON: Record<string, IconType> = {
-  flagship: Users,
-  education: GraduationCap,
-  aid: HeartHandshake,
-  community: Trees,
-  relief: Stethoscope,
-  digital: Radio,
-  publication: BookOpen,
-};
-const iconFor = (category: string): IconType =>
-  CATEGORY_ICON[category.trim().toLowerCase()] ?? Sparkles;
-
-// Real-world programme calendar. Status is derived from the date below, so the
-// page stays correct over time without code changes.
-const EVENTS: ProgramEvent[] = [
-  {
-    id: "webinar-2026",
-    title: "Online Career Webinar",
-    category: "Digital",
-    Icon: Radio,
-    date: "2026-07-12",
-    location: "Online · Zoom",
-    desc: "Live Q&A with alumni across medicine, engineering and civil service on careers after graduation.",
-  },
-  {
-    id: "medical-camp-2026",
-    title: "Free Medical Camp",
-    category: "Relief",
-    Icon: Stethoscope,
-    date: "2026-08-23",
-    location: "Bishwambarpur Upazila",
-    desc: "A day-long free health camp — general check-ups, medicine and awareness for the local community.",
-  },
-  {
-    id: "sayor-2026",
-    title: "SAYOR — 12th Edition",
-    category: "Publication",
-    Icon: BookOpen,
-    date: "2026-10-15",
-    location: "Print + Digital",
-    desc: "The new issue of PUSAB's annual magazine, gathering literature, essays and alumni voices.",
-  },
-  {
-    id: "scholarship-2026",
-    title: "PUSAB Scholarship 2026",
-    category: "Aid",
-    Icon: HeartHandshake,
-    date: "2026-11-05",
-    location: "Applications online",
-    desc: "Merit and need-based stipends for deserving students from underserved families, with mentor pairing.",
-  },
-  {
-    id: "reunion-2026",
-    title: "Annual Reunion 2026",
-    category: "Flagship",
-    Icon: Users,
-    date: "2026-12-20",
-    location: "Sunamganj",
-    desc: "The flagship gathering — cross-batch networking, awards and a cultural evening for 500+ members.",
-  },
-  {
-    id: "schooling",
-    title: "School Tutoring Programme",
-    category: "Education",
-    Icon: GraduationCap,
-    ongoing: true,
-    recurrence: "Weekly sessions",
-    location: "12 local schools",
-    desc: "Free tutoring, career mentoring and olympiad prep delivered by members across the upazila.",
-  },
-  {
-    id: "online-mentoring",
-    title: "Admission Mentoring",
-    category: "Digital",
-    Icon: Radio,
-    ongoing: true,
-    recurrence: "Monthly AMAs",
-    location: "Online",
-    desc: "Rolling admission AMAs and one-to-one guidance for university aspirants from Bishwambarpur.",
-  },
-  {
-    id: "picnic-2026",
-    title: "Winter Picnic 2026",
-    category: "Community",
-    Icon: Trees,
-    date: "2026-01-31",
-    location: "Tanguar Haor",
-    desc: "A full-day outdoor reunion with games, cuisine and families welcome — a warm start to the year.",
-  },
-  {
-    id: "sayor-11",
-    title: "SAYOR — 11th Edition",
-    category: "Publication",
-    Icon: BookOpen,
-    date: "2025-12-10",
-    location: "Print + Digital",
-    desc: "Released the eleventh annual issue with 17 pieces spanning education, culture and creative writing.",
-  },
-  {
-    id: "reunion-2025",
-    title: "Annual Reunion 2025",
-    category: "Flagship",
-    Icon: Users,
-    date: "2025-12-21",
-    location: "Sunamganj",
-    desc: "Hundreds of members reunited for recognition, networking and a memorable cultural night.",
-  },
-  {
-    id: "scholarship-2025",
-    title: "PUSAB Scholarship 2025",
-    category: "Aid",
-    Icon: HeartHandshake,
-    date: "2025-11-08",
-    location: "Disbursed directly",
-    desc: "Awarded need-based stipends to students preparing for and entering public universities.",
-  },
-  {
-    id: "flood-relief-2024",
-    title: "Flood Relief Drive",
-    category: "Relief",
-    Icon: Stethoscope,
-    date: "2024-07-15",
-    location: "Sunamganj",
-    desc: "Coordinated emergency relief, food and shelter support for flood-affected families across the region.",
-  },
-];
 
 const STATUS_META: Record<
   Status,
@@ -209,12 +48,6 @@ const STATUS_META: Record<
     ctaTo: "/moments",
   },
 };
-
-function statusOf(e: ProgramEvent, now: number): Status {
-  if (e.ongoing) return "ongoing";
-  if (e.date && new Date(e.date).getTime() >= now) return "upcoming";
-  return "completed";
-}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -264,34 +97,8 @@ const FILTERS: { key: "all" | Status; label: string }[] = [
 ];
 
 function ProgramsPage() {
-  const now = useMemo(() => Date.now(), []);
   const [filter, setFilter] = useState<"all" | Status>("all");
-  const [apiEvents, setApiEvents] = useState<ProgramEvent[] | null>(null);
-
-  // Load programs from the API; fall back to the built-in calendar if empty.
-  useEffect(() => {
-    programsApi
-      .listAll()
-      .then((rows) =>
-        setApiEvents(
-          rows.map((p) => ({
-            id: String(p.id),
-            title: p.title,
-            category: p.category,
-            Icon: iconFor(p.category),
-            date: p.date ?? undefined,
-            ongoing: p.ongoing,
-            recurrence: p.recurrence,
-            location: p.location,
-            desc: p.description,
-            image: p.image_url ? optimizeImage(p.image_url, 800) : undefined,
-          })),
-        ),
-      )
-      .catch(() => setApiEvents([]));
-  }, []);
-
-  const source = apiEvents && apiEvents.length > 0 ? apiEvents : EVENTS;
+  const { events: source, now } = useProgramEvents();
 
   const { ordered, counts } = useMemo(() => {
     const rank: Record<Status, number> = { upcoming: 0, ongoing: 1, completed: 2 };
