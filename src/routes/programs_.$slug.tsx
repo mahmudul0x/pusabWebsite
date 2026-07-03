@@ -40,7 +40,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-export const Route = createFileRoute("/programs/$slug")({
+export const Route = createFileRoute("/programs_/$slug")({
   loader: async ({ params }) => {
     const fallback = PROGRAMS.find((p) => p.key === params.slug);
     if (!fallback) throw notFound();
