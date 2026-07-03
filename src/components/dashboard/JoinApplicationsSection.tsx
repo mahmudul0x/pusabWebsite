@@ -5,12 +5,36 @@ import { contactApi, type ContactMessage } from "@/lib/api";
 import { useResource, errMessage } from "./useResource";
 import { SectionHeader, EmptyState, Toolbar, FilterSelect, ListSkeleton, useConfirm } from "./primitives";
 
-function InfoPill({ icon, value }: { icon: React.ReactNode; value: string }) {
+function DetailItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-[var(--color-background)] px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-      {icon}
-      {value}
-    </span>
+    <div className="flex items-start gap-2">
+      <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-[var(--color-background)] text-muted-foreground">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70">{label}</p>
+        <p className="text-sm font-medium leading-snug break-words">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function DetailGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-border bg-[var(--color-background)]/60 p-3.5">
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--color-accent-1)] mb-2.5">
+        {title}
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{children}</div>
+    </div>
   );
 }
 
@@ -135,18 +159,42 @@ export function JoinApplicationsSection() {
                   </div>
                 </div>
 
-                {/* Info pills */}
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {m.father_name && <InfoPill icon={<UserRound size={10} />} value={`Father: ${m.father_name}`} />}
-                  {m.mother_name && <InfoPill icon={<UserRound size={10} />} value={`Mother: ${m.mother_name}`} />}
-                  {m.blood_group && <InfoPill icon={<Droplet size={10} />} value={m.blood_group} />}
-                  {m.university && <InfoPill icon={<GraduationCap size={10} />} value={m.university} />}
-                  {m.subject && <InfoPill icon={<BookOpen size={10} />} value={m.subject} />}
-                  {m.session && <InfoPill icon={<BookOpen size={10} />} value={`Session: ${m.session}`} />}
-                  {m.union_name && <InfoPill icon={<MapPin size={10} />} value={m.union_name} />}
-                  {m.village && <InfoPill icon={<MapPin size={10} />} value={m.village} />}
-                  {m.school && <InfoPill icon={<School size={10} />} value={m.school} />}
-                  {m.college && <InfoPill icon={<School size={10} />} value={m.college} />}
+                {/* Details */}
+                <div className="mt-4 space-y-2.5">
+                  {(m.father_name || m.mother_name || m.blood_group) && (
+                    <DetailGroup title="Family">
+                      {m.father_name && (
+                        <DetailItem icon={<UserRound size={12} />} label="Father's name" value={m.father_name} />
+                      )}
+                      {m.mother_name && (
+                        <DetailItem icon={<UserRound size={12} />} label="Mother's name" value={m.mother_name} />
+                      )}
+                      {m.blood_group && (
+                        <DetailItem icon={<Droplet size={12} />} label="Blood group" value={m.blood_group} />
+                      )}
+                    </DetailGroup>
+                  )}
+
+                  {(m.university || m.subject || m.session) && (
+                    <DetailGroup title="Academic">
+                      {m.university && (
+                        <DetailItem icon={<GraduationCap size={12} />} label="Institute" value={m.university} />
+                      )}
+                      {m.subject && (
+                        <DetailItem icon={<BookOpen size={12} />} label="Subject / Department" value={m.subject} />
+                      )}
+                      {m.session && <DetailItem icon={<BookOpen size={12} />} label="Session" value={m.session} />}
+                    </DetailGroup>
+                  )}
+
+                  {(m.union_name || m.village || m.school || m.college) && (
+                    <DetailGroup title="Address & Schooling">
+                      {m.union_name && <DetailItem icon={<MapPin size={12} />} label="Union" value={m.union_name} />}
+                      {m.village && <DetailItem icon={<MapPin size={12} />} label="Village" value={m.village} />}
+                      {m.school && <DetailItem icon={<School size={12} />} label="School" value={m.school} />}
+                      {m.college && <DetailItem icon={<School size={12} />} label="College" value={m.college} />}
+                    </DetailGroup>
+                  )}
                 </div>
 
                 {m.message && (
