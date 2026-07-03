@@ -1,7 +1,7 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useState } from "react";
 import {
-  ArrowUpRight,
   MapPin,
   CalendarClock,
   Clock,
@@ -10,9 +10,9 @@ import {
   ListChecks,
   Quote,
   ChevronRight,
+  ChevronDown,
   AlertTriangle,
 } from "lucide-react";
-import { GradientButton } from "@/components/site/GradientButton";
 import { programPagesApi, optimizeImage, type ProgramPage } from "@/lib/api";
 import { PROGRAMS } from "@/lib/site-content";
 import { useProgramEvents, statusOf, type Status } from "@/lib/usePrograms";
@@ -127,14 +127,58 @@ function StatChips({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) 
   );
 }
 
+function YearFilter({
+  years,
+  year,
+  onChange,
+  accent,
+}: {
+  years: number[];
+  year: number | "all";
+  onChange: (y: number | "all") => void;
+  accent: string;
+}) {
+  if (years.length === 0) return null;
+  return (
+    <div className="relative inline-block">
+      <select
+        value={year}
+        onChange={(e) => onChange(e.target.value === "all" ? "all" : Number(e.target.value))}
+        className="appearance-none rounded-full border bg-[var(--color-surface)] py-2 pl-4 pr-9 text-sm font-semibold outline-none transition-colors"
+        style={{ borderColor: `color-mix(in oklab, ${accent} 30%, var(--color-border))` }}
+      >
+        <option value="all">All years</option>
+        {years.map((y) => (
+          <option key={y} value={y}>
+            {y}
+          </option>
+        ))}
+      </select>
+      <ChevronDown size={13} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+    </div>
+  );
+}
+
 /**
  * Reunion — a once-a-year gathering: everyone who's ever been part of PUSAB
  * comes back, and the day is remembered through its photos. So the page
  * leads with that framing, then puts the photo wall front and center
- * (bigger and earlier than any other layout), and keeps the moment-by-moment
- * timeline as supporting detail underneath rather than the lead element.
+ * (bigger and earlier than any other layout), filterable by edition/year
+ * since a new set of photos and numbers exists for every year it's held.
  */
 function TimelineLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
+  const years = useMemo(() => {
+    const set = new Set<number>();
+    page.gallery.forEach((g) => g.year && set.add(g.year));
+    page.stats.forEach((s) => s.year && set.add(s.year));
+    return [...set].sort((a, b) => b - a);
+  }, [page.gallery, page.stats]);
+
+  const [year, setYear] = useState<number | "all">(years[0] ?? "all");
+
+  const gallery = year === "all" ? page.gallery : page.gallery.filter((g) => g.year === year);
+  const stats = year === "all" ? page.stats : page.stats.filter((s) => s.year === year);
+
   return (
     <>
       <div
@@ -152,15 +196,24 @@ function TimelineLayout({ page, theme }: { page: ProgramPage; theme: ProgramThem
         </p>
       </div>
 
-      <StatBanner page={page} theme={theme} />
+      {years.length > 0 && (
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <SectionLabel icon={<CalendarClock size={13} />} accent={theme.colorA}>
+            Browse by edition
+          </SectionLabel>
+          <YearFilter years={years} year={year} onChange={setYear} accent={theme.colorA} />
+        </div>
+      )}
 
-      {page.gallery.length > 0 && (
+      <StatBanner page={{ ...page, stats }} theme={theme} />
+
+      {gallery.length > 0 && (
         <div className="mb-10">
           <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
             Faces from the night
           </SectionLabel>
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-            {page.gallery.map((g, i) => (
+            {gallery.map((g, i) => (
               <div
                 key={g.id}
                 className={
@@ -185,45 +238,6 @@ function TimelineLayout({ page, theme }: { page: ProgramPage; theme: ProgramThem
         </div>
       )}
 
-      {page.objectives.length > 0 && (
-        <div className="mb-10">
-          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
-            The evening, moment by moment
-          </SectionLabel>
-          <div className="relative pl-8">
-            <div
-              className="absolute left-2.5 top-1 bottom-1 w-px"
-              style={{ background: `linear-gradient(to bottom, ${theme.colorA}, ${theme.colorB})` }}
-            />
-            <ol className="space-y-6">
-              {page.objectives.map((o) => (
-                <li key={o.id} className="relative">
-                  <span
-                    className="absolute -left-8 top-1 grid h-4 w-4 place-items-center rounded-full"
-                    style={{ background: theme.colorA }}
-                  />
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-                    {o.image_url && (
-                      <img
-                        src={optimizeImage(o.image_url, 200)}
-                        alt={o.title}
-                        loading="lazy"
-                        className="h-20 w-28 shrink-0 rounded-lg object-cover"
-                      />
-                    )}
-                    <div>
-                      <h3 className="font-display text-base font-semibold leading-tight">{o.title}</h3>
-                      {o.description && (
-                        <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{o.description}</p>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      )}
       {(page.eligibility || page.process) && (
         <div className="mb-10 rounded-xl border border-border bg-[var(--color-surface)] p-5">
           {page.eligibility && (
@@ -254,31 +268,6 @@ function ChecklistLayout({ page, theme }: { page: ProgramPage; theme: ProgramThe
           <p className="text-sm leading-relaxed">{page.eligibility}</p>
         </div>
       )}
-      {page.objectives.length > 0 && (
-        <div className="mb-10">
-          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
-            What's included
-          </SectionLabel>
-          <ol className="space-y-2.5">
-            {page.objectives.map((o, i) => (
-              <li key={o.id} className="flex items-start gap-3 rounded-xl border border-border bg-[var(--color-surface)] p-4">
-                <span
-                  className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold text-white"
-                  style={{ background: theme.colorA }}
-                >
-                  {i + 1}
-                </span>
-                <div>
-                  <h3 className="text-sm font-semibold leading-tight">{o.title}</h3>
-                  {o.description && (
-                    <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{o.description}</p>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
       {page.process && (
         <div className="mb-10 rounded-xl border border-border bg-[var(--color-surface)] p-5">
           <SectionLabel icon={<ClipboardList size={13} />} accent={theme.colorA}>
@@ -295,41 +284,6 @@ function ChecklistLayout({ page, theme }: { page: ProgramPage; theme: ProgramThe
 function CurriculumLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
   return (
     <>
-      {page.objectives.length > 0 && (
-        <div className="mb-10">
-          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
-            What we teach
-          </SectionLabel>
-          <div className="grid gap-1.5 sm:grid-cols-3">
-            {page.objectives.map((o) => (
-              <div key={o.id} className="group relative aspect-[4/3] overflow-hidden rounded-lg">
-                {o.image_url ? (
-                  <img
-                    src={optimizeImage(o.image_url, 400)}
-                    alt={o.title}
-                    loading="lazy"
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div
-                    className="absolute inset-0"
-                    style={{ background: `linear-gradient(135deg, ${theme.colorA}, ${theme.colorB})` }}
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/10 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-3">
-                  <h3 className="text-sm font-semibold text-white leading-tight">{o.title}</h3>
-                  {o.description && (
-                    <p className="mt-0.5 text-[11px] text-white/80 leading-relaxed line-clamp-2">
-                      {o.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
       <div className="mb-10 grid gap-6 sm:grid-cols-2">
         {page.eligibility && (
           <div>
@@ -382,34 +336,6 @@ function SpotlightLayout({ page, theme }: { page: ProgramPage; theme: ProgramThe
                     <p className="text-sm font-semibold leading-tight">{t.name}</p>
                     {t.role && <p className="text-xs text-muted-foreground">{t.role}</p>}
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      {page.objectives.length > 0 && (
-        <div className="mb-10">
-          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
-            The ceremony
-          </SectionLabel>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {page.objectives.map((o) => (
-              <div
-                key={o.id}
-                className="overflow-hidden rounded-2xl border-2"
-                style={{ borderColor: `color-mix(in oklab, ${theme.colorA} 25%, var(--color-border))` }}
-              >
-                <div className="relative aspect-[16/9] overflow-hidden" style={{ background: `linear-gradient(135deg, ${theme.colorA}, ${theme.colorB})` }}>
-                  {o.image_url ? (
-                    <img src={optimizeImage(o.image_url, 600)} alt={o.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-                  ) : (
-                    <theme.Icon size={32} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white/85" />
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-display text-base font-semibold">{o.title}</h3>
-                  {o.description && <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{o.description}</p>}
                 </div>
               </div>
             ))}
@@ -474,30 +400,6 @@ function AlertLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }
           </ol>
         </div>
       )}
-      {page.objectives.length > 0 && (
-        <div className="mb-10">
-          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
-            Where we've responded
-          </SectionLabel>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {page.objectives.map((o) => (
-              <div key={o.id} className="overflow-hidden rounded-xl border border-border bg-[var(--color-surface)]">
-                <div className="relative aspect-square overflow-hidden" style={{ background: `linear-gradient(135deg, ${theme.colorA}, ${theme.colorB})` }}>
-                  {o.image_url ? (
-                    <img src={optimizeImage(o.image_url, 400)} alt={o.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-                  ) : (
-                    <theme.Icon size={24} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white/80" />
-                  )}
-                </div>
-                <div className="p-3">
-                  <h3 className="text-sm font-semibold leading-tight">{o.title}</h3>
-                  {o.description && <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{o.description}</p>}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
       <StatChips page={page} theme={theme} />
     </>
   );
@@ -532,25 +434,6 @@ function GalleryFirstLayout({ page, theme }: { page: ProgramPage; theme: Program
           ))}
         </div>
       )}
-      {page.objectives.length > 0 && (
-        <div className="mb-10">
-          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
-            Why we go
-          </SectionLabel>
-          <div className="flex flex-wrap gap-2.5">
-            {page.objectives.map((o) => (
-              <div
-                key={o.id}
-                className="rounded-full border px-4 py-2 text-sm"
-                style={{ borderColor: `color-mix(in oklab, ${theme.colorA} 30%, var(--color-border))` }}
-              >
-                <span className="font-semibold">{o.title}</span>
-                {o.description && <span className="text-muted-foreground"> — {o.description}</span>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
       <StatChips page={page} theme={theme} />
     </>
   );
@@ -560,24 +443,6 @@ function GalleryFirstLayout({ page, theme }: { page: ProgramPage; theme: Program
 function CompactLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
   return (
     <>
-      {page.objectives.length > 0 && (
-        <div className="mb-10 grid gap-2.5 sm:grid-cols-2">
-          {page.objectives.map((o) => (
-            <div key={o.id} className="flex items-center gap-3 rounded-xl border border-border bg-[var(--color-surface)] p-4">
-              <span
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-white"
-                style={{ background: `linear-gradient(135deg, ${theme.colorA}, ${theme.colorB})` }}
-              >
-                <theme.Icon size={16} />
-              </span>
-              <div className="min-w-0">
-                <h3 className="text-sm font-semibold leading-tight">{o.title}</h3>
-                {o.description && <p className="text-xs text-muted-foreground leading-relaxed">{o.description}</p>}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
       {(page.eligibility || page.process) && (
         <div className="mb-10 space-y-3 rounded-xl border border-border bg-[var(--color-surface)] p-5">
           {page.eligibility && (
@@ -815,29 +680,6 @@ function ProgramDetailPage() {
             </div>
           )}
 
-          {/* CTA */}
-          <div className="relative overflow-hidden rounded-[2rem] p-8 md:p-12" style={{ background: gradient }}>
-            <div className="absolute inset-0 [background-image:linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:32px_32px] opacity-50" />
-            <div className="relative flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-              <div className="max-w-xl text-white">
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/80">Get involved</p>
-                <h3 className="mt-3 font-display text-2xl md:text-3xl font-bold leading-tight">
-                  Want to take part in {title}? Reach out to the team.
-                </h3>
-              </div>
-              <GradientButton to="/contact" variant="ghost" className="text-white! border-white/45!">
-                <span className="inline-flex items-center gap-1.5">
-                  Contact the team <ArrowUpRight size={16} />
-                </span>
-              </GradientButton>
-            </div>
-          </div>
-
-          <div className="mt-10 text-center">
-            <Link to="/programs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              ← Back to all programs
-            </Link>
-          </div>
         </div>
       </section>
     </>

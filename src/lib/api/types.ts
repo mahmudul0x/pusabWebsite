@@ -135,6 +135,7 @@ export interface ProgramObjective {
 
 export interface ProgramStat {
   id: number;
+  year: number | null;
   label: string;
   value: string;
   order: number;
@@ -142,6 +143,7 @@ export interface ProgramStat {
 
 export interface ProgramGalleryImage {
   id: number;
+  year: number | null;
   image_url: string;
   caption: string;
   order: number;
@@ -149,6 +151,7 @@ export interface ProgramGalleryImage {
 
 export interface ProgramTestimonial {
   id: number;
+  year: number | null;
   name: string;
   role: string;
   quote: string;

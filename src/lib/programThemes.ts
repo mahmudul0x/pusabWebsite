@@ -28,7 +28,9 @@ export type ProgramLayout =
 
 export interface ProgramTheme {
   Icon: LucideIcon;
-  /** CSS color values (not var() names) used for this page's accent gradient. */
+  /** CSS color values used for this page's accent gradient — always the
+   * site's own accent tokens, so every program page matches the main
+   * theme rather than carrying its own brand color. */
   colorA: string;
   colorB: string;
   layout: ProgramLayout;
@@ -36,53 +38,58 @@ export interface ProgramTheme {
   mood: string;
 }
 
+// Every program shares the site's accent gradient — only the layout and
+// mood icon/label vary per program, not the color.
+const SITE_COLOR_A = "var(--color-accent-1)";
+const SITE_COLOR_B = "var(--color-accent-2)";
+
 export const PROGRAM_THEMES: Record<string, ProgramTheme> = {
   reunion: {
     Icon: Users,
-    colorA: "#f59e0b",
-    colorB: "#ef4444",
+    colorA: SITE_COLOR_A,
+    colorB: SITE_COLOR_B,
     layout: "timeline",
     mood: "Celebration",
   },
   schooling: {
     Icon: GraduationCap,
-    colorA: "#0ea5e9",
-    colorB: "#22c55e",
+    colorA: SITE_COLOR_A,
+    colorB: SITE_COLOR_B,
     layout: "curriculum",
     mood: "Education",
   },
   scholarship: {
     Icon: Award,
-    colorA: "#22c55e",
-    colorB: "#0ea5e9",
+    colorA: SITE_COLOR_A,
+    colorB: SITE_COLOR_B,
     layout: "checklist",
     mood: "Opportunity",
   },
   felicitation: {
     Icon: Award,
-    colorA: "#a855f7",
-    colorB: "#ec4899",
+    colorA: SITE_COLOR_A,
+    colorB: SITE_COLOR_B,
     layout: "spotlight",
     mood: "Recognition",
   },
   humanity: {
     Icon: Stethoscope,
-    colorA: "#ef4444",
-    colorB: "#f59e0b",
+    colorA: SITE_COLOR_A,
+    colorB: SITE_COLOR_B,
     layout: "alert",
     mood: "Relief",
   },
   picnic: {
     Icon: Trees,
-    colorA: "#f97316",
-    colorB: "#eab308",
+    colorA: SITE_COLOR_A,
+    colorB: SITE_COLOR_B,
     layout: "gallery-first",
     mood: "Togetherness",
   },
   online: {
     Icon: Radio,
-    colorA: "#6366f1",
-    colorB: "#06b6d4",
+    colorA: SITE_COLOR_A,
+    colorB: SITE_COLOR_B,
     layout: "compact",
     mood: "Digital",
   },
@@ -90,8 +97,8 @@ export const PROGRAM_THEMES: Record<string, ProgramTheme> = {
 
 export const DEFAULT_THEME: ProgramTheme = {
   Icon: HeartHandshake,
-  colorA: "var(--color-accent-1)",
-  colorB: "var(--color-accent-2)",
+  colorA: SITE_COLOR_A,
+  colorB: SITE_COLOR_B,
   layout: "checklist",
   mood: "Program",
 };
