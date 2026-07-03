@@ -37,13 +37,30 @@ export class ApiError extends Error {
   }
 }
 
+/** Flattens a DRF error value (string | string[] | nested object | list of nested objects) into one readable message. */
+function flattenFieldError(v: unknown): string | undefined {
+  if (typeof v === "string") return v;
+  if (Array.isArray(v)) {
+    for (const item of v) {
+      const msg = flattenFieldError(item);
+      if (msg) return msg;
+    }
+    return undefined;
+  }
+  if (v && typeof v === "object") {
+    for (const [nestedKey, nestedVal] of Object.entries(v as Record<string, unknown>)) {
+      const msg = flattenFieldError(nestedVal);
+      if (msg) return `${nestedKey}: ${msg}`;
+    }
+  }
+  return undefined;
+}
+
 function firstFieldError(d: Record<string, unknown>): string | undefined {
   const key = Object.keys(d)[0];
   if (!key) return undefined;
-  const v = d[key];
-  if (Array.isArray(v)) return `${key}: ${String(v[0])}`;
-  if (typeof v === "string") return v;
-  return undefined;
+  const msg = flattenFieldError(d[key]);
+  return msg ? `${key} — ${msg}` : undefined;
 }
 
 async function toApiError(res: Response): Promise<ApiError> {

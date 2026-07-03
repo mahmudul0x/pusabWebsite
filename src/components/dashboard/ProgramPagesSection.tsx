@@ -69,8 +69,21 @@ export function ProgramPagesSection() {
   const set = <K extends keyof ProgramPage>(k: K, v: ProgramPage[K]) =>
     setForm((f) => (f ? { ...f, [k]: v } : f));
 
+  function validate(f: ProgramPage): string | null {
+    if (f.objectives.some((o) => !o.title.trim())) return "Every highlight needs a title.";
+    if (f.stats.some((s) => !s.label.trim() || !s.value.trim())) return "Every stat needs a label and a value.";
+    if (f.gallery.some((g) => !g.image_url.trim())) return "Remove empty gallery rows, or add a photo to them.";
+    if (f.testimonials.some((t) => !t.name.trim() || !t.quote.trim())) return "Every testimonial needs a name and a quote.";
+    return null;
+  }
+
   async function save() {
     if (!form) return;
+    const problem = validate(form);
+    if (problem) {
+      toast.error(problem);
+      return;
+    }
     setSaving(true);
     try {
       const updated = await programPagesApi.update(form.slug, {
