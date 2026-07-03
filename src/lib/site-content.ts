@@ -2,7 +2,7 @@ export const SITE = {
   name: "PUSAB",
   fullName: "Public University Students' Association of Bishwambarpur",
   founded: "July 30, 2014",
-  foundedAt: "Govt. Digendra Barman College, Bishwambarpur Upazila, Sunamganj",
+  foundedAt: "Digendra Barman Government College (then Digendra Barman Degree College), Bishwambarpur Upazila, Sunamganj",
   members: "300+",
   email: "info.pusab@gmail.com",
   phone: "+880 1992-93601",

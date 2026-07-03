@@ -45,7 +45,7 @@ const GLANCE_FACTS = [
   { value: SITE.members, label: "Active members" },
   { value: "Non-profit", label: "Structure" },
   { value: "Non-political", label: "Affiliation" },
-  { value: "1st in Sunamganj", label: "Of its kind" },
+  { value: "First in Sunamganj", label: "Of its kind" },
 ];
 
 export const Route = createFileRoute("/about")({
@@ -55,7 +55,7 @@ export const Route = createFileRoute("/about")({
       {
         name: "description",
         content:
-          "PUSAB is a non-profit, non-political student association from Bishwambarpur Upazila, founded in 2014 at Govt. Digendra Barman College.",
+          "PUSAB is a non-profit, non-political student association from Bishwambarpur Upazila, founded in 2014 at Digendra Barman Government College (then Digendra Barman Degree College).",
       },
       { property: "og:title", content: "About — PUSAB" },
       {
@@ -235,7 +235,7 @@ function AboutPage() {
                 },
                 {
                   date: "2018",
-                  title: "SAYOR — pre-admission coaching",
+                  title: "SAYOR- thoughts of years.",
                   desc: "Started the Students' Admission Yearly Orientation Round, mentoring hundreds of admission seekers each year.",
                 },
                 {
