@@ -127,11 +127,64 @@ function StatChips({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) 
   );
 }
 
-/** Reunion — vertical timeline of highlights, celebratory stat banner. */
+/**
+ * Reunion — a once-a-year gathering: everyone who's ever been part of PUSAB
+ * comes back, and the day is remembered through its photos. So the page
+ * leads with that framing, then puts the photo wall front and center
+ * (bigger and earlier than any other layout), and keeps the moment-by-moment
+ * timeline as supporting detail underneath rather than the lead element.
+ */
 function TimelineLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
   return (
     <>
+      <div
+        className="mb-10 rounded-2xl border p-5 sm:p-6"
+        style={{
+          borderColor: `color-mix(in oklab, ${theme.colorA} 25%, var(--color-border))`,
+          background: `color-mix(in oklab, ${theme.colorA} 6%, transparent)`,
+        }}
+      >
+        <p className="text-sm leading-relaxed">
+          Once every year, PUSAB members from every batch and every university find their way back
+          to Bishwambarpur for one evening — old friends, familiar faces, and a room full of
+          people who grew up in the same place. It's the one night the whole family shows up, and
+          the photos from that night are what everyone remembers it by.
+        </p>
+      </div>
+
       <StatBanner page={page} theme={theme} />
+
+      {page.gallery.length > 0 && (
+        <div className="mb-10">
+          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
+            Faces from the night
+          </SectionLabel>
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+            {page.gallery.map((g, i) => (
+              <div
+                key={g.id}
+                className={
+                  "group relative overflow-hidden rounded-xl border border-border " +
+                  (i === 0 ? "col-span-2 aspect-[16/9] sm:col-span-1 sm:row-span-2 sm:aspect-square" : "aspect-square")
+                }
+              >
+                <img
+                  src={optimizeImage(g.image_url, i === 0 ? 800 : 400)}
+                  alt={g.caption || page.title}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                {g.caption && (
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent p-2">
+                    <p className="text-[11px] text-white leading-tight">{g.caption}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {page.objectives.length > 0 && (
         <div className="mb-10">
           <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
@@ -576,10 +629,10 @@ function ProgramDetailPage() {
     ? events.filter((e) => e.category.toLowerCase() === fallback.category.toLowerCase())
     : [];
 
-  // Picnic and Online layouts render gallery/eligibility themselves (or skip
-  // them by design) — the generic gallery block below only renders for
-  // layouts that don't already handle it inline.
-  const rendersOwnGallery = layout === "gallery-first";
+  // Reunion (photo wall) and Picnic render the gallery themselves, inline
+  // with their own story — the generic gallery block below only renders for
+  // layouts that don't already handle it.
+  const rendersOwnGallery = layout === "gallery-first" || layout === "timeline";
   const rendersOwnTestimonials = layout === "spotlight";
 
   const LayoutComponent = LAYOUTS[layout];
