@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Mail, MailOpen, Trash2, GraduationCap, MapPin, School, Phone, BookOpen, Users } from "lucide-react";
+import { Mail, MailOpen, Trash2, GraduationCap, MapPin, School, Phone, BookOpen, Users, Droplet, UserRound } from "lucide-react";
 import { contactApi, type ContactMessage } from "@/lib/api";
 import { useResource, errMessage } from "./useResource";
 import { SectionHeader, EmptyState, Toolbar, FilterSelect, ListSkeleton, useConfirm } from "./primitives";
@@ -31,7 +31,9 @@ export function JoinApplicationsSection() {
       m.phone.toLowerCase().includes(q) ||
       (m.university && m.university.toLowerCase().includes(q)) ||
       (m.village && m.village.toLowerCase().includes(q)) ||
-      (m.union_name && m.union_name.toLowerCase().includes(q));
+      (m.union_name && m.union_name.toLowerCase().includes(q)) ||
+      (m.father_name && m.father_name.toLowerCase().includes(q)) ||
+      (m.mother_name && m.mother_name.toLowerCase().includes(q));
     const matchesF = filter === "all" || (filter === "unread" ? !m.is_read : m.is_read);
     return matchesQ && matchesF;
   });
@@ -66,7 +68,7 @@ export function JoinApplicationsSection() {
         newLabel="Refresh"
       />
 
-      <Toolbar query={query} onQuery={setQuery} placeholder="Search by name, phone, university…">
+      <Toolbar query={query} onQuery={setQuery} placeholder="Search by name, phone, institute…">
         <FilterSelect
           value={filter}
           onChange={setFilter}
@@ -135,6 +137,9 @@ export function JoinApplicationsSection() {
 
                 {/* Info pills */}
                 <div className="mt-3 flex flex-wrap gap-1.5">
+                  {m.father_name && <InfoPill icon={<UserRound size={10} />} value={`Father: ${m.father_name}`} />}
+                  {m.mother_name && <InfoPill icon={<UserRound size={10} />} value={`Mother: ${m.mother_name}`} />}
+                  {m.blood_group && <InfoPill icon={<Droplet size={10} />} value={m.blood_group} />}
                   {m.university && <InfoPill icon={<GraduationCap size={10} />} value={m.university} />}
                   {m.subject && <InfoPill icon={<BookOpen size={10} />} value={m.subject} />}
                   {m.session && <InfoPill icon={<BookOpen size={10} />} value={`Session: ${m.session}`} />}

@@ -343,7 +343,7 @@ export function FloatingNavbar() {
               <span className="font-display text-[18px] font-bold tracking-[0.02em] text-foreground">
                 PUSAB
               </span>
-              <span className="text-[9px] uppercase tracking-[0.28em] text-muted-foreground mt-0.5">
+              <span className="text-[9px] uppercase tracking-[0.28em] text-muted-foreground mt-0.5 whitespace-nowrap">
                 est. 2014
               </span>
             </div>
@@ -478,9 +478,9 @@ export function FloatingNavbar() {
           <div className="ml-auto hidden lg:flex items-center gap-2">
             <Link
               to="/support"
-              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-2 text-sm font-semibold text-foreground/80 transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] hover:text-foreground"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border px-3.5 py-2 text-sm font-semibold text-foreground/80 transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] hover:text-foreground"
             >
-              <Heart size={14} className="text-[var(--color-accent-1)]" /> Donation
+              <Heart size={14} className="text-[var(--color-accent-1)]" /> Contribute
             </Link>
             <Link to="/join" className="formal-cta group">
               <span>Join PUSAB</span>
@@ -504,11 +504,13 @@ export function FloatingNavbar() {
           position: relative;
           display: inline-flex;
           align-items: center;
+          justify-content: center;
           padding: 10px 18px;
           border-radius: 9999px;
           font-size: 13px;
           font-weight: 700;
           letter-spacing: 0.02em;
+          white-space: nowrap;
           color: #ffffff;
           background: linear-gradient(90deg, var(--color-accent-1), var(--color-accent-2));
           box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--color-accent-1) 60%, transparent);
@@ -745,7 +747,7 @@ export function FloatingNavbar() {
                     onClick={() => setMobileOpen(false)}
                     className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-border py-3 text-sm font-semibold"
                   >
-                    <Heart size={15} className="text-[var(--color-accent-1)]" /> Donation
+                    <Heart size={15} className="text-[var(--color-accent-1)]" /> Contribute
                   </Link>
                   <Link
                     to="/join"

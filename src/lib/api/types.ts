@@ -66,6 +66,9 @@ export interface ContactMessage {
   id: number;
   name: string;
   phone: string;
+  father_name: string;
+  mother_name: string;
+  blood_group: string;
   subject: string;
   university: string;
   session: string;

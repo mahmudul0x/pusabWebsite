@@ -72,9 +72,54 @@ function Field({
   );
 }
 
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
+  const hasValue = value.length > 0;
+  return (
+    <label className="relative block">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="peer w-full bg-transparent outline-none px-4 pt-6 pb-2 text-sm border border-border rounded-xl focus:border-[var(--color-accent-1)] transition-colors appearance-none"
+      >
+        <option value="" disabled hidden />
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
+      <span
+        className={
+          "pointer-events-none absolute left-4 transition-all duration-200 " +
+          (hasValue
+            ? "top-2 text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-1)]"
+            : "top-4 text-sm text-muted-foreground peer-focus:top-2 peer-focus:text-[10px] peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[var(--color-accent-1)]")
+        }
+      >
+        {label}
+      </span>
+    </label>
+  );
+}
+
 function JoinPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [fatherName, setFatherName] = useState("");
+  const [motherName, setMotherName] = useState("");
+  const [bloodGroup, setBloodGroup] = useState("");
   const [subject, setSubject] = useState("");
   const [university, setUniversity] = useState("");
   const [session, setSession] = useState("");
@@ -87,7 +132,8 @@ function JoinPage() {
   const [busy, setBusy] = useState(false);
 
   function reset() {
-    setName(""); setPhone(""); setSubject(""); setUniversity("");
+    setName(""); setPhone(""); setFatherName(""); setMotherName(""); setBloodGroup("");
+    setSubject(""); setUniversity("");
     setSession(""); setUnionName(""); setVillage(""); setSchool("");
     setCollege(""); setMessage("");
   }
@@ -95,14 +141,15 @@ function JoinPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (honeypot) return;
-    if (!name.trim() || !phone.trim()) {
-      toast.error("Name and phone number are required.");
+    if (!name.trim() || !phone.trim() || !fatherName.trim() || !motherName.trim() || !bloodGroup.trim()) {
+      toast.error("Full name, phone, parents' names and blood group are required.");
       return;
     }
     setBusy(true);
     try {
       await contactApi.create({
-        name, phone, subject, university, session,
+        name, phone, father_name: fatherName, mother_name: motherName, blood_group: bloodGroup,
+        subject, university, session,
         union_name: unionName, village, school, college, message,
         email: "",
       } as never);
@@ -181,17 +228,20 @@ function JoinPage() {
                   Personal Info
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field label="Name *" value={name} onChange={setName} />
+                  <Field label="Full name *" value={name} onChange={setName} />
                   <Field label="Phone *" type="tel" value={phone} onChange={setPhone} />
+                  <Field label="Father's name *" value={fatherName} onChange={setFatherName} />
+                  <Field label="Mother's name *" value={motherName} onChange={setMotherName} />
+                  <SelectField label="Blood group *" value={bloodGroup} onChange={setBloodGroup} options={BLOOD_GROUPS} />
                 </div>
               </div>
 
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] mb-4 mt-2" style={{ color: "var(--color-accent-2)" }}>
-                  University
+                  Institute
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field label="University" value={university} onChange={setUniversity} />
+                  <Field label="Institute" value={university} onChange={setUniversity} />
                   <Field label="Session (e.g. 2023-24)" value={session} onChange={setSession} />
                 </div>
                 <div className="mt-4">
@@ -225,7 +275,7 @@ function JoinPage() {
                 {
                   Icon: GraduationCap,
                   title: "Who can join?",
-                  body: "Any student from Bishwambarpur who is currently enrolled in a public university in Bangladesh.",
+                  body: "Any student from Bishwambarpur who is currently enrolled in a public university, government medical college and engineering college in Bangladesh.",
                 },
                 {
                   Icon: Users,
