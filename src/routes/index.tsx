@@ -278,7 +278,7 @@ function Index() {
           <div>
             <p className="text-label mb-3">Annual Magazine</p>
             <h2 className="font-display text-4xl md:text-6xl font-bold tracking-tight">
-              <span className="gradient-text">SAYOR</span> — voice of a generation.
+              <span className="gradient-text">SAYOR</span>- thoughts of years.
             </h2>
             <p className="mt-6 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
               SAYOR is PUSAB's flagship annual magazine, bringing together voices from education,

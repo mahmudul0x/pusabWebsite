@@ -190,7 +190,7 @@ function AboutPage() {
                 {
                   date: "2016",
                   title: "First scholarship drive",
-                  desc: "Launched merit & need-based stipends for HSC graduates from Bishwambarpur preparing for university admissions.",
+                  desc: "Launched merit & need-based stipends for HSC graduates from Bishwambarpur preparing for university admissions. PUSAB also arrenges Scholarship Exam for the student of class VIII, IX and X.",
                 },
                 {
                   date: "2020",
