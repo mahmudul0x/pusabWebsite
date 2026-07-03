@@ -152,11 +152,11 @@ export const DEMO_EC_MEMBERS: EcMember[] = [
 export const OBJECTIVES = [
   {
     title: "Student Unity",
-    desc: "Foster cooperation among public university students from Bishwambarpur.",
+    desc: "To foster cooperation among students from public universities, government medical colleges, and engineering colleges in Bangladesh who are permanent residents of Bishwambarpur Upazila.",
   },
   {
     title: "Holistic Development",
-    desc: "Engage youth in the upazila's overall educational and social uplift.",
+    desc: "To engage all segments of society, including youth (students), guardians, teachers and allumnus of PUSAB in the overall educational and social development of the Upazila.",
   },
   {
     title: "Achievement Recognition",
@@ -172,7 +172,7 @@ export const OBJECTIVES = [
   },
   {
     title: "PUSAB Scholarship",
-    desc: "Provide financial aid to deserving students from underserved families.",
+    desc: "Provide financial aid to deserving students from underserved families. PUSAB also arrenges Scholarship Exam for the student of class VIII, IX and X.",
   },
   {
     title: "Career Counseling",
@@ -194,8 +194,8 @@ export const OBJECTIVES = [
   },
   { title: "Networking", desc: "Build a lifelong network of Bishwambarpur students and alumni." },
   {
-    title: "Pioneer Spirit",
-    desc: "Remain the first organization of its kind in Sunamganj district.",
+    title: "Transparent Governance",
+    desc: "Run the association through elected leadership, open elections and accountable finances.",
   },
 ];
 
@@ -255,5 +255,5 @@ export const STATS = [
   { value: 300, suffix: "+", label: "Members" },
   { value: 2014, label: "Established", noPlus: true, raw: true },
   { value: 14, label: "Core Objectives" },
-  { value: 1, label: "Pioneer in Sunamganj", suffix: "st" },
+  { value: 1, text: "First", label: "Pioneer in Sunamganj" },
 ];

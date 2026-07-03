@@ -51,12 +51,12 @@ const ACTIVITIES = [
   {
     Icon: HeartHandshake,
     title: "Student Unity & Cooperation",
-    desc: "Building lifelong bonds between students from across public universities and the region.",
+    desc: "To foster cooperation among students from public universities, government medical colleges, and engineering colleges in Bangladesh who are permanent residents of Bishwambarpur Upazila.",
   },
   {
     Icon: Award,
     title: "Achievement Recognition",
-    desc: "Honoring those who carry Bishwambarpur's name to the top of national merit lists.",
+    desc: "Honor students who bring pride to the region through merit.",
   },
   {
     Icon: Megaphone,
@@ -66,12 +66,12 @@ const ACTIVITIES = [
   {
     Icon: GraduationCap,
     title: "Admission Support",
-    desc: "Mentoring aspirants through HSC, admission tests and university application.",
+    desc: "Mentoring aspirants through SSC, HSC, admission tests and university application.",
   },
   {
     Icon: BookOpen,
     title: "PUSAB Scholarship",
-    desc: "Need-based financial aid to deserving students from underserved families.",
+    desc: "Provide financial aid to deserving students from underserved families. PUSAB also arrenges Scholarship Exam for the student of class VIII, IX and X.",
   },
   {
     Icon: Stethoscope,
@@ -228,7 +228,7 @@ function Index() {
         <div className="container-page grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
           {STATS.map((s, i) => (
             <div key={i} className="px-6 py-12 text-center">
-              <StatCounter value={s.value} suffix={s.suffix} raw={s.raw} />
+              <StatCounter value={s.value} suffix={s.suffix} raw={s.raw} text={s.text} />
               <div className="mt-2 text-label">{s.label}</div>
             </div>
           ))}

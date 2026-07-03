@@ -14,6 +14,7 @@ import {
   PartyPopper,
   ShieldCheck,
   Network,
+  Scale,
   Flag,
   Quote,
 } from "lucide-react";
@@ -38,7 +39,7 @@ const AIM_ICONS = [
   PartyPopper,
   ShieldCheck,
   Network,
-  Flag,
+  Scale,
 ];
 
 const GLANCE_FACTS = [
@@ -166,6 +167,76 @@ function AboutPage() {
         </div>
       </section>
 
+      <section className="py-24 md:py-28">
+        <div className="container-page">
+          <p className="text-label mb-3">Timeline</p>
+          <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight mb-16">
+            The journey so far.
+          </h2>
+          <div className="relative">
+            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[var(--color-accent-1)] via-[var(--color-accent-2)] to-[var(--color-accent-3)]" />
+            <ol className="space-y-14 md:space-y-20">
+              {[
+                {
+                  date: SITE.founded,
+                  title: "Founding of PUSAB",
+                  desc: `Established at ${SITE.foundedAt} — the first organization of its kind in Sunamganj district.`,
+                },
+                {
+                  date: "2014",
+                  title: "SAYOR- thoughts of years.",
+                  desc: "SAYOR is PUSAB's flagship annual magazine, bringing together voices from education, culture, science, heritage, literature and student life across Bishwambarpur.",
+                },
+                {
+                  date: "2016",
+                  title: "First scholarship drive",
+                  desc: "Launched merit & need-based stipends for HSC graduates from Bishwambarpur preparing for university admissions.",
+                },
+                {
+                  date: "2020",
+                  title: "Pandemic relief operations",
+                  desc: "Distributed food, medical aid and learning materials across the upazila during COVID-19 lockdowns.",
+                },
+                {
+                  date: "2022",
+                  title: "Flood response in Sunamganj",
+                  desc: "Coordinated emergency relief, shelter support and rebuilding aid for flood-affected families.",
+                },
+                {
+                  date: "2024",
+                  title: "300+ active members",
+                  desc: "Crossed 300 members across public universities, medical and engineering colleges nationwide.",
+                },
+                {
+                  date: "2026",
+                  title: "Digital home of PUSAB",
+                  desc: "Launched the official PUSAB platform — programs, leadership, publicity and moments, all in one place.",
+                },
+              ].map((item, i) => {
+                const left = i % 2 === 0;
+                return (
+                  <motion.li
+                    key={item.title}
+                    initial={{ opacity: 0, y: 28 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    className="relative pl-12 md:pl-0 md:grid md:grid-cols-2 md:gap-12"
+                  >
+                    <span className="absolute left-2 md:left-1/2 top-1.5 md:-translate-x-1/2 h-3 w-3 rounded-full bg-[var(--color-accent-1)] shadow-[0_0_20px_var(--color-accent-1)]" />
+                    <div className={left ? "md:text-right md:pr-12" : "md:col-start-2 md:pl-12"}>
+                      <p className="text-label">{item.date}</p>
+                      <h3 className="mt-2 font-display text-2xl font-semibold">{item.title}</h3>
+                      <p className="mt-2 text-muted-foreground leading-relaxed">{item.desc}</p>
+                    </div>
+                  </motion.li>
+                );
+              })}
+            </ol>
+          </div>
+        </div>
+      </section>
+
       {/* Our aims */}
       <section className="py-24 md:py-28">
         <div className="container-page">
@@ -213,82 +284,20 @@ function AboutPage() {
         </div>
       </section>
 
-      <section className="py-24 md:py-28">
-        <div className="container-page">
-          <p className="text-label mb-3">Timeline</p>
-          <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight mb-16">
-            The journey so far.
-          </h2>
-          <div className="relative">
-            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[var(--color-accent-1)] via-[var(--color-accent-2)] to-[var(--color-accent-3)]" />
-            <ol className="space-y-14 md:space-y-20">
-              {[
-                {
-                  date: SITE.founded,
-                  title: "Founding of PUSAB",
-                  desc: `Established at ${SITE.foundedAt} — the first organization of its kind in Sunamganj district.`,
-                },
-                {
-                  date: "2016",
-                  title: "First scholarship drive",
-                  desc: "Launched merit & need-based stipends for HSC graduates from Bishwambarpur preparing for university admissions.",
-                },
-                {
-                  date: "2018",
-                  title: "SAYOR- thoughts of years.",
-                  desc: "Started the Students' Admission Yearly Orientation Round, mentoring hundreds of admission seekers each year.",
-                },
-                {
-                  date: "2020",
-                  title: "Pandemic relief operations",
-                  desc: "Distributed food, medical aid and learning materials across the upazila during COVID-19 lockdowns.",
-                },
-                {
-                  date: "2022",
-                  title: "Flood response in Sunamganj",
-                  desc: "Coordinated emergency relief, shelter support and rebuilding aid for flood-affected families.",
-                },
-                {
-                  date: "2024",
-                  title: "300+ active members",
-                  desc: "Crossed 300 members across public universities, medical and engineering colleges nationwide.",
-                },
-                {
-                  date: "2026",
-                  title: "Digital home of PUSAB",
-                  desc: "Launched the official PUSAB platform — programs, leadership, publicity and moments, all in one place.",
-                },
-              ].map((item, i) => {
-                const left = i % 2 === 0;
-                return (
-                  <motion.li
-                    key={item.title}
-                    initial={{ opacity: 0, y: 28 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-80px" }}
-                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative pl-12 md:pl-0 md:grid md:grid-cols-2 md:gap-12"
-                  >
-                    <span className="absolute left-2 md:left-1/2 top-1.5 md:-translate-x-1/2 h-3 w-3 rounded-full bg-[var(--color-accent-1)] shadow-[0_0_20px_var(--color-accent-1)]" />
-                    <div className={left ? "md:text-right md:pr-12" : "md:col-start-2 md:pl-12"}>
-                      <p className="text-label">{item.date}</p>
-                      <h3 className="mt-2 font-display text-2xl font-semibold">{item.title}</h3>
-                      <p className="mt-2 text-muted-foreground leading-relaxed">{item.desc}</p>
-                    </div>
-                  </motion.li>
-                );
-              })}
-            </ol>
-          </div>
-        </div>
-      </section>
-
       <section className="py-20 md:py-24">
         <div className="container-page">
           <GlowCard className="text-center">
             <p className="text-label mb-3">Connect with PUSAB</p>
             <h3 className="font-display text-2xl md:text-3xl font-bold">
-              {SITE.email} · {SITE.phone}
+              <a href={`mailto:${SITE.email}`} className="block hover:text-(--color-accent-1) transition-colors">
+                {SITE.email}
+              </a>
+              <a
+                href={`tel:${SITE.phone.replace(/\s+/g, "")}`}
+                className="block hover:text-(--color-accent-1) transition-colors"
+              >
+                {SITE.phone}
+              </a>
             </h3>
           </GlowCard>
         </div>
