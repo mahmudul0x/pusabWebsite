@@ -1,8 +1,19 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight, MapPin, CalendarClock, Clock, CheckCircle2 } from "lucide-react";
+import {
+  ArrowUpRight,
+  MapPin,
+  CalendarClock,
+  Clock,
+  CheckCircle2,
+  Target,
+  ClipboardList,
+  ListChecks,
+  Quote,
+} from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
 import { GradientButton } from "@/components/site/GradientButton";
+import { programPagesApi, optimizeImage } from "@/lib/api";
 import { PROGRAMS } from "@/lib/site-content";
 import { useProgramEvents, statusOf, type Status } from "@/lib/usePrograms";
 import heroPrograms from "@/assets/hero-programs.jpg";
@@ -30,56 +41,206 @@ function formatDate(iso: string) {
 }
 
 export const Route = createFileRoute("/programs/$slug")({
-  loader: ({ params }) => {
-    const program = PROGRAMS.find((p) => p.key === params.slug);
-    if (!program) throw notFound();
-    return program;
+  loader: async ({ params }) => {
+    const fallback = PROGRAMS.find((p) => p.key === params.slug);
+    if (!fallback) throw notFound();
+    try {
+      const page = await programPagesApi.get(params.slug);
+      return { fallback, page };
+    } catch {
+      return { fallback, page: null };
+    }
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.title} — PUSAB` },
-          { name: "description", content: loaderData.desc },
-          { property: "og:title", content: `${loaderData.title} — PUSAB` },
-          { property: "og:description", content: loaderData.desc },
-          { property: "og:url", content: `/programs/${loaderData.key}` },
-        ]
-      : [],
-    links: [{ rel: "canonical", href: `/programs/${loaderData?.key ?? ""}` }],
-  }),
+  head: ({ loaderData }) => {
+    const title = loaderData?.page?.title ?? loaderData?.fallback.title ?? "Program";
+    const desc = loaderData?.page?.tagline || loaderData?.fallback.desc || "";
+    const slug = loaderData?.fallback.key ?? "";
+    return {
+      meta: [
+        { title: `${title} — PUSAB` },
+        { name: "description", content: desc },
+        { property: "og:title", content: `${title} — PUSAB` },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: `/programs/${slug}` },
+      ],
+      links: [{ rel: "canonical", href: `/programs/${slug}` }],
+    };
+  },
   component: ProgramDetailPage,
 });
 
 function ProgramDetailPage() {
-  const program = Route.useLoaderData();
+  const { fallback, page } = Route.useLoaderData();
   const { events, now } = useProgramEvents();
 
-  const related = program.category
-    ? events.filter((e) => e.category.toLowerCase() === program.category.toLowerCase())
+  const title = page?.title || fallback.title;
+  const tagline = page?.tagline || fallback.desc;
+  const overview = page?.overview || fallback.desc;
+  const heroImage = page?.hero_image_url ? optimizeImage(page.hero_image_url, 1600) : heroPrograms;
+
+  const related = fallback.category
+    ? events.filter((e) => e.category.toLowerCase() === fallback.category.toLowerCase())
     : [];
 
   return (
     <>
       <PageHero
-        title={program.title}
-        lede={program.desc}
-        crumbs={[{ label: "Home", to: "/" }, { label: "Programs", to: "/programs" }, { label: program.title }]}
-        image={heroPrograms}
-        imageAlt={program.title}
+        title={title}
+        lede={tagline}
+        crumbs={[{ label: "Home", to: "/" }, { label: "Programs", to: "/programs" }, { label: title }]}
+        image={heroImage}
+        imageAlt={title}
       />
 
       <section className="py-16 md:py-24">
         <div className="container-page">
-          <div className="mb-12 max-w-2xl">
+          {/* Overview */}
+          <div className="mb-14 max-w-2xl">
             <p className="text-label mb-3">About this program</p>
-            <h2 className="font-display text-2xl md:text-4xl font-bold tracking-tight">
-              {program.title}
-            </h2>
-            <p className="mt-4 text-muted-foreground leading-relaxed">{program.desc}</p>
+            <h2 className="font-display text-2xl md:text-4xl font-bold tracking-tight">{title}</h2>
+            <p className="mt-4 text-muted-foreground leading-relaxed whitespace-pre-line">{overview}</p>
+            {page?.schedule_note && (
+              <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm text-muted-foreground">
+                <Clock size={14} className="text-[var(--color-accent-1)]" /> {page.schedule_note}
+              </p>
+            )}
           </div>
 
+          {/* Stats */}
+          {page && page.stats.length > 0 && (
+            <div className="mb-14 grid grid-cols-2 gap-4 sm:grid-cols-4">
+              {page.stats.map((s) => (
+                <div
+                  key={s.id}
+                  className="rounded-2xl border border-border bg-[var(--color-surface)] p-5 text-center"
+                >
+                  <p className="font-display text-2xl md:text-3xl font-extrabold gradient-text">{s.value}</p>
+                  <p className="mt-1.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                    {s.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Objectives */}
+          {page && page.objectives.length > 0 && (
+            <div className="mb-14">
+              <p className="text-label mb-6 flex items-center gap-2">
+                <Target size={14} /> Objectives
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {page.objectives.map((o) => (
+                  <div
+                    key={o.id}
+                    className="rounded-2xl border border-border bg-[var(--color-surface)] p-5"
+                  >
+                    <h3 className="font-display text-base font-semibold">{o.title}</h3>
+                    {o.description && (
+                      <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+                        {o.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Eligibility + Process */}
+          {(page?.eligibility || page?.process) && (
+            <div className="mb-14 grid gap-4 sm:grid-cols-2">
+              {page.eligibility && (
+                <div className="rounded-2xl border border-border bg-[var(--color-surface)] p-6">
+                  <p className="mb-3 flex items-center gap-2 text-label">
+                    <ListChecks size={14} /> Who can join
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {page.eligibility}
+                  </p>
+                </div>
+              )}
+              {page.process && (
+                <div className="rounded-2xl border border-border bg-[var(--color-surface)] p-6">
+                  <p className="mb-3 flex items-center gap-2 text-label">
+                    <ClipboardList size={14} /> How it works
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {page.process}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Gallery */}
+          {page && page.gallery.length > 0 && (
+            <div className="mb-14">
+              <p className="text-label mb-6">Gallery</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {page.gallery.map((g) => (
+                  <div
+                    key={g.id}
+                    className="group relative aspect-square overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]"
+                  >
+                    <img
+                      src={optimizeImage(g.image_url, 480)}
+                      alt={g.caption || title}
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    {g.caption && (
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent p-2.5">
+                        <p className="text-[11px] text-white leading-tight">{g.caption}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Testimonials */}
+          {page && page.testimonials.length > 0 && (
+            <div className="mb-14">
+              <p className="text-label mb-6">What people say</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {page.testimonials.map((t) => (
+                  <div
+                    key={t.id}
+                    className="rounded-2xl border border-border bg-[var(--color-surface)] p-6"
+                  >
+                    <Quote size={20} className="text-[var(--color-accent-1)] opacity-70" />
+                    <p className="mt-3 text-sm leading-relaxed">{t.quote}</p>
+                    <div className="mt-4 flex items-center gap-3">
+                      {t.photo_url ? (
+                        <img
+                          src={optimizeImage(t.photo_url, 80)}
+                          alt={t.name}
+                          className="h-9 w-9 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          className="grid h-9 w-9 place-items-center rounded-full text-xs font-bold text-white"
+                          style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}
+                        >
+                          {t.name.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold leading-tight">{t.name}</p>
+                        {t.role && <p className="text-xs text-muted-foreground">{t.role}</p>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Related activity from the programme calendar */}
           {related.length > 0 && (
-            <div className="mb-16">
+            <div className="mb-14">
               <p className="text-label mb-6">Related activity</p>
               <motion.ul layout className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <AnimatePresence mode="popLayout">
@@ -148,7 +309,7 @@ function ProgramDetailPage() {
                   Get involved
                 </p>
                 <h3 className="mt-3 font-display text-2xl md:text-3xl font-bold leading-tight">
-                  Want to take part in {program.title}? Reach out to the team.
+                  Want to take part in {title}? Reach out to the team.
                 </h3>
               </div>
               <GradientButton to="/contact" variant="ghost" className="text-white! border-white/45!">

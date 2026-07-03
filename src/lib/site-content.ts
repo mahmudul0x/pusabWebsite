@@ -20,7 +20,6 @@ export const NAV_LINKS = [
     to: "/programs",
     label: "Programs",
     children: [
-      { to: "/programs", label: "All Programs" },
       { to: "/programs/reunion", label: "Annual Reunion" },
       { to: "/programs/schooling", label: "Schooling Program" },
       { to: "/programs/scholarship", label: "PUSAB Scholarship" },

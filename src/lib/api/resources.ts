@@ -11,6 +11,7 @@ import type {
   LeaderMessage,
   Paginated,
   Program,
+  ProgramPage,
   PublicityPost,
   SiteSettings,
 } from "./types";
@@ -100,4 +101,23 @@ export const settingsApi = {
   get: () => apiFetch<SiteSettings>("/api/settings/", {}, { auth: false }),
   update: (body: Partial<SiteSettings>) =>
     apiFetch<SiteSettings>("/api/settings/", { method: "PATCH", body: JSON.stringify(body) }),
+};
+
+// Program detail pages — looked up by slug (matches the /programs/<slug> route).
+export const programPagesApi = {
+  listAll: async (): Promise<ProgramPage[]> => {
+    const page = await apiFetch<Paginated<ProgramPage>>(
+      "/api/program-pages/",
+      {},
+      { auth: false },
+    );
+    return page.results;
+  },
+  get: (slug: string) =>
+    apiFetch<ProgramPage>(`/api/program-pages/${slug}/`, {}, { auth: false }),
+  update: (slug: string, body: Partial<ProgramPage>) =>
+    apiFetch<ProgramPage>(`/api/program-pages/${slug}/`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
 };

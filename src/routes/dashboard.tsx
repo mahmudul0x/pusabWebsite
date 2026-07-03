@@ -40,6 +40,7 @@ import {
   Plus,
   Star,
   Quote,
+  FileText,
 } from "lucide-react";
 import logoPusab from "@/assets/logo-pusab.png";
 import { StatCard } from "@/components/dashboard/primitives";
@@ -53,6 +54,7 @@ import { LeadershipMessagesSection } from "@/components/dashboard/LeadershipMess
 import { UsersSection } from "@/components/dashboard/UsersSection";
 import { SettingsSection } from "@/components/dashboard/SettingsSection";
 import { FelicitationSection } from "@/components/dashboard/FelicitationSection";
+import { ProgramPagesSection } from "@/components/dashboard/ProgramPagesSection";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -201,6 +203,7 @@ const NAV = [
   { key: "convening-committee", label: "Convening Committee", Icon: Star, group: "content" },
   { key: "leadership-messages", label: "Leadership Messages", Icon: Quote, group: "content" },
   { key: "programs", label: "Programs", Icon: CalendarRange, group: "content" },
+  { key: "program-pages", label: "Program Pages", Icon: FileText, group: "content" },
   { key: "felicitation", label: "Felicitation", Icon: Award, group: "content" },
   { key: "messages", label: "Messages", Icon: MessageSquare, group: "system" },
   { key: "join-applications", label: "Join Applications", Icon: Users, group: "system" },
@@ -501,6 +504,7 @@ function DashboardShell() {
           {section === "convening-committee" && <CommitteeSection view="convening-committee" />}
           {section === "leadership-messages" && <LeadershipMessagesSection />}
           {section === "programs" && <ProgramsSection />}
+          {section === "program-pages" && <ProgramPagesSection />}
           {section === "felicitation" && <FelicitationSection />}
           {section === "messages" && <MessagesSection />}
           {section === "join-applications" && <JoinApplicationsSection />}

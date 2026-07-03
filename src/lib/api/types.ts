@@ -124,3 +124,50 @@ export interface FelicitationEntry {
   note: string;
   created_at: string;
 }
+
+export interface ProgramObjective {
+  id: number;
+  title: string;
+  description: string;
+  order: number;
+}
+
+export interface ProgramStat {
+  id: number;
+  label: string;
+  value: string;
+  order: number;
+}
+
+export interface ProgramGalleryImage {
+  id: number;
+  image_url: string;
+  caption: string;
+  order: number;
+}
+
+export interface ProgramTestimonial {
+  id: number;
+  name: string;
+  role: string;
+  quote: string;
+  photo_url: string;
+  order: number;
+}
+
+export interface ProgramPage {
+  id: number;
+  slug: string;
+  title: string;
+  tagline: string;
+  hero_image_url: string;
+  overview: string;
+  eligibility: string;
+  process: string;
+  schedule_note: string;
+  objectives: ProgramObjective[];
+  stats: ProgramStat[];
+  gallery: ProgramGalleryImage[];
+  testimonials: ProgramTestimonial[];
+  updated_at: string;
+}
