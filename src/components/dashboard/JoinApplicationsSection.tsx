@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Mail, MailOpen, Trash2, GraduationCap, MapPin, School, Phone, BookOpen, Users, Droplet, UserRound } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Mail, MailOpen, Trash2, GraduationCap, MapPin, School, Phone, BookOpen, Users, Droplet, UserRound, Eye, X } from "lucide-react";
 import { contactApi, type ContactMessage } from "@/lib/api";
 import { useResource, errMessage } from "./useResource";
 import { SectionHeader, EmptyState, Toolbar, FilterSelect, ListSkeleton, useConfirm } from "./primitives";
@@ -38,11 +39,125 @@ function DetailGroup({ title, children }: { title: string; children: React.React
   );
 }
 
+function ApplicationDetailModal({ m, onClose }: { m: ContactMessage | null; onClose: () => void }) {
+  useEffect(() => {
+    if (!m) return;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [m, onClose]);
+
+  return (
+    <AnimatePresence>
+      {m && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[200] flex items-end justify-center bg-slate-950/70 p-0 backdrop-blur-sm sm:items-center sm:p-6"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 32, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.97 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="flex max-h-[92vh] w-full max-w-xl flex-col overflow-hidden rounded-t-3xl border border-border bg-[var(--color-surface)] shadow-2xl sm:rounded-3xl"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-sm font-bold text-white"
+                  style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}
+                >
+                  {m.name.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-display text-base font-extrabold tracking-tight leading-tight">{m.name}</h3>
+                  <a href={`tel:${m.phone}`} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-[var(--color-accent-1)] transition-colors">
+                    <Phone size={10} /> {m.phone}
+                  </a>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-border text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+                aria-label="Close"
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="overflow-y-auto px-6 py-6 space-y-2.5">
+              {(m.father_name || m.mother_name || m.blood_group) && (
+                <DetailGroup title="Family">
+                  {m.father_name && (
+                    <DetailItem icon={<UserRound size={12} />} label="Father's name" value={m.father_name} />
+                  )}
+                  {m.mother_name && (
+                    <DetailItem icon={<UserRound size={12} />} label="Mother's name" value={m.mother_name} />
+                  )}
+                  {m.blood_group && (
+                    <DetailItem icon={<Droplet size={12} />} label="Blood group" value={m.blood_group} />
+                  )}
+                </DetailGroup>
+              )}
+
+              {(m.university || m.subject || m.session) && (
+                <DetailGroup title="Academic">
+                  {m.university && (
+                    <DetailItem icon={<GraduationCap size={12} />} label="Institute" value={m.university} />
+                  )}
+                  {m.subject && (
+                    <DetailItem icon={<BookOpen size={12} />} label="Subject / Department" value={m.subject} />
+                  )}
+                  {m.session && <DetailItem icon={<BookOpen size={12} />} label="Session" value={m.session} />}
+                </DetailGroup>
+              )}
+
+              {(m.union_name || m.village || m.school || m.college) && (
+                <DetailGroup title="Address & Schooling">
+                  {m.union_name && <DetailItem icon={<MapPin size={12} />} label="Union" value={m.union_name} />}
+                  {m.village && <DetailItem icon={<MapPin size={12} />} label="Village" value={m.village} />}
+                  {m.school && <DetailItem icon={<School size={12} />} label="School" value={m.school} />}
+                  {m.college && <DetailItem icon={<School size={12} />} label="College" value={m.college} />}
+                </DetailGroup>
+              )}
+
+              {m.message && (
+                <div className="rounded-xl border border-border bg-[var(--color-background)]/60 p-3.5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--color-accent-1)] mb-2">
+                    Message
+                  </p>
+                  <p className="text-sm leading-relaxed whitespace-pre-line">{m.message}</p>
+                </div>
+              )}
+
+              <p className="text-[11px] text-muted-foreground pt-1">
+                Submitted {new Date(m.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export function JoinApplicationsSection() {
   const { items, loading, reload } = useResource(contactApi);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [confirm, confirmEl] = useConfirm();
+  const [selected, setSelected] = useState<ContactMessage | null>(null);
 
   const applications = items.filter((m) => m.phone && m.phone.trim() !== "");
   const unread = applications.filter((m) => !m.is_read).length;
@@ -127,94 +242,51 @@ export function JoinApplicationsSection() {
                 <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg,var(--color-accent-1),var(--color-accent-2))" }} />
               )}
 
-              <div className="p-5">
-                {/* Header row */}
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    {!m.is_read && (
-                      <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: "var(--color-accent-1)" }} />
-                    )}
-                    <div
-                      className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-sm font-bold text-white"
-                      style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}
-                    >
-                      {m.name.slice(0, 2).toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-sm leading-tight">{m.name}</p>
-                      <a href={`tel:${m.phone}`} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-[var(--color-accent-1)] transition-colors mt-0.5">
-                        <Phone size={10} /> {m.phone}
-                      </a>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[11px] text-muted-foreground">
-                      {new Date(m.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                    </span>
-                    {!m.is_read && (
-                      <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ background: "var(--color-accent-1)" }}>
-                        New
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Details */}
-                <div className="mt-4 space-y-2.5">
-                  {(m.father_name || m.mother_name || m.blood_group) && (
-                    <DetailGroup title="Family">
-                      {m.father_name && (
-                        <DetailItem icon={<UserRound size={12} />} label="Father's name" value={m.father_name} />
-                      )}
-                      {m.mother_name && (
-                        <DetailItem icon={<UserRound size={12} />} label="Mother's name" value={m.mother_name} />
-                      )}
-                      {m.blood_group && (
-                        <DetailItem icon={<Droplet size={12} />} label="Blood group" value={m.blood_group} />
-                      )}
-                    </DetailGroup>
-                  )}
-
-                  {(m.university || m.subject || m.session) && (
-                    <DetailGroup title="Academic">
-                      {m.university && (
-                        <DetailItem icon={<GraduationCap size={12} />} label="Institute" value={m.university} />
-                      )}
-                      {m.subject && (
-                        <DetailItem icon={<BookOpen size={12} />} label="Subject / Department" value={m.subject} />
-                      )}
-                      {m.session && <DetailItem icon={<BookOpen size={12} />} label="Session" value={m.session} />}
-                    </DetailGroup>
-                  )}
-
-                  {(m.union_name || m.village || m.school || m.college) && (
-                    <DetailGroup title="Address & Schooling">
-                      {m.union_name && <DetailItem icon={<MapPin size={12} />} label="Union" value={m.union_name} />}
-                      {m.village && <DetailItem icon={<MapPin size={12} />} label="Village" value={m.village} />}
-                      {m.school && <DetailItem icon={<School size={12} />} label="School" value={m.school} />}
-                      {m.college && <DetailItem icon={<School size={12} />} label="College" value={m.college} />}
-                    </DetailGroup>
-                  )}
-                </div>
-
-                {m.message && (
-                  <p className="mt-3 text-sm text-muted-foreground leading-relaxed border-t border-border pt-3 whitespace-pre-line">
-                    {m.message}
-                  </p>
+              <div className="flex flex-wrap items-center gap-3 p-4">
+                {!m.is_read && (
+                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: "var(--color-accent-1)" }} />
                 )}
-
-                {/* Actions */}
-                <div className="mt-4 flex items-center gap-2 pt-3 border-t border-border">
+                <div
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-sm font-bold text-white"
+                  style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}
+                >
+                  {m.name.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-sm leading-tight">{m.name}</p>
+                  <a href={`tel:${m.phone}`} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-[var(--color-accent-1)] transition-colors mt-0.5">
+                    <Phone size={10} /> {m.phone}
+                  </a>
+                </div>
+                {m.university && (
+                  <span className="hidden sm:inline text-xs text-muted-foreground">{m.university}</span>
+                )}
+                <span className="text-[11px] text-muted-foreground shrink-0">
+                  {new Date(m.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                </span>
+                {!m.is_read && (
+                  <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white shrink-0" style={{ background: "var(--color-accent-1)" }}>
+                    New
+                  </span>
+                )}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={() => setSelected(m)}
+                    className="grid h-8 w-8 place-items-center rounded-xl border border-border text-muted-foreground transition-all hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] hover:text-foreground"
+                    aria-label="View details"
+                  >
+                    <Eye size={13} />
+                  </button>
                   <button
                     onClick={() => toggleRead(m)}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-all hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] hover:text-foreground"
+                    className="grid h-8 w-8 place-items-center rounded-xl border border-border text-muted-foreground transition-all hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] hover:text-foreground"
+                    aria-label={m.is_read ? "Mark unreviewed" : "Mark reviewed"}
                   >
-                    {m.is_read ? <Mail size={12} /> : <MailOpen size={12} />}
-                    {m.is_read ? "Mark unreviewed" : "Mark reviewed"}
+                    {m.is_read ? <Mail size={13} /> : <MailOpen size={13} />}
                   </button>
                   <button
                     onClick={() => remove(m)}
-                    className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-xl border border-border text-muted-foreground transition-all hover:border-red-400 hover:bg-red-500/10 hover:text-red-500"
+                    className="grid h-8 w-8 place-items-center rounded-xl border border-border text-muted-foreground transition-all hover:border-red-400 hover:bg-red-500/10 hover:text-red-500"
                     aria-label="Delete"
                   >
                     <Trash2 size={13} />
@@ -225,6 +297,7 @@ export function JoinApplicationsSection() {
           ))}
         </ul>
       )}
+      <ApplicationDetailModal m={selected} onClose={() => setSelected(null)} />
       {confirmEl}
     </div>
   );
