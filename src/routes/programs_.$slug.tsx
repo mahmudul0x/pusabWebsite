@@ -92,30 +92,29 @@ function ProgramDetailPage() {
         imageAlt={title}
       />
 
-      <section className="py-16 md:py-24">
+      <section className="py-14 md:py-20">
         <div className="container-page">
           {/* Overview */}
-          <div className="mb-14 max-w-2xl">
-            <p className="text-label mb-3">About this program</p>
-            <h2 className="font-display text-2xl md:text-4xl font-bold tracking-tight">{title}</h2>
-            <p className="mt-4 text-muted-foreground leading-relaxed whitespace-pre-line">{overview}</p>
+          <div className="mb-10 max-w-2xl">
+            <p className="text-label mb-2.5">About this program</p>
+            <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{overview}</p>
             {page?.schedule_note && (
-              <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-border bg-[var(--color-surface)] px-4 py-2 text-sm text-muted-foreground">
-                <Clock size={14} className="text-[var(--color-accent-1)]" /> {page.schedule_note}
+              <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-[var(--color-surface)] px-3.5 py-1.5 text-xs text-muted-foreground">
+                <Clock size={12} className="text-[var(--color-accent-1)]" /> {page.schedule_note}
               </p>
             )}
           </div>
 
           {/* Stats */}
           {page && page.stats.length > 0 && (
-            <div className="mb-14 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {page.stats.map((s) => (
                 <div
                   key={s.id}
-                  className="rounded-2xl border border-border bg-[var(--color-surface)] p-5 text-center"
+                  className="rounded-xl border border-border bg-[var(--color-surface)] px-4 py-3.5 text-center"
                 >
-                  <p className="font-display text-2xl md:text-3xl font-extrabold gradient-text">{s.value}</p>
-                  <p className="mt-1.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                  <p className="font-display text-xl md:text-2xl font-extrabold gradient-text">{s.value}</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                     {s.label}
                   </p>
                 </div>
@@ -123,24 +122,38 @@ function ProgramDetailPage() {
             </div>
           )}
 
-          {/* Objectives */}
+          {/* Objectives — compact photo + short note cards */}
           {page && page.objectives.length > 0 && (
-            <div className="mb-14">
-              <p className="text-label mb-6 flex items-center gap-2">
-                <Target size={14} /> Objectives
+            <div className="mb-10">
+              <p className="text-label mb-4 flex items-center gap-2">
+                <Target size={13} /> Highlights
               </p>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {page.objectives.map((o) => (
                   <div
                     key={o.id}
-                    className="rounded-2xl border border-border bg-[var(--color-surface)] p-5"
+                    className="overflow-hidden rounded-xl border border-border bg-[var(--color-surface)]"
                   >
-                    <h3 className="font-display text-base font-semibold">{o.title}</h3>
-                    {o.description && (
-                      <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
-                        {o.description}
-                      </p>
-                    )}
+                    <div className="relative aspect-[16/10] overflow-hidden bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))]">
+                      {o.image_url ? (
+                        <img
+                          src={optimizeImage(o.image_url, 480)}
+                          alt={o.title}
+                          loading="lazy"
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : (
+                        <Target size={26} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white/80" />
+                      )}
+                    </div>
+                    <div className="p-3.5">
+                      <h3 className="font-display text-sm font-semibold leading-tight">{o.title}</h3>
+                      {o.description && (
+                        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                          {o.description}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -149,11 +162,11 @@ function ProgramDetailPage() {
 
           {/* Eligibility + Process */}
           {(page?.eligibility || page?.process) && (
-            <div className="mb-14 grid gap-4 sm:grid-cols-2">
+            <div className="mb-10 grid gap-3 sm:grid-cols-2">
               {page.eligibility && (
-                <div className="rounded-2xl border border-border bg-[var(--color-surface)] p-6">
-                  <p className="mb-3 flex items-center gap-2 text-label">
-                    <ListChecks size={14} /> Who can join
+                <div className="rounded-xl border border-border bg-[var(--color-surface)] p-5">
+                  <p className="mb-2 flex items-center gap-2 text-label">
+                    <ListChecks size={13} /> Who can join
                   </p>
                   <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                     {page.eligibility}
@@ -161,9 +174,9 @@ function ProgramDetailPage() {
                 </div>
               )}
               {page.process && (
-                <div className="rounded-2xl border border-border bg-[var(--color-surface)] p-6">
-                  <p className="mb-3 flex items-center gap-2 text-label">
-                    <ClipboardList size={14} /> How it works
+                <div className="rounded-xl border border-border bg-[var(--color-surface)] p-5">
+                  <p className="mb-2 flex items-center gap-2 text-label">
+                    <ClipboardList size={13} /> How it works
                   </p>
                   <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                     {page.process}
@@ -175,23 +188,23 @@ function ProgramDetailPage() {
 
           {/* Gallery */}
           {page && page.gallery.length > 0 && (
-            <div className="mb-14">
-              <p className="text-label mb-6">Gallery</p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="mb-10">
+              <p className="text-label mb-4">Gallery</p>
+              <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
                 {page.gallery.map((g) => (
                   <div
                     key={g.id}
-                    className="group relative aspect-square overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]"
+                    className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-[var(--color-surface)]"
                   >
                     <img
-                      src={optimizeImage(g.image_url, 480)}
+                      src={optimizeImage(g.image_url, 320)}
                       alt={g.caption || title}
                       loading="lazy"
                       className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     {g.caption && (
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent p-2.5">
-                        <p className="text-[11px] text-white leading-tight">{g.caption}</p>
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent p-2">
+                        <p className="text-[10px] text-white leading-tight">{g.caption}</p>
                       </div>
                     )}
                   </div>
@@ -202,26 +215,26 @@ function ProgramDetailPage() {
 
           {/* Testimonials */}
           {page && page.testimonials.length > 0 && (
-            <div className="mb-14">
-              <p className="text-label mb-6">What people say</p>
-              <div className="grid gap-4 sm:grid-cols-2">
+            <div className="mb-10">
+              <p className="text-label mb-4">What people say</p>
+              <div className="grid gap-3 sm:grid-cols-2">
                 {page.testimonials.map((t) => (
                   <div
                     key={t.id}
-                    className="rounded-2xl border border-border bg-[var(--color-surface)] p-6"
+                    className="rounded-xl border border-border bg-[var(--color-surface)] p-5"
                   >
-                    <Quote size={20} className="text-[var(--color-accent-1)] opacity-70" />
-                    <p className="mt-3 text-sm leading-relaxed">{t.quote}</p>
-                    <div className="mt-4 flex items-center gap-3">
+                    <Quote size={16} className="text-[var(--color-accent-1)] opacity-70" />
+                    <p className="mt-2 text-sm leading-relaxed">{t.quote}</p>
+                    <div className="mt-3 flex items-center gap-2.5">
                       {t.photo_url ? (
                         <img
                           src={optimizeImage(t.photo_url, 80)}
                           alt={t.name}
-                          className="h-9 w-9 rounded-full object-cover"
+                          className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (
                         <div
-                          className="grid h-9 w-9 place-items-center rounded-full text-xs font-bold text-white"
+                          className="grid h-8 w-8 place-items-center rounded-full text-[11px] font-bold text-white"
                           style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}
                         >
                           {t.name.slice(0, 2).toUpperCase()}

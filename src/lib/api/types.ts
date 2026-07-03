@@ -129,6 +129,7 @@ export interface ProgramObjective {
   id: number;
   title: string;
   description: string;
+  image_url: string;
   order: number;
 }
 

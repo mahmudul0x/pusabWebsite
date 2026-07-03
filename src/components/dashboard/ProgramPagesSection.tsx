@@ -81,7 +81,7 @@ export function ProgramPagesSection() {
         eligibility: form.eligibility,
         process: form.process,
         schedule_note: form.schedule_note,
-        objectives: form.objectives.map(({ title, description, order }) => ({ title, description, order })),
+        objectives: form.objectives.map(({ title, description, image_url, order }) => ({ title, description, image_url, order })),
         stats: form.stats.map(({ label, value, order }) => ({ label, value, order })),
         gallery: form.gallery.map(({ image_url, caption, order }) => ({ image_url, caption, order })),
         testimonials: form.testimonials.map(({ name, role, quote, photo_url, order }) => ({
@@ -192,19 +192,28 @@ export function ProgramPagesSection() {
             </Field>
           </div>
 
-          {/* Objectives */}
+          {/* Objectives — photo + short note cards shown on the page as "Highlights" */}
           <div>
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-              Objectives
+              Highlights (photo + short note)
             </p>
             <div className="space-y-2.5">
-              {form.objectives.map((o, i) => (
+              {form.objectives.map((o) => (
                 <RepeatingRow
                   key={o.id}
                   onRemove={() =>
                     set("objectives", form.objectives.filter((x) => x.id !== o.id) as Objective[])
                   }
                 >
+                  <div className="sm:col-span-2">
+                    <ImageUpload
+                      value={o.image_url}
+                      onChange={(u) =>
+                        set("objectives", form.objectives.map((x) => (x.id === o.id ? { ...x, image_url: u } : x)) as Objective[])
+                      }
+                      folder="programs"
+                    />
+                  </div>
                   <input
                     value={o.title}
                     placeholder="Title"
@@ -218,7 +227,7 @@ export function ProgramPagesSection() {
                   />
                   <input
                     value={o.description}
-                    placeholder="Description (optional)"
+                    placeholder="Short note (optional)"
                     onChange={(e) =>
                       set(
                         "objectives",
@@ -232,11 +241,11 @@ export function ProgramPagesSection() {
             </div>
             <div className="mt-3">
               <AddRowButton
-                label="Add objective"
+                label="Add highlight"
                 onClick={() =>
                   set("objectives", [
                     ...form.objectives,
-                    { id: nextTempId(), title: "", description: "", order: form.objectives.length },
+                    { id: nextTempId(), title: "", description: "", image_url: "", order: form.objectives.length },
                   ] as Objective[])
                 }
               />
