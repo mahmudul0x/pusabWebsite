@@ -10,12 +10,13 @@ import {
   ListChecks,
   Quote,
   ChevronRight,
+  AlertTriangle,
 } from "lucide-react";
 import { GradientButton } from "@/components/site/GradientButton";
-import { programPagesApi, optimizeImage } from "@/lib/api";
+import { programPagesApi, optimizeImage, type ProgramPage } from "@/lib/api";
 import { PROGRAMS } from "@/lib/site-content";
 import { useProgramEvents, statusOf, type Status } from "@/lib/usePrograms";
-import { themeFor } from "@/lib/programThemes";
+import { themeFor, type ProgramTheme } from "@/lib/programThemes";
 import heroPrograms from "@/assets/hero-programs.jpg";
 
 const STATUS_META: Record<Status, { label: string; Icon: typeof CalendarClock; chip: string }> = {
@@ -89,11 +90,481 @@ function SectionLabel({
   );
 }
 
+function StatBanner({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
+  if (page.stats.length === 0) return null;
+  return (
+    <div
+      className="mb-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl sm:grid-cols-4"
+      style={{ background: `linear-gradient(120deg, ${theme.colorA}, ${theme.colorB})` }}
+    >
+      {page.stats.map((s) => (
+        <div key={s.id} className="bg-slate-950/85 px-4 py-6 text-center backdrop-blur">
+          <p className="font-display text-2xl md:text-3xl font-extrabold text-white">{s.value}</p>
+          <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-white/70">{s.label}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StatChips({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
+  if (page.stats.length === 0) return null;
+  return (
+    <div className="mb-10 flex flex-wrap gap-2.5">
+      {page.stats.map((s) => (
+        <div
+          key={s.id}
+          className="inline-flex items-center gap-2 rounded-full border px-4 py-2"
+          style={{ borderColor: `color-mix(in oklab, ${theme.colorA} 30%, var(--color-border))` }}
+        >
+          <span className="font-display text-sm font-extrabold" style={{ color: theme.colorA }}>
+            {s.value}
+          </span>
+          <span className="text-xs text-muted-foreground">{s.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Reunion — vertical timeline of highlights, celebratory stat banner. */
+function TimelineLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
+  return (
+    <>
+      <StatBanner page={page} theme={theme} />
+      {page.objectives.length > 0 && (
+        <div className="mb-10">
+          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
+            The evening, moment by moment
+          </SectionLabel>
+          <div className="relative pl-8">
+            <div
+              className="absolute left-2.5 top-1 bottom-1 w-px"
+              style={{ background: `linear-gradient(to bottom, ${theme.colorA}, ${theme.colorB})` }}
+            />
+            <ol className="space-y-6">
+              {page.objectives.map((o) => (
+                <li key={o.id} className="relative">
+                  <span
+                    className="absolute -left-8 top-1 grid h-4 w-4 place-items-center rounded-full"
+                    style={{ background: theme.colorA }}
+                  />
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                    {o.image_url && (
+                      <img
+                        src={optimizeImage(o.image_url, 200)}
+                        alt={o.title}
+                        loading="lazy"
+                        className="h-20 w-28 shrink-0 rounded-lg object-cover"
+                      />
+                    )}
+                    <div>
+                      <h3 className="font-display text-base font-semibold leading-tight">{o.title}</h3>
+                      {o.description && (
+                        <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{o.description}</p>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      )}
+      {(page.eligibility || page.process) && (
+        <div className="mb-10 rounded-xl border border-border bg-[var(--color-surface)] p-5">
+          {page.eligibility && (
+            <p className="text-sm text-muted-foreground leading-relaxed">{page.eligibility}</p>
+          )}
+          {page.process && (
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{page.process}</p>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+/** Scholarship — big stat banner, numbered checklist, eligibility emphasized. */
+function ChecklistLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
+  return (
+    <>
+      <StatBanner page={page} theme={theme} />
+      {page.eligibility && (
+        <div
+          className="mb-10 rounded-2xl border-2 p-6"
+          style={{ borderColor: `color-mix(in oklab, ${theme.colorA} 35%, var(--color-border))` }}
+        >
+          <SectionLabel icon={<ListChecks size={13} />} accent={theme.colorA}>
+            Who's eligible
+          </SectionLabel>
+          <p className="text-sm leading-relaxed">{page.eligibility}</p>
+        </div>
+      )}
+      {page.objectives.length > 0 && (
+        <div className="mb-10">
+          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
+            What's included
+          </SectionLabel>
+          <ol className="space-y-2.5">
+            {page.objectives.map((o, i) => (
+              <li key={o.id} className="flex items-start gap-3 rounded-xl border border-border bg-[var(--color-surface)] p-4">
+                <span
+                  className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold text-white"
+                  style={{ background: theme.colorA }}
+                >
+                  {i + 1}
+                </span>
+                <div>
+                  <h3 className="text-sm font-semibold leading-tight">{o.title}</h3>
+                  {o.description && (
+                    <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{o.description}</p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+      {page.process && (
+        <div className="mb-10 rounded-xl border border-border bg-[var(--color-surface)] p-5">
+          <SectionLabel icon={<ClipboardList size={13} />} accent={theme.colorA}>
+            How to apply
+          </SectionLabel>
+          <p className="text-sm text-muted-foreground leading-relaxed">{page.process}</p>
+        </div>
+      )}
+    </>
+  );
+}
+
+/** Schooling — photo-mosaic highlights, plain-text eligibility/process (ongoing, low-friction program). */
+function CurriculumLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
+  return (
+    <>
+      {page.objectives.length > 0 && (
+        <div className="mb-10">
+          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
+            What we teach
+          </SectionLabel>
+          <div className="grid gap-1.5 sm:grid-cols-3">
+            {page.objectives.map((o) => (
+              <div key={o.id} className="group relative aspect-[4/3] overflow-hidden rounded-lg">
+                {o.image_url ? (
+                  <img
+                    src={optimizeImage(o.image_url, 400)}
+                    alt={o.title}
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div
+                    className="absolute inset-0"
+                    style={{ background: `linear-gradient(135deg, ${theme.colorA}, ${theme.colorB})` }}
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/10 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-3">
+                  <h3 className="text-sm font-semibold text-white leading-tight">{o.title}</h3>
+                  {o.description && (
+                    <p className="mt-0.5 text-[11px] text-white/80 leading-relaxed line-clamp-2">
+                      {o.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="mb-10 grid gap-6 sm:grid-cols-2">
+        {page.eligibility && (
+          <div>
+            <SectionLabel accent={theme.colorA}>Who it's for</SectionLabel>
+            <p className="text-sm text-muted-foreground leading-relaxed">{page.eligibility}</p>
+          </div>
+        )}
+        {page.process && (
+          <div>
+            <SectionLabel accent={theme.colorA}>How sessions run</SectionLabel>
+            <p className="text-sm text-muted-foreground leading-relaxed">{page.process}</p>
+          </div>
+        )}
+      </div>
+      <StatChips page={page} theme={theme} />
+    </>
+  );
+}
+
+/** Felicitation — award-style spotlight cards, testimonials pulled up near the top. */
+function SpotlightLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
+  return (
+    <>
+      {page.testimonials.length > 0 && (
+        <div className="mb-10">
+          <SectionLabel icon={<Quote size={13} />} accent={theme.colorA}>
+            In their words
+          </SectionLabel>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {page.testimonials.map((t) => (
+              <div
+                key={t.id}
+                className="rounded-2xl border-2 p-5"
+                style={{ borderColor: `color-mix(in oklab, ${theme.colorA} 30%, var(--color-border))` }}
+              >
+                <Quote size={18} style={{ color: theme.colorA }} className="opacity-70" />
+                <p className="mt-2 text-sm leading-relaxed italic">{t.quote}</p>
+                <div className="mt-3 flex items-center gap-2.5">
+                  {t.photo_url ? (
+                    <img src={optimizeImage(t.photo_url, 80)} alt={t.name} className="h-8 w-8 rounded-full object-cover" />
+                  ) : (
+                    <div
+                      className="grid h-8 w-8 place-items-center rounded-full text-[11px] font-bold text-white"
+                      style={{ background: `linear-gradient(135deg, ${theme.colorA}, ${theme.colorB})` }}
+                    >
+                      {t.name.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-semibold leading-tight">{t.name}</p>
+                    {t.role && <p className="text-xs text-muted-foreground">{t.role}</p>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {page.objectives.length > 0 && (
+        <div className="mb-10">
+          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
+            The ceremony
+          </SectionLabel>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {page.objectives.map((o) => (
+              <div
+                key={o.id}
+                className="overflow-hidden rounded-2xl border-2"
+                style={{ borderColor: `color-mix(in oklab, ${theme.colorA} 25%, var(--color-border))` }}
+              >
+                <div className="relative aspect-[16/9] overflow-hidden" style={{ background: `linear-gradient(135deg, ${theme.colorA}, ${theme.colorB})` }}>
+                  {o.image_url ? (
+                    <img src={optimizeImage(o.image_url, 600)} alt={o.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                  ) : (
+                    <theme.Icon size={32} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white/85" />
+                  )}
+                </div>
+                <div className="p-4">
+                  <h3 className="font-display text-base font-semibold">{o.title}</h3>
+                  {o.description && <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{o.description}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {(page.eligibility || page.process) && (
+        <div className="mb-10 grid gap-3 sm:grid-cols-2">
+          {page.eligibility && (
+            <div className="rounded-xl border border-border bg-[var(--color-surface)] p-5">
+              <SectionLabel icon={<ListChecks size={13} />} accent={theme.colorA}>Achievers</SectionLabel>
+              <p className="text-sm text-muted-foreground leading-relaxed">{page.eligibility}</p>
+            </div>
+          )}
+          {page.process && (
+            <div className="rounded-xl border border-border bg-[var(--color-surface)] p-5">
+              <SectionLabel icon={<ClipboardList size={13} />} accent={theme.colorA}>The programme</SectionLabel>
+              <p className="text-sm text-muted-foreground leading-relaxed">{page.process}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+/** Humanity — urgent alert strip, numbered action steps, gallery of relief work prioritized. */
+function AlertLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
+  return (
+    <>
+      {page.eligibility && (
+        <div
+          className="mb-10 flex items-start gap-3 rounded-xl border-2 p-5"
+          style={{ borderColor: theme.colorA, background: `color-mix(in oklab, ${theme.colorA} 8%, transparent)` }}
+        >
+          <AlertTriangle size={18} style={{ color: theme.colorA }} className="mt-0.5 shrink-0" />
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em]" style={{ color: theme.colorA }}>
+              Who this reaches
+            </p>
+            <p className="mt-1 text-sm leading-relaxed">{page.eligibility}</p>
+          </div>
+        </div>
+      )}
+      {page.process && (
+        <div className="mb-10">
+          <SectionLabel icon={<ClipboardList size={13} />} accent={theme.colorA}>
+            Response steps
+          </SectionLabel>
+          <ol className="space-y-2">
+            {page.process.split(/(?<=[.!])\s+/).filter(Boolean).map((step, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span
+                  className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold text-white"
+                  style={{ background: theme.colorA }}
+                >
+                  {i + 1}
+                </span>
+                <p className="text-sm text-muted-foreground leading-relaxed pt-0.5">{step}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+      {page.objectives.length > 0 && (
+        <div className="mb-10">
+          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
+            Where we've responded
+          </SectionLabel>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {page.objectives.map((o) => (
+              <div key={o.id} className="overflow-hidden rounded-xl border border-border bg-[var(--color-surface)]">
+                <div className="relative aspect-square overflow-hidden" style={{ background: `linear-gradient(135deg, ${theme.colorA}, ${theme.colorB})` }}>
+                  {o.image_url ? (
+                    <img src={optimizeImage(o.image_url, 400)} alt={o.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                  ) : (
+                    <theme.Icon size={24} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white/80" />
+                  )}
+                </div>
+                <div className="p-3">
+                  <h3 className="text-sm font-semibold leading-tight">{o.title}</h3>
+                  {o.description && <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{o.description}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <StatChips page={page} theme={theme} />
+    </>
+  );
+}
+
+/** Picnic — masonry gallery leads, no eligibility/process (informal, everyone welcome). */
+function GalleryFirstLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
+  return (
+    <>
+      {page.gallery.length > 0 && (
+        <div className="mb-10 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+          {page.gallery.map((g, i) => (
+            <div
+              key={g.id}
+              className={
+                "group relative overflow-hidden rounded-xl border border-border " +
+                (i === 0 ? "col-span-2 aspect-[16/9] sm:col-span-2 sm:row-span-2 sm:aspect-square" : "aspect-square")
+              }
+            >
+              <img
+                src={optimizeImage(g.image_url, i === 0 ? 800 : 400)}
+                alt={g.caption || page.title}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              {g.caption && (
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent p-2">
+                  <p className="text-[11px] text-white leading-tight">{g.caption}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {page.objectives.length > 0 && (
+        <div className="mb-10">
+          <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
+            Why we go
+          </SectionLabel>
+          <div className="flex flex-wrap gap-2.5">
+            {page.objectives.map((o) => (
+              <div
+                key={o.id}
+                className="rounded-full border px-4 py-2 text-sm"
+                style={{ borderColor: `color-mix(in oklab, ${theme.colorA} 30%, var(--color-border))` }}
+              >
+                <span className="font-semibold">{o.title}</span>
+                {o.description && <span className="text-muted-foreground"> — {o.description}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <StatChips page={page} theme={theme} />
+    </>
+  );
+}
+
+/** Online — minimal, schedule-focused; no gallery (it's a virtual programme). */
+function CompactLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
+  return (
+    <>
+      {page.objectives.length > 0 && (
+        <div className="mb-10 grid gap-2.5 sm:grid-cols-2">
+          {page.objectives.map((o) => (
+            <div key={o.id} className="flex items-center gap-3 rounded-xl border border-border bg-[var(--color-surface)] p-4">
+              <span
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-white"
+                style={{ background: `linear-gradient(135deg, ${theme.colorA}, ${theme.colorB})` }}
+              >
+                <theme.Icon size={16} />
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-sm font-semibold leading-tight">{o.title}</h3>
+                {o.description && <p className="text-xs text-muted-foreground leading-relaxed">{o.description}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {(page.eligibility || page.process) && (
+        <div className="mb-10 space-y-3 rounded-xl border border-border bg-[var(--color-surface)] p-5">
+          {page.eligibility && (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em]" style={{ color: theme.colorA }}>
+                Who can join
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{page.eligibility}</p>
+            </div>
+          )}
+          {page.process && (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em]" style={{ color: theme.colorA }}>
+                How to join
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{page.process}</p>
+            </div>
+          )}
+        </div>
+      )}
+      <StatChips page={page} theme={theme} />
+    </>
+  );
+}
+
+const LAYOUTS: Record<ProgramTheme["layout"], (props: { page: ProgramPage; theme: ProgramTheme }) => React.ReactNode> = {
+  timeline: TimelineLayout,
+  checklist: ChecklistLayout,
+  curriculum: CurriculumLayout,
+  spotlight: SpotlightLayout,
+  alert: AlertLayout,
+  "gallery-first": GalleryFirstLayout,
+  compact: CompactLayout,
+};
+
 function ProgramDetailPage() {
   const { fallback, page } = Route.useLoaderData();
   const { events, now } = useProgramEvents();
   const theme = themeFor(fallback.key);
-  const { Icon: MoodIcon, colorA, colorB, mood, emphasis } = theme;
+  const { Icon: MoodIcon, colorA, colorB, mood, layout } = theme;
   const gradient = `linear-gradient(120deg, ${colorA}, ${colorB})`;
 
   const title = page?.title || fallback.title;
@@ -105,96 +576,13 @@ function ProgramDetailPage() {
     ? events.filter((e) => e.category.toLowerCase() === fallback.category.toLowerCase())
     : [];
 
-  const hasStats = Boolean(page && page.stats.length > 0);
-  const hasHighlights = Boolean(page && page.objectives.length > 0);
-  const hasEligibility = Boolean(page?.eligibility || page?.process);
+  // Picnic and Online layouts render gallery/eligibility themselves (or skip
+  // them by design) — the generic gallery block below only renders for
+  // layouts that don't already handle it inline.
+  const rendersOwnGallery = layout === "gallery-first";
+  const rendersOwnTestimonials = layout === "spotlight";
 
-  const statsBlock = hasStats && (
-    <div className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {page!.stats.map((s) => (
-        <div
-          key={s.id}
-          className="rounded-xl border p-4 text-center"
-          style={{ borderColor: `color-mix(in oklab, ${colorA} 25%, var(--color-border))` }}
-        >
-          <p
-            className="font-display text-2xl md:text-3xl font-extrabold"
-            style={{
-              backgroundImage: gradient,
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-            }}
-          >
-            {s.value}
-          </p>
-          <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">{s.label}</p>
-        </div>
-      ))}
-    </div>
-  );
-
-  const highlightsBlock = hasHighlights && (
-    <div className="mb-10">
-      <SectionLabel icon={<MoodIcon size={13} />} accent={colorA}>
-        Highlights
-      </SectionLabel>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {page!.objectives.map((o) => (
-          <div key={o.id} className="overflow-hidden rounded-xl border border-border bg-[var(--color-surface)]">
-            <div className="relative aspect-[16/10] overflow-hidden" style={{ background: gradient }}>
-              {o.image_url ? (
-                <img
-                  src={optimizeImage(o.image_url, 480)}
-                  alt={o.title}
-                  loading="lazy"
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              ) : (
-                <MoodIcon size={26} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white/80" />
-              )}
-            </div>
-            <div className="p-3.5">
-              <h3 className="font-display text-sm font-semibold leading-tight">{o.title}</h3>
-              {o.description && (
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{o.description}</p>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const eligibilityBlock = hasEligibility && (
-    <div className="mb-10 grid gap-3 sm:grid-cols-2">
-      {page?.eligibility && (
-        <div className="rounded-xl border border-border bg-[var(--color-surface)] p-5">
-          <SectionLabel icon={<ListChecks size={13} />} accent={colorA}>
-            Who can join
-          </SectionLabel>
-          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-            {page.eligibility}
-          </p>
-        </div>
-      )}
-      {page?.process && (
-        <div className="rounded-xl border border-border bg-[var(--color-surface)] p-5">
-          <SectionLabel icon={<ClipboardList size={13} />} accent={colorA}>
-            How it works
-          </SectionLabel>
-          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{page.process}</p>
-        </div>
-      )}
-    </div>
-  );
-
-  const orderedBlocks =
-    emphasis === "stats"
-      ? [statsBlock, highlightsBlock, eligibilityBlock]
-      : emphasis === "eligibility"
-        ? [eligibilityBlock, highlightsBlock, statsBlock]
-        : [highlightsBlock, statsBlock, eligibilityBlock];
+  const LayoutComponent = LAYOUTS[layout];
 
   return (
     <>
@@ -219,9 +607,7 @@ function ProgramDetailPage() {
             <span className="text-white">{title}</span>
           </nav>
 
-          <div
-            className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur"
-          >
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
             <MoodIcon size={13} style={{ color: colorA }} />
             {mood}
           </div>
@@ -251,10 +637,11 @@ function ProgramDetailPage() {
             )}
           </div>
 
-          {orderedBlocks}
+          {/* Per-program layout renders its own mix of stats/highlights/eligibility/process */}
+          {page && <LayoutComponent page={page} theme={theme} />}
 
-          {/* Gallery */}
-          {page && page.gallery.length > 0 && (
+          {/* Gallery — skipped for layouts that already render it inline, and for "compact" (virtual events) */}
+          {page && page.gallery.length > 0 && !rendersOwnGallery && layout !== "compact" && (
             <div className="mb-10">
               <SectionLabel accent={colorA}>Gallery</SectionLabel>
               <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
@@ -280,8 +667,8 @@ function ProgramDetailPage() {
             </div>
           )}
 
-          {/* Testimonials */}
-          {page && page.testimonials.length > 0 && (
+          {/* Testimonials — skipped for "spotlight" which already shows them near the top */}
+          {page && page.testimonials.length > 0 && !rendersOwnTestimonials && (
             <div className="mb-10">
               <SectionLabel accent={colorA}>What people say</SectionLabel>
               <div className="grid gap-3 sm:grid-cols-2">

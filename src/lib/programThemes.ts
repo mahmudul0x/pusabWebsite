@@ -11,17 +11,27 @@ import {
 
 /**
  * Per-program visual identity for /programs/<slug>. Colors stay within the
- * site's existing palette (no new brand colors) but each program gets its
- * own accent pairing, icon and section emphasis so the 7 pages read as
- * distinct places rather than one template recolored.
+ * site's existing palette (no new brand colors), but each program also gets
+ * a distinct `layout` — which sections render, and how — so the 7 pages
+ * read as genuinely different places rather than one template recolored.
+ * All layouts read from the same ProgramPage data; only the presentation
+ * (and which optional sections are shown at all) changes.
  */
+export type ProgramLayout =
+  | "timeline" // Reunion: vertical timeline for highlights, big stat banner, no eligibility grid
+  | "checklist" // Scholarship: stat banner up top, highlights as a numbered checklist, eligibility emphasized
+  | "curriculum" // Schooling: highlights as a photo mosaic, plain-text eligibility/process (no boxes)
+  | "spotlight" // Felicitation: large award-style highlight cards, testimonials pulled up near the top
+  | "alert" // Humanity: urgent banner strip, process as numbered action steps, gallery prioritized
+  | "gallery-first" // Picnic: masonry gallery leads, no eligibility/process at all
+  | "compact"; // Online: minimal, schedule-focused, no gallery (virtual event)
+
 export interface ProgramTheme {
   Icon: LucideIcon;
   /** CSS color values (not var() names) used for this page's accent gradient. */
   colorA: string;
   colorB: string;
-  /** Which optional section renders first, right after the overview. */
-  emphasis: "stats" | "highlights" | "eligibility";
+  layout: ProgramLayout;
   /** Short one-word mood label shown as a kicker above the title. */
   mood: string;
 }
@@ -31,49 +41,49 @@ export const PROGRAM_THEMES: Record<string, ProgramTheme> = {
     Icon: Users,
     colorA: "#f59e0b",
     colorB: "#ef4444",
-    emphasis: "stats",
+    layout: "timeline",
     mood: "Celebration",
   },
   schooling: {
     Icon: GraduationCap,
     colorA: "#0ea5e9",
     colorB: "#22c55e",
-    emphasis: "highlights",
+    layout: "curriculum",
     mood: "Education",
   },
   scholarship: {
     Icon: Award,
     colorA: "#22c55e",
     colorB: "#0ea5e9",
-    emphasis: "stats",
+    layout: "checklist",
     mood: "Opportunity",
   },
   felicitation: {
     Icon: Award,
     colorA: "#a855f7",
     colorB: "#ec4899",
-    emphasis: "highlights",
+    layout: "spotlight",
     mood: "Recognition",
   },
   humanity: {
     Icon: Stethoscope,
     colorA: "#ef4444",
     colorB: "#f59e0b",
-    emphasis: "eligibility",
+    layout: "alert",
     mood: "Relief",
   },
   picnic: {
     Icon: Trees,
     colorA: "#f97316",
     colorB: "#eab308",
-    emphasis: "highlights",
+    layout: "gallery-first",
     mood: "Togetherness",
   },
   online: {
     Icon: Radio,
     colorA: "#6366f1",
     colorB: "#06b6d4",
-    emphasis: "eligibility",
+    layout: "compact",
     mood: "Digital",
   },
 };
@@ -82,7 +92,7 @@ export const DEFAULT_THEME: ProgramTheme = {
   Icon: HeartHandshake,
   colorA: "var(--color-accent-1)",
   colorB: "var(--color-accent-2)",
-  emphasis: "highlights",
+  layout: "checklist",
   mood: "Program",
 };
 
