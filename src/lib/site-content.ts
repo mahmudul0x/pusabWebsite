@@ -25,6 +25,7 @@ export const NAV_LINKS = [
       { to: "/programs/scholarship", label: "PUSAB Scholarship" },
       { to: "/felicitation", label: "Felicitation & Freshers' Reception" },
       { to: "/programs/humanity", label: "PUSAB for Humanity" },
+      { to: "/programs/iftar-mahfil", label: "Iftar Mahfil" },
       { to: "/programs/picnic", label: "Annual Picnic" },
       { to: "/programs/online", label: "Online Events" },
     ],
@@ -234,6 +235,12 @@ export const PROGRAMS = [
     title: "PUSAB for Humanity",
     desc: "Disaster relief, blanket distribution and medical camps.",
     category: "Relief",
+  },
+  {
+    key: "iftar-mahfil",
+    title: "Iftar Mahfil",
+    desc: "A Ramadan gathering where members break their fast together.",
+    category: "Community",
   },
   {
     key: "online",

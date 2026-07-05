@@ -20,6 +20,8 @@ import { ReunionPage } from "@/components/site/ReunionPage";
 import { SchoolingPage } from "@/components/site/SchoolingPage";
 import { HumanityPage } from "@/components/site/HumanityPage";
 import { ScholarshipPage } from "@/components/site/ScholarshipPage";
+import { PicnicPage } from "@/components/site/PicnicPage";
+import { OnlineEventsPage } from "@/components/site/OnlineEventsPage";
 import heroPrograms from "@/assets/hero-programs.jpg";
 
 const STATUS_META: Record<Status, { label: string; Icon: typeof CalendarClock; chip: string }> = {
@@ -525,6 +527,45 @@ function ProgramDetailPage() {
   if (fallback.key === "scholarship") {
     return (
       <ScholarshipPage
+        page={page}
+        fallbackTitle={fallback.title}
+        fallbackDesc={fallback.desc}
+        heroImageFallback={heroPrograms}
+        years={years}
+        currentYear={page?.year ?? new Date().getFullYear()}
+        loadingYear={loadingYear}
+        onSwitchYear={switchYear}
+      />
+    );
+  }
+
+  // Picnic also has a fully bespoke design (boxed light hero with Date/Venue/
+  // Who Can Join facts, an "About the Picnic" + "Open to All" side card, a
+  // 6-icon Picnic Highlights grid, gallery with nav arrows, a Date/Time/Venue
+  // info strip, and a navy CTA banner) matching a specific reference layout.
+  if (fallback.key === "picnic") {
+    return (
+      <PicnicPage
+        page={page}
+        fallbackTitle={fallback.title}
+        fallbackDesc={fallback.desc}
+        heroImageFallback={heroPrograms}
+        years={years}
+        currentYear={page?.year ?? new Date().getFullYear()}
+        loadingYear={loadingYear}
+        onSwitchYear={switchYear}
+      />
+    );
+  }
+
+  // Online Events also has a fully bespoke design (dark hero with Open to
+  // All/Live & Interactive/Learn & Grow/Certificate facts, a search + filter
+  // bar, a 4-card "Join Our Next Events" grid with speakers and live/upcoming
+  // badges, a "Why Join" info grid, gallery with nav arrows, and a subscribe
+  // banner) matching a specific reference layout.
+  if (fallback.key === "online") {
+    return (
+      <OnlineEventsPage
         page={page}
         fallbackTitle={fallback.title}
         fallbackDesc={fallback.desc}

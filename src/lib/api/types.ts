@@ -165,6 +165,20 @@ export interface ProgramTestimonial {
   order: number;
 }
 
+export interface ProgramWebinar {
+  id: number;
+  tag: string;
+  title: string;
+  speaker_name: string;
+  speaker_role: string;
+  speaker_photo_url: string;
+  event_date: string;
+  event_time: string;
+  status: "live" | "upcoming";
+  register_url: string;
+  order: number;
+}
+
 export interface ProgramPage {
   id: number;
   slug: string;
@@ -188,6 +202,7 @@ export interface ProgramPage {
   stats: ProgramStat[];
   gallery: ProgramGalleryImage[];
   testimonials: ProgramTestimonial[];
+  webinars: ProgramWebinar[];
   /** Every edition year that exists for this slug, newest first. Only
    * present on GET responses (added by the backend view), not on writes. */
   years?: number[];

@@ -6,6 +6,7 @@ import {
   Stethoscope,
   Radio,
   Award,
+  Moon,
   type LucideIcon,
 } from "lucide-react";
 
@@ -23,7 +24,7 @@ export type ProgramLayout =
   | "curriculum" // Schooling: highlights as a photo mosaic, plain-text eligibility/process (no boxes)
   | "spotlight" // Felicitation: large award-style highlight cards, testimonials pulled up near the top
   | "alert" // Humanity: urgent banner strip, process as numbered action steps, gallery prioritized
-  | "gallery-first" // Picnic: masonry gallery leads, no eligibility/process at all
+  | "gallery-first" // unused now that Picnic has a bespoke component; kept for the type/LAYOUTS map
   | "compact"; // Online: minimal, schedule-focused, no gallery (virtual event)
 
 export interface ProgramTheme {
@@ -81,6 +82,13 @@ export const PROGRAM_THEMES: Record<string, ProgramTheme> = {
   },
   picnic: {
     Icon: Trees,
+    colorA: SITE_COLOR_A,
+    colorB: SITE_COLOR_B,
+    layout: "gallery-first",
+    mood: "Togetherness",
+  },
+  "iftar-mahfil": {
+    Icon: Moon,
     colorA: SITE_COLOR_A,
     colorB: SITE_COLOR_B,
     layout: "gallery-first",

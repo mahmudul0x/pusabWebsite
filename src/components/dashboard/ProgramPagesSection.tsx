@@ -11,6 +11,12 @@ type InfoItem = ProgramPage["info_items"][number];
 type Stat = ProgramPage["stats"][number];
 type GalleryImage = ProgramPage["gallery"][number];
 type Testimonial = ProgramPage["testimonials"][number];
+type Webinar = ProgramPage["webinars"][number];
+
+const WEBINAR_STATUS_OPTIONS = [
+  { value: "upcoming", label: "Upcoming" },
+  { value: "live", label: "Live" },
+];
 
 let tempId = -1;
 const nextTempId = () => tempId--;
@@ -57,6 +63,7 @@ function emptyEdition(slug: string, title: string, year: number): ProgramPage {
     stats: [],
     gallery: [],
     testimonials: [],
+    webinars: [],
     updated_at: "",
   };
 }
@@ -182,6 +189,7 @@ export function ProgramPagesSection() {
     if (f.stats.some((s) => !s.label.trim() || !s.value.trim())) return "Every stat needs a label and a value.";
     if (f.gallery.some((g) => !g.image_url.trim())) return "Remove empty gallery rows, or add a photo to them.";
     if (f.testimonials.some((t) => !t.name.trim() || !t.quote.trim())) return "Every testimonial needs a name and a quote.";
+    if (f.webinars.some((w) => !w.title.trim())) return "Every event card needs a title.";
     return null;
   }
 
@@ -220,6 +228,11 @@ export function ProgramPagesSection() {
         testimonials: form.testimonials.map(({ name, role, quote, photo_url, order }) => ({
           name, role, quote, photo_url, order,
         })),
+        webinars: form.webinars.map(
+          ({ tag, title, speaker_name, speaker_role, speaker_photo_url, event_date, event_time, status, register_url, order }) => ({
+            tag, title, speaker_name, speaker_role, speaker_photo_url, event_date, event_time, status, register_url, order,
+          }),
+        ),
       };
       const saved = isNewEdition
         ? await programPagesApi.create(body as never)
@@ -614,6 +627,94 @@ export function ProgramPagesSection() {
                     ...form.testimonials,
                     { id: nextTempId(), name: "", role: "", quote: "", photo_url: "", order: form.testimonials.length },
                   ] as Testimonial[])
+                }
+              />
+            </EditorSection>
+
+            <EditorSection title="Online event cards" count={form.webinars.length}>
+              {form.webinars.map((w) => (
+                <RepeatingRow key={w.id} onRemove={() => set("webinars", form.webinars.filter((x) => x.id !== w.id) as Webinar[])}>
+                  <input
+                    value={w.tag}
+                    placeholder="Type, e.g. Talk Show / Workshop / Seminar"
+                    onChange={(e) => set("webinars", form.webinars.map((x) => (x.id === w.id ? { ...x, tag: e.target.value } : x)) as Webinar[])}
+                    className={inputCls + " mt-0"}
+                  />
+                  <select
+                    value={w.status}
+                    onChange={(e) => set("webinars", form.webinars.map((x) => (x.id === w.id ? { ...x, status: e.target.value as Webinar["status"] } : x)) as Webinar[])}
+                    className={inputCls + " mt-0"}
+                  >
+                    {WEBINAR_STATUS_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    value={w.title}
+                    placeholder="Event title"
+                    onChange={(e) => set("webinars", form.webinars.map((x) => (x.id === w.id ? { ...x, title: e.target.value } : x)) as Webinar[])}
+                    className={inputCls + " mt-0 sm:col-span-2"}
+                  />
+                  <input
+                    value={w.speaker_name}
+                    placeholder="Speaker name"
+                    onChange={(e) => set("webinars", form.webinars.map((x) => (x.id === w.id ? { ...x, speaker_name: e.target.value } : x)) as Webinar[])}
+                    className={inputCls + " mt-0"}
+                  />
+                  <input
+                    value={w.speaker_role}
+                    placeholder="Speaker role, e.g. Professor, DU"
+                    onChange={(e) => set("webinars", form.webinars.map((x) => (x.id === w.id ? { ...x, speaker_role: e.target.value } : x)) as Webinar[])}
+                    className={inputCls + " mt-0"}
+                  />
+                  <input
+                    value={w.event_date}
+                    placeholder="Date, e.g. 20 May 2025"
+                    onChange={(e) => set("webinars", form.webinars.map((x) => (x.id === w.id ? { ...x, event_date: e.target.value } : x)) as Webinar[])}
+                    className={inputCls + " mt-0"}
+                  />
+                  <input
+                    value={w.event_time}
+                    placeholder="Time, e.g. 08:00 PM (GMT+6)"
+                    onChange={(e) => set("webinars", form.webinars.map((x) => (x.id === w.id ? { ...x, event_time: e.target.value } : x)) as Webinar[])}
+                    className={inputCls + " mt-0"}
+                  />
+                  <input
+                    value={w.register_url}
+                    placeholder="Register link (URL, optional)"
+                    onChange={(e) => set("webinars", form.webinars.map((x) => (x.id === w.id ? { ...x, register_url: e.target.value } : x)) as Webinar[])}
+                    className={inputCls + " mt-0"}
+                  />
+                  <div className="sm:col-span-2">
+                    <ImageUpload
+                      value={w.speaker_photo_url}
+                      onChange={(u) => set("webinars", form.webinars.map((x) => (x.id === w.id ? { ...x, speaker_photo_url: u } : x)) as Webinar[])}
+                      folder="programs"
+                    />
+                  </div>
+                </RepeatingRow>
+              ))}
+              <AddRowButton
+                label="Add event card"
+                onClick={() =>
+                  set("webinars", [
+                    ...form.webinars,
+                    {
+                      id: nextTempId(),
+                      tag: "",
+                      title: "",
+                      speaker_name: "",
+                      speaker_role: "",
+                      speaker_photo_url: "",
+                      event_date: "",
+                      event_time: "",
+                      status: "upcoming",
+                      register_url: "",
+                      order: form.webinars.length,
+                    },
+                  ] as Webinar[])
                 }
               />
             </EditorSection>
