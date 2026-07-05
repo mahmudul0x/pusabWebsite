@@ -18,6 +18,7 @@ import { useProgramEvents, statusOf, type Status } from "@/lib/usePrograms";
 import { themeFor, type ProgramTheme } from "@/lib/programThemes";
 import { ReunionPage } from "@/components/site/ReunionPage";
 import { SchoolingPage } from "@/components/site/SchoolingPage";
+import { HumanityPage } from "@/components/site/HumanityPage";
 import { ScholarshipPage } from "@/components/site/ScholarshipPage";
 import heroPrograms from "@/assets/hero-programs.jpg";
 
@@ -477,6 +478,25 @@ function ProgramDetailPage() {
   if (fallback.key === "schooling") {
     return (
       <SchoolingPage
+        page={page}
+        fallbackTitle={fallback.title}
+        fallbackDesc={fallback.desc}
+        heroImageFallback={heroPrograms}
+        years={years}
+        currentYear={page?.year ?? new Date().getFullYear()}
+        loadingYear={loadingYear}
+        onSwitchYear={switchYear}
+      />
+    );
+  }
+
+  // Humanity also has a fully bespoke design (boxed cream/green hero,
+  // Serve/Support/Sustain hero facts, a 4-stat mission card, a 5-card
+  // initiatives grid, a dark impact-stats banner, gallery with nav arrows,
+  // and a CTA banner) matching a specific reference layout.
+  if (fallback.key === "humanity") {
+    return (
+      <HumanityPage
         page={page}
         fallbackTitle={fallback.title}
         fallbackDesc={fallback.desc}
