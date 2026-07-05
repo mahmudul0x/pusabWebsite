@@ -6,6 +6,7 @@ import { errMessage } from "./useResource";
 import { SectionHeader, Field, inputCls } from "./primitives";
 import { ImageUpload } from "./ImageUpload";
 
+type Objective = ProgramPage["objectives"][number];
 type Stat = ProgramPage["stats"][number];
 type GalleryImage = ProgramPage["gallery"][number];
 type Testimonial = ProgramPage["testimonials"][number];
@@ -13,6 +14,20 @@ type Testimonial = ProgramPage["testimonials"][number];
 let tempId = -1;
 const nextTempId = () => tempId--;
 const CURRENT_YEAR = new Date().getFullYear();
+
+const ICON_OPTIONS = [
+  { value: "", label: "No icon" },
+  { value: "users", label: "Users (reconnect)" },
+  { value: "mic", label: "Mic (talks)" },
+  { value: "camera", label: "Camera (photos)" },
+  { value: "award", label: "Award (recognition)" },
+  { value: "utensils", label: "Utensils (food)" },
+  { value: "gift", label: "Gift (surprises)" },
+  { value: "calendar", label: "Calendar (schedule)" },
+  { value: "heart", label: "Heart (community)" },
+  { value: "music", label: "Music (entertainment)" },
+  { value: "sparkles", label: "Sparkles (highlight)" },
+];
 
 function emptyEdition(slug: string, title: string, year: number): ProgramPage {
   return {
@@ -26,6 +41,13 @@ function emptyEdition(slug: string, title: string, year: number): ProgramPage {
     eligibility: "",
     process: "",
     schedule_note: "",
+    event_date: "",
+    venue: "",
+    event_time: "",
+    register_label: "",
+    register_url: "",
+    cta_title: "",
+    cta_subtitle: "",
     objectives: [],
     stats: [],
     gallery: [],
@@ -150,6 +172,7 @@ export function ProgramPagesSection() {
 
   function validate(f: ProgramPage): string | null {
     if (!f.title.trim()) return "Title is required.";
+    if (f.objectives.some((o) => !o.title.trim())) return "Every highlight needs a title.";
     if (f.stats.some((s) => !s.label.trim() || !s.value.trim())) return "Every stat needs a label and a value.";
     if (f.gallery.some((g) => !g.image_url.trim())) return "Remove empty gallery rows, or add a photo to them.";
     if (f.testimonials.some((t) => !t.name.trim() || !t.quote.trim())) return "Every testimonial needs a name and a quote.";
@@ -175,6 +198,16 @@ export function ProgramPagesSection() {
         eligibility: form.eligibility,
         process: form.process,
         schedule_note: form.schedule_note,
+        event_date: form.event_date,
+        venue: form.venue,
+        event_time: form.event_time,
+        register_label: form.register_label,
+        register_url: form.register_url,
+        cta_title: form.cta_title,
+        cta_subtitle: form.cta_subtitle,
+        objectives: form.objectives.map(({ title, description, icon, image_url, order }) => ({
+          title, description, icon, image_url, order,
+        })),
         stats: form.stats.map(({ label, value, order }) => ({ label, value, order })),
         gallery: form.gallery.map(({ image_url, caption, order }) => ({ image_url, caption, order })),
         testimonials: form.testimonials.map(({ name, role, quote, photo_url, order }) => ({
@@ -336,6 +369,89 @@ export function ProgramPagesSection() {
                 </div>
               </div>
             </details>
+
+            <details className="group rounded-xl border border-border">
+              <summary className="flex cursor-pointer list-none items-center px-3.5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground [&::-webkit-details-marker]:hidden">
+                Event, registration &amp; CTA
+              </summary>
+              <div className="space-y-3.5 border-t border-border p-3.5">
+                <div className="grid gap-2.5 sm:grid-cols-3">
+                  <Field label="Event date" hint='e.g. "December, Every Year"'>
+                    <input value={form.event_date} onChange={(e) => set("event_date", e.target.value)} className={inputCls} />
+                  </Field>
+                  <Field label="Venue">
+                    <input value={form.venue} onChange={(e) => set("venue", e.target.value)} className={inputCls} />
+                  </Field>
+                  <Field label="Time" hint='e.g. "6:00 PM – 11:00 PM"'>
+                    <input value={form.event_time} onChange={(e) => set("event_time", e.target.value)} className={inputCls} />
+                  </Field>
+                </div>
+
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  <Field label="Register button label" hint='e.g. "Register for Reunion"'>
+                    <input value={form.register_label} onChange={(e) => set("register_label", e.target.value)} className={inputCls} />
+                  </Field>
+                  <Field label="Register link (URL)">
+                    <input value={form.register_url} onChange={(e) => set("register_url", e.target.value)} className={inputCls} />
+                  </Field>
+                </div>
+
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  <Field label="CTA banner title" hint='e.g. "Be Part of the Tradition"'>
+                    <input value={form.cta_title} onChange={(e) => set("cta_title", e.target.value)} className={inputCls} />
+                  </Field>
+                  <Field label="CTA banner subtitle">
+                    <input value={form.cta_subtitle} onChange={(e) => set("cta_subtitle", e.target.value)} className={inputCls} />
+                  </Field>
+                </div>
+              </div>
+            </details>
+
+            <EditorSection title="Highlights" count={form.objectives.length}>
+              {form.objectives.map((o) => (
+                <RepeatingRow key={o.id} onRemove={() => set("objectives", form.objectives.filter((x) => x.id !== o.id) as Objective[])}>
+                  <input
+                    value={o.title}
+                    placeholder="Title, e.g. Reconnect"
+                    onChange={(e) => set("objectives", form.objectives.map((x) => (x.id === o.id ? { ...x, title: e.target.value } : x)) as Objective[])}
+                    className={inputCls + " mt-0"}
+                  />
+                  <select
+                    value={o.icon}
+                    onChange={(e) => set("objectives", form.objectives.map((x) => (x.id === o.id ? { ...x, icon: e.target.value } : x)) as Objective[])}
+                    className={inputCls + " mt-0"}
+                  >
+                    {ICON_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    value={o.description}
+                    placeholder="Short description (optional)"
+                    onChange={(e) => set("objectives", form.objectives.map((x) => (x.id === o.id ? { ...x, description: e.target.value } : x)) as Objective[])}
+                    className={inputCls + " mt-0 sm:col-span-2"}
+                  />
+                  <div className="sm:col-span-2">
+                    <ImageUpload
+                      value={o.image_url}
+                      onChange={(u) => set("objectives", form.objectives.map((x) => (x.id === o.id ? { ...x, image_url: u } : x)) as Objective[])}
+                      folder="programs"
+                    />
+                  </div>
+                </RepeatingRow>
+              ))}
+              <AddRowButton
+                label="Add highlight"
+                onClick={() =>
+                  set("objectives", [
+                    ...form.objectives,
+                    { id: nextTempId(), title: "", description: "", icon: "", image_url: "", order: form.objectives.length },
+                  ] as Objective[])
+                }
+              />
+            </EditorSection>
 
             <EditorSection title="Stat tiles" count={form.stats.length}>
               {form.stats.map((s) => (

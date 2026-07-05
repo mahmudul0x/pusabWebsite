@@ -16,6 +16,7 @@ import { programPagesApi, optimizeImage, type ProgramPage } from "@/lib/api";
 import { PROGRAMS } from "@/lib/site-content";
 import { useProgramEvents, statusOf, type Status } from "@/lib/usePrograms";
 import { themeFor, type ProgramTheme } from "@/lib/programThemes";
+import { ReunionPage } from "@/components/site/ReunionPage";
 import heroPrograms from "@/assets/hero-programs.jpg";
 
 const STATUS_META: Record<Status, { label: string; Icon: typeof CalendarClock; chip: string }> = {
@@ -447,6 +448,25 @@ function ProgramDetailPage() {
     } finally {
       setLoadingYear(false);
     }
+  }
+
+  // Reunion has a fully bespoke design (hero, event-info card, highlights
+  // grid, gallery with a "+N more" overlay, testimonial carousel, CTA
+  // banner) that doesn't fit the shared layout system used by the other 6
+  // programs — it's rendered by its own component instead.
+  if (fallback.key === "reunion") {
+    return (
+      <ReunionPage
+        page={page}
+        fallbackTitle={fallback.title}
+        fallbackDesc={fallback.desc}
+        heroImageFallback={heroPrograms}
+        years={years}
+        currentYear={page?.year ?? new Date().getFullYear()}
+        loadingYear={loadingYear}
+        onSwitchYear={switchYear}
+      />
+    );
   }
 
   const title = page?.title || fallback.title;

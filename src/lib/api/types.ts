@@ -129,6 +129,7 @@ export interface ProgramObjective {
   id: number;
   title: string;
   description: string;
+  icon: string;
   image_url: string;
   order: number;
 }
@@ -167,6 +168,13 @@ export interface ProgramPage {
   eligibility: string;
   process: string;
   schedule_note: string;
+  event_date: string;
+  venue: string;
+  event_time: string;
+  register_label: string;
+  register_url: string;
+  cta_title: string;
+  cta_subtitle: string;
   objectives: ProgramObjective[];
   stats: ProgramStat[];
   gallery: ProgramGalleryImage[];
