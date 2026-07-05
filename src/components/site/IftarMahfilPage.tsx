@@ -1,0 +1,437 @@
+import { Link } from "@tanstack/react-router";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import {
+  ChevronRight,
+  ChevronLeft,
+  Calendar,
+  Clock,
+  MapPin,
+  ArrowRight,
+  Users,
+  Heart,
+  Music,
+  Sparkles,
+  Mic,
+  Utensils,
+  Camera,
+  Gift,
+  Quote,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { optimizeImage, type ProgramPage } from "@/lib/api";
+
+const FEATURE_ICONS: Record<string, LucideIcon> = {
+  users: Users,
+  heart: Heart,
+  music: Music,
+  sparkles: Sparkles,
+  mic: Mic,
+  utensils: Utensils,
+  camera: Camera,
+  gift: Gift,
+};
+
+// Cream + deep green + gold — a Ramadan-specific palette matching this
+// page's reference design, distinct from the site's usual blue accent.
+const CREAM = "#FBF3E7";
+const GREEN = "#12331F";
+const GREEN_2 = "#1B4A2C";
+const GOLD = "#C9982F";
+const GOLD_GRADIENT = `linear-gradient(120deg, ${GOLD}, #B07E22)`;
+
+export function IftarMahfilPage({
+  page,
+  fallbackTitle,
+  fallbackDesc,
+  heroImageFallback,
+  years,
+  currentYear,
+  loadingYear,
+  onSwitchYear,
+}: {
+  page: ProgramPage | null;
+  fallbackTitle: string;
+  fallbackDesc: string;
+  heroImageFallback: string;
+  years: number[];
+  currentYear: number;
+  loadingYear: boolean;
+  onSwitchYear: (y: number) => void;
+}) {
+  const title = page?.title || fallbackTitle;
+  const tagline = page?.tagline || fallbackDesc;
+  const overview = page?.overview || fallbackDesc;
+  const heroImage = page?.hero_image_url ? optimizeImage(page.hero_image_url, 1200) : heroImageFallback;
+
+  const gallery = page?.gallery ?? [];
+  const GALLERY_STEP = 5;
+  const [galleryStart, setGalleryStart] = useState(0);
+  const galleryPage = gallery.slice(galleryStart, galleryStart + GALLERY_STEP);
+  const canGalleryPrev = galleryStart > 0;
+  const canGalleryNext = galleryStart + GALLERY_STEP < gallery.length;
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const aboutFeatures = page?.objectives ?? [];
+  const highlights = page?.info_items ?? [];
+
+  const titleParts = title.split(" ");
+  const splitAt = Math.ceil(titleParts.length / 2);
+
+  return (
+    <>
+      {/* Hero — cream card with a diagonal gold-edge split */}
+      <section className="pt-28 pb-10 md:pt-32 md:pb-0" style={{ background: CREAM }}>
+        <div className="container-page">
+          <nav className="mb-6 flex items-center gap-2 text-xs" style={{ color: "color-mix(in oklab, #12331F 55%, transparent)" }}>
+            <Link to="/" className="transition-opacity hover:opacity-70">
+              Home
+            </Link>
+            <ChevronRight size={12} className="opacity-60" />
+            <Link to="/programs" className="transition-opacity hover:opacity-70">
+              Programs
+            </Link>
+            <ChevronRight size={12} className="opacity-60" />
+            <span style={{ color: GREEN }}>{title}</span>
+          </nav>
+        </div>
+
+        <div className="relative overflow-hidden md:grid md:grid-cols-2 md:items-stretch">
+          <div className="container-page md:mx-0 md:max-w-none py-8 md:py-16 md:pr-12 lg:pr-20">
+            <span
+              className="mb-4 inline-block rounded-full border px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em]"
+              style={{ borderColor: "color-mix(in oklab, #12331F 25%, transparent)", color: GREEN }}
+            >
+              Faith &middot; Unity &middot; Gratitude
+            </span>
+            <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] md:text-5xl">
+              <span style={{ color: GREEN }}>{titleParts.slice(0, splitAt).join(" ")}</span>{" "}
+              <span style={{ color: GOLD }}>{titleParts.slice(splitAt).join(" ")}</span>
+            </h1>
+            {tagline && (
+              <p className="mt-5 max-w-md text-sm leading-relaxed md:text-base" style={{ color: "color-mix(in oklab, #12331F 75%, transparent)" }}>
+                {tagline}
+              </p>
+            )}
+
+            <div className="mt-8 flex flex-wrap gap-6">
+              {page?.event_date && (
+                <div className="flex items-center gap-2.5">
+                  <Calendar size={18} style={{ color: GREEN }} />
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "color-mix(in oklab, #12331F 55%, transparent)" }}>Date</p>
+                    <p className="text-xs font-semibold" style={{ color: GREEN }}>{page.event_date}</p>
+                  </div>
+                </div>
+              )}
+              {page?.event_time && (
+                <div className="flex items-center gap-2.5">
+                  <Clock size={18} style={{ color: GREEN }} />
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "color-mix(in oklab, #12331F 55%, transparent)" }}>Time</p>
+                    <p className="text-xs font-semibold" style={{ color: GREEN }}>{page.event_time}</p>
+                  </div>
+                </div>
+              )}
+              {page?.venue && (
+                <div className="flex items-center gap-2.5">
+                  <MapPin size={18} style={{ color: GREEN }} />
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "color-mix(in oklab, #12331F 55%, transparent)" }}>Venue</p>
+                    <p className="text-xs font-semibold" style={{ color: GREEN }}>{page.venue}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <a
+              href={page?.register_url || "#"}
+              className="mt-8 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
+              style={{ background: `linear-gradient(120deg, ${GREEN}, ${GREEN_2})` }}
+            >
+              Stay Updated <ArrowRight size={15} />
+            </a>
+          </div>
+
+          <div className="relative h-[280px] md:h-auto">
+            <div
+              className="absolute inset-0 hidden md:block"
+              style={{ clipPath: "polygon(6% 0, 100% 0, 100% 100%, 0% 100%)" }}
+            >
+              <img src={heroImage} alt={title} className="h-full w-full object-cover" />
+            </div>
+            <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover md:hidden" />
+            <div
+              className="absolute inset-y-0 left-0 hidden w-2 md:block"
+              style={{ background: GOLD, clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 md:py-20">
+        <div className="container-page">
+          {/* Year switcher */}
+          {years.length > 1 && page && (
+            <div className="mb-10">
+              <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD }}>
+                <Calendar size={13} /> Browse by year
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {years.map((y) => {
+                  const isActive = y === currentYear;
+                  return (
+                    <button
+                      key={y}
+                      onClick={() => onSwitchYear(y)}
+                      disabled={loadingYear}
+                      className={
+                        "rounded-full px-5 py-2.5 text-sm font-bold transition-all disabled:opacity-60 " +
+                        (isActive ? "text-white shadow-md" : "border text-foreground/80 hover:text-foreground")
+                      }
+                      style={
+                        isActive
+                          ? { background: GOLD_GRADIENT }
+                          : { borderColor: "color-mix(in oklab, #C9982F 30%, var(--color-border))" }
+                      }
+                    >
+                      {y}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* About + quote card */}
+          <div className="mb-14 grid gap-6 lg:grid-cols-[1.3fr_1fr] lg:items-start">
+            <div>
+              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD }}>
+                About the Iftar
+              </p>
+              <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">
+                More Than Just Breaking the Fast
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{overview}</p>
+
+              {aboutFeatures.length > 0 && (
+                <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-4">
+                  {aboutFeatures.map((f) => {
+                    const FeatureIcon = FEATURE_ICONS[f.icon] ?? Sparkles;
+                    return (
+                      <div key={f.id} className="flex flex-col items-center gap-2 text-center sm:items-start sm:text-left">
+                        <div
+                          className="grid h-11 w-11 place-items-center rounded-full"
+                          style={{ background: "color-mix(in oklab, #12331F 8%, transparent)" }}
+                        >
+                          <FeatureIcon size={20} style={{ color: GREEN }} />
+                        </div>
+                        <p className="text-sm font-bold leading-tight">{f.title}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-2xl p-6 md:p-8" style={{ background: CREAM }}>
+              <h3 className="font-display text-lg font-bold" style={{ color: GREEN }}>
+                All Are Welcome
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Open to all PUSAB members, alumni, and their families.
+              </p>
+              <div className="mt-6 rounded-xl bg-white/60 p-5">
+                <Quote size={18} style={{ color: GOLD }} className="opacity-80" />
+                <p className="mt-2 text-sm italic leading-relaxed" style={{ color: GREEN }}>
+                  "The best of you are those who feed others and return greetings of peace."
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground">— Prophet Muhammad (ﷺ)</p>
+              </div>
+              <a
+                href={page?.register_url || "#"}
+                className="mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
+                style={{ background: `linear-gradient(120deg, ${GREEN}, ${GREEN_2})` }}
+              >
+                Join Us <ArrowRight size={15} />
+              </a>
+            </div>
+          </div>
+
+          {/* Highlights */}
+          {highlights.length > 0 && (
+            <div className="mb-14 text-center">
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD }}>
+                What to Expect
+              </p>
+              <h2 className="font-display text-2xl md:text-3xl font-bold tracking-tight">Iftar Highlights</h2>
+              <div className="mx-auto mt-2 h-1 w-14 rounded-full" style={{ background: GOLD_GRADIENT }} />
+              <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+                {highlights.map((item) => {
+                  const ItemIcon = FEATURE_ICONS[item.icon] ?? Sparkles;
+                  return (
+                    <div key={item.id} className="flex flex-col items-center text-center">
+                      <div
+                        className="grid h-16 w-16 place-items-center rounded-full"
+                        style={{ background: "color-mix(in oklab, #12331F 8%, transparent)" }}
+                      >
+                        <ItemIcon size={24} style={{ color: GREEN }} />
+                      </div>
+                      <p className="mt-4 text-sm font-bold leading-tight">{item.label}</p>
+                      <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{item.value}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Gallery with prev/next arrows */}
+          {gallery.length > 0 && (
+            <div className="mb-14">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD }}>
+                    Glimpses from Past Iftar
+                  </p>
+                  <h2 className="mt-1 font-display text-2xl font-bold tracking-tight md:text-3xl">
+                    Moments That Stay in Our Hearts
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setLightboxIndex(0)}
+                  className="hidden shrink-0 rounded-full border border-border px-4 py-2 text-xs font-bold text-foreground/80 transition-colors hover:text-foreground sm:inline-flex"
+                >
+                  View All Photos
+                </button>
+              </div>
+              <div className="relative flex items-center gap-3">
+                <button
+                  onClick={() => setGalleryStart((s) => Math.max(0, s - GALLERY_STEP))}
+                  disabled={!canGalleryPrev}
+                  aria-label="Previous photos"
+                  className="hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-[var(--color-surface)] text-foreground transition-colors disabled:opacity-30 sm:grid"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <div className="grid flex-1 grid-cols-2 gap-2.5 sm:grid-cols-5">
+                  {galleryPage.map((g, i) => (
+                    <button
+                      key={g.id}
+                      onClick={() => setLightboxIndex(galleryStart + i)}
+                      className="group relative aspect-square overflow-hidden rounded-xl border border-border"
+                    >
+                      <img
+                        src={optimizeImage(g.image_url, 320)}
+                        alt={g.caption || title}
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      {g.caption && (
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent p-2">
+                          <p className="text-[10px] text-white leading-tight">{g.caption}</p>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setGalleryStart((s) => (s + GALLERY_STEP < gallery.length ? s + GALLERY_STEP : s))}
+                  disabled={!canGalleryNext}
+                  aria-label="Next photos"
+                  className="hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-[var(--color-surface)] text-foreground transition-colors disabled:opacity-30 sm:grid"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Lightbox */}
+          <AnimatePresence>
+            {lightboxIndex !== null && gallery[lightboxIndex] && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setLightboxIndex(null)}
+                className="fixed inset-0 z-[10000] grid place-items-center bg-black/85 p-6 backdrop-blur-xl"
+              >
+                <motion.div
+                  initial={{ scale: 0.96, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.96, opacity: 0 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="max-w-[92vw]"
+                >
+                  <img
+                    src={optimizeImage(gallery[lightboxIndex].image_url, 1600)}
+                    alt={gallery[lightboxIndex].caption || title}
+                    className="max-h-[80vh] max-w-full rounded-2xl border border-white/10 object-contain"
+                  />
+                  {gallery[lightboxIndex].caption && (
+                    <p className="mt-4 text-center text-sm text-white/85">{gallery[lightboxIndex].caption}</p>
+                  )}
+                </motion.div>
+                <button
+                  onClick={() => setLightboxIndex(null)}
+                  aria-label="Close"
+                  className="absolute right-6 top-6 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur"
+                >
+                  <X size={18} />
+                </button>
+                {lightboxIndex > 0 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightboxIndex((i) => (i !== null ? i - 1 : i));
+                    }}
+                    aria-label="Previous photo"
+                    className="absolute left-4 top-1/2 hidden -translate-y-1/2 h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur sm:grid"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                )}
+                {lightboxIndex < gallery.length - 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightboxIndex((i) => (i !== null ? i + 1 : i));
+                    }}
+                    aria-label="Next photo"
+                    className="absolute right-4 top-1/2 hidden -translate-y-1/2 h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur sm:grid"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* CTA */}
+          <div
+            className="flex flex-col items-center gap-5 rounded-2xl p-8 text-center sm:flex-row sm:justify-between sm:text-left"
+            style={{ background: `linear-gradient(120deg, ${GREEN}, ${GREEN_2})` }}
+          >
+            <div className="text-white">
+              <h3 className="font-display text-lg font-bold leading-tight">
+                {page?.cta_title || "Let's make this Ramadan memorable together."}
+              </h3>
+              {page?.cta_subtitle && <p className="mt-1 text-sm text-white/75">{page.cta_subtitle}</p>}
+            </div>
+            {page?.register_label && (
+              <a
+                href={page.register_url || "#"}
+                className="inline-flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-[#1a1a1a] transition-opacity hover:opacity-90"
+                style={{ background: GOLD_GRADIENT }}
+              >
+                {page.register_label} <ArrowRight size={15} />
+              </a>
+            )}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

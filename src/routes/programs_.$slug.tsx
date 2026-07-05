@@ -22,6 +22,7 @@ import { HumanityPage } from "@/components/site/HumanityPage";
 import { ScholarshipPage } from "@/components/site/ScholarshipPage";
 import { PicnicPage } from "@/components/site/PicnicPage";
 import { OnlineEventsPage } from "@/components/site/OnlineEventsPage";
+import { IftarMahfilPage } from "@/components/site/IftarMahfilPage";
 import heroPrograms from "@/assets/hero-programs.jpg";
 
 const STATUS_META: Record<Status, { label: string; Icon: typeof CalendarClock; chip: string }> = {
@@ -566,6 +567,26 @@ function ProgramDetailPage() {
   if (fallback.key === "online") {
     return (
       <OnlineEventsPage
+        page={page}
+        fallbackTitle={fallback.title}
+        fallbackDesc={fallback.desc}
+        heroImageFallback={heroPrograms}
+        years={years}
+        currentYear={page?.year ?? new Date().getFullYear()}
+        loadingYear={loadingYear}
+        onSwitchYear={switchYear}
+      />
+    );
+  }
+
+  // Iftar Mahfil also has a fully bespoke design (cream hero with a diagonal
+  // gold-edge photo split and Date/Time/Venue facts, an "About the Iftar" +
+  // hadith-quote side card, a 6-icon "Iftar Highlights" grid, gallery with
+  // nav arrows, and a dark green CTA banner) matching a specific reference
+  // layout.
+  if (fallback.key === "iftar-mahfil") {
+    return (
+      <IftarMahfilPage
         page={page}
         fallbackTitle={fallback.title}
         fallbackDesc={fallback.desc}
