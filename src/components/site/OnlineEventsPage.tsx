@@ -33,8 +33,8 @@ const ICONS: Record<string, LucideIcon> = {
   "graduation-cap": GraduationCap,
 };
 
-const BLUE = "#1D4ED8";
-const BLUE_2 = "#1E3A8A";
+const BLUE = "var(--color-accent-1)";
+const BLUE_2 = "var(--color-accent-2)";
 const GRADIENT = `linear-gradient(120deg, ${BLUE}, ${BLUE_2})`;
 
 // Each event card gets its own banner gradient + icon based on its tag, so
@@ -190,7 +190,7 @@ export function OnlineEventsPage({
               <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white/70">Connect. Learn. Grow.</p>
               <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-white md:text-5xl">{title}</h1>
               {tagline && <p className="mt-5 max-w-md text-sm leading-relaxed text-white/75 md:text-base">{tagline}</p>}
-              <div className="mt-4 h-0.5 w-14 rounded-full" style={{ background: "#60A5FA" }} />
+              <div className="mt-4 h-0.5 w-14 rounded-full" style={{ background: "color-mix(in oklab, var(--color-accent-1) 60%, white)" }} />
 
               {facts.length > 0 && (
                 <div className="mt-7 grid grid-cols-2 gap-5 sm:grid-cols-4">

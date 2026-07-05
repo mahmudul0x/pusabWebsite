@@ -31,13 +31,8 @@ const ICONS: Record<string, LucideIcon> = {
   sparkles: Sparkles,
 };
 
-// This page's palette matches its reference design 1:1 — navy + forest
-// green — rather than the site's usual blue accent tokens, following the
-// same deliberate-match precedent used for the Humanity/Scholarship pages.
-const NAVY = "#152B4E";
-const NAVY_2 = "#0B1C38";
-const GREEN = "#1F7A3D";
-const GREEN_2 = "#155A2C";
+const ACCENT = "var(--color-accent-1)";
+const ACCENT_2 = "var(--color-accent-2)";
 
 function HeroFacts({
   eventDate,
@@ -60,12 +55,12 @@ function HeroFacts({
     <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-3">
       {facts.map((f) => (
         <div key={f.label} className="flex items-start gap-2.5">
-          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full" style={{ background: "color-mix(in oklab, #152B4E 8%, transparent)" }}>
-            <f.icon size={15} style={{ color: NAVY }} />
+          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full" style={{ background: "color-mix(in oklab, var(--color-accent-1) 8%, transparent)" }}>
+            <f.icon size={15} style={{ color: ACCENT }} />
           </div>
           <div>
-            <p className="text-xs font-bold leading-tight text-[#0e1c33]">{f.label}</p>
-            <p className="mt-1 text-[11px] leading-snug text-[#0e1c33]/60">{f.value}</p>
+            <p className="text-xs font-bold leading-tight text-foreground">{f.label}</p>
+            <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{f.value}</p>
           </div>
         </div>
       ))}
@@ -121,31 +116,31 @@ export function PicnicPage({
       {/* Hero — boxed light card, image on the right */}
       <section className="pt-28 pb-10 md:pt-32 md:pb-14" style={{ background: "var(--color-surface-2)" }}>
         <div className="container-page">
-          <nav className="mb-6 flex items-center gap-2 text-xs text-[#0e1c33]/60">
-            <Link to="/" className="transition-colors hover:text-[#0e1c33]">
+          <nav className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
+            <Link to="/" className="transition-colors hover:text-foreground">
               Home
             </Link>
             <ChevronRight size={12} className="opacity-60" />
-            <Link to="/programs" className="transition-colors hover:text-[#0e1c33]">
+            <Link to="/programs" className="transition-colors hover:text-foreground">
               Programs
             </Link>
             <ChevronRight size={12} className="opacity-60" />
-            <span className="text-[#0e1c33]">{title}</span>
+            <span className="text-foreground">{title}</span>
           </nav>
 
           <div className="grid gap-8 md:grid-cols-2 md:items-center">
             <div>
               <p
                 className="mb-3 inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em]"
-                style={{ borderColor: `color-mix(in oklab, ${GREEN} 35%, var(--color-border))`, color: GREEN }}
+                style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))`, color: ACCENT }}
               >
                 Together in Nature
               </p>
-              <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-[#0e1c33] md:text-5xl">
+              <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-foreground md:text-5xl">
                 {title.split(" ").slice(0, -1).join(" ")}{" "}
-                <span style={{ color: GREEN }}>{title.split(" ").slice(-1)}</span>
+                <span style={{ color: ACCENT }}>{title.split(" ").slice(-1)}</span>
               </h1>
-              {tagline && <p className="mt-5 max-w-md text-sm leading-relaxed text-[#0e1c33]/70 md:text-base">{tagline}</p>}
+              {tagline && <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground md:text-base">{tagline}</p>}
 
               <HeroFacts eventDate={page?.event_date ?? ""} venue={page?.venue ?? ""} eligibility={page?.eligibility ?? ""} />
 
@@ -153,7 +148,7 @@ export function PicnicPage({
                 <a
                   href={page.register_url || "#"}
                   className="mt-7 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                  style={{ background: NAVY }}
+                  style={{ background: ACCENT }}
                 >
                   Stay Updated <ArrowRight size={15} />
                 </a>
@@ -172,7 +167,7 @@ export function PicnicPage({
           {/* Year switcher */}
           {years.length > 1 && page && (
             <div className="mb-10">
-              <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GREEN }}>
+              <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                 <Calendar size={13} /> Browse by year
               </p>
               <div className="flex flex-wrap gap-2">
@@ -189,8 +184,8 @@ export function PicnicPage({
                       }
                       style={
                         isActive
-                          ? { background: NAVY }
-                          : { borderColor: `color-mix(in oklab, ${GREEN} 30%, var(--color-border))` }
+                          ? { background: ACCENT }
+                          : { borderColor: `color-mix(in oklab, ${ACCENT} 30%, var(--color-border))` }
                       }
                     >
                       {y}
@@ -204,7 +199,7 @@ export function PicnicPage({
           {/* About the Picnic — text + 4 icon facts on the left, "Open to All" card on the right */}
           <div className="mb-16 grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:items-start">
             <div>
-              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GREEN }}>
+              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                 About the Picnic
               </p>
               <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">Relax. Reconnect. Recharge.</h2>
@@ -220,7 +215,7 @@ export function PicnicPage({
                     const FactIcon = ICONS[f.icon] ?? Sparkles;
                     return (
                       <div key={f.id} className="flex items-start gap-2">
-                        <FactIcon size={16} style={{ color: NAVY }} className="mt-0.5 shrink-0" />
+                        <FactIcon size={16} style={{ color: ACCENT }} className="mt-0.5 shrink-0" />
                         <p className="text-xs font-semibold leading-snug text-foreground/80">{f.title}</p>
                       </div>
                     );
@@ -230,7 +225,7 @@ export function PicnicPage({
             </div>
 
             <div className="rounded-2xl p-6" style={{ background: "var(--color-surface-2)" }}>
-              <div className="grid h-14 w-14 place-items-center rounded-full" style={{ background: GREEN }}>
+              <div className="grid h-14 w-14 place-items-center rounded-full" style={{ background: ACCENT }}>
                 <Users size={24} className="text-white" />
               </div>
               <h3 className="mt-4 font-display text-lg font-bold tracking-tight">Open to All</h3>
@@ -241,7 +236,7 @@ export function PicnicPage({
                 <a
                   href={page.register_url || "#"}
                   className="mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                  style={{ background: GREEN }}
+                  style={{ background: ACCENT }}
                 >
                   {page.register_label} <ArrowRight size={15} />
                 </a>
@@ -253,11 +248,11 @@ export function PicnicPage({
           {highlights.length > 0 && (
             <div className="mb-16">
               <div className="text-center">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GREEN }}>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                   What to Expect
                 </p>
                 <h2 className="mt-1 font-display text-2xl font-bold tracking-tight md:text-3xl">Picnic Highlights</h2>
-                <div className="mx-auto mt-3 h-1 w-14 rounded-full" style={{ background: GREEN }} />
+                <div className="mx-auto mt-3 h-1 w-14 rounded-full" style={{ background: ACCENT }} />
               </div>
               <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
                 {highlights.map((item) => {
@@ -266,9 +261,9 @@ export function PicnicPage({
                     <div key={item.id} className="text-center">
                       <div
                         className="mx-auto grid h-14 w-14 place-items-center rounded-full"
-                        style={{ background: "color-mix(in oklab, #1F7A3D 10%, transparent)" }}
+                        style={{ background: "color-mix(in oklab, var(--color-accent-1) 10%, transparent)" }}
                       >
-                        <ItemIcon size={22} style={{ color: GREEN }} />
+                        <ItemIcon size={22} style={{ color: ACCENT }} />
                       </div>
                       <p className="mt-3 text-sm font-bold leading-tight">{item.label}</p>
                       <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{item.value}</p>
@@ -284,7 +279,7 @@ export function PicnicPage({
             <div className="mb-16">
               <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GREEN }}>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                     Glimpses From Past Picnics
                   </p>
                   <h2 className="mt-1 font-display text-2xl font-bold tracking-tight md:text-3xl">Memories Worth Sharing</h2>
@@ -404,8 +399,8 @@ export function PicnicPage({
             <div className="mb-8 grid grid-cols-1 gap-6 rounded-2xl p-6 sm:grid-cols-3 sm:p-8" style={{ background: "var(--color-surface-2)" }}>
               {eventInfo.map((f) => (
                 <div key={f.label} className="flex items-center justify-center gap-3 text-center sm:justify-start sm:text-left">
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border" style={{ borderColor: `color-mix(in oklab, ${GREEN} 35%, var(--color-border))` }}>
-                    <f.icon size={18} style={{ color: GREEN }} />
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border" style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))` }}>
+                    <f.icon size={18} style={{ color: ACCENT }} />
                   </div>
                   <div>
                     <p className="text-sm font-bold leading-tight">{f.label}</p>
@@ -416,22 +411,22 @@ export function PicnicPage({
             </div>
           )}
 
-          {/* CTA — navy banner */}
+          {/* CTA */}
           <div
             className="flex flex-col items-center gap-5 rounded-2xl p-8 text-center sm:flex-row sm:justify-between sm:text-left"
-            style={{ background: `linear-gradient(120deg, ${NAVY}, ${NAVY_2})` }}
+            style={{ background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})` }}
           >
             <div className="text-white">
               <h3 className="font-display text-lg font-bold leading-tight">
                 {page?.cta_title || "Let's make this picnic the best one yet!"}
               </h3>
-              {page?.cta_subtitle && <p className="mt-1 text-sm text-white/75">{page.cta_subtitle}</p>}
+              {page?.cta_subtitle && <p className="mt-1 text-sm text-white/85">{page.cta_subtitle}</p>}
             </div>
             {page?.register_label && (
               <a
                 href={page.register_url || "#"}
-                className="inline-flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                style={{ background: GREEN }}
+                className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold transition-opacity hover:opacity-90"
+                style={{ color: ACCENT }}
               >
                 {page.register_label} <ArrowRight size={15} />
               </a>

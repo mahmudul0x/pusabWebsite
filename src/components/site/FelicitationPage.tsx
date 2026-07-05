@@ -35,12 +35,11 @@ const FEATURE_ICONS: Record<string, LucideIcon> = {
   "map-pin": MapPin,
 };
 
-// Deep green + gold — this page's own palette, distinct from the site's
-// usual blue accent, matching its reference design by deliberate request.
-const GREEN = "#0F2E24";
-const GREEN_2 = "#173D30";
-const GOLD = "#D9A441";
-const GOLD_GRADIENT = `linear-gradient(120deg, ${GOLD}, #C4872B)`;
+const ACCENT = "var(--color-accent-1)";
+const ACCENT_2 = "var(--color-accent-2)";
+const GRADIENT = `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})`;
+const DARK_PANEL = "#0B1220";
+const DARK_PANEL_2 = "#151E33";
 
 const SCHEDULE = [
   { time: "03:00 PM – 03:30 PM", title: "Registration & Meet Up", desc: "Check-in and meet fellow members.", icon: ClipboardList },
@@ -89,8 +88,8 @@ export function FelicitationPage({
 
   return (
     <>
-      {/* Hero — boxed dark-green card with a diagonal gold-edge split */}
-      <section className="pt-28 pb-10 md:pt-32 md:pb-0" style={{ background: GREEN }}>
+      {/* Hero — boxed dark card with a diagonal accent-edge split */}
+      <section className="pt-28 pb-10 md:pt-32 md:pb-0" style={{ background: DARK_PANEL }}>
         <div className="container-page">
           <nav className="mb-6 flex items-center gap-2 text-xs text-white/60">
             <Link to="/" className="transition-colors hover:text-white">
@@ -109,16 +108,16 @@ export function FelicitationPage({
           <div className="container-page md:mx-0 md:max-w-none py-8 md:py-16 md:pr-12 lg:pr-20">
             <p
               className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em]"
-              style={{ color: GOLD }}
+              style={{ color: ACCENT }}
             >
               Celebrating Achievements. Welcoming New Journeys.
             </p>
             <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-white md:text-5xl">
               {titleParts.slice(0, splitAt).join(" ")}
               {" "}
-              <span style={{ color: GOLD }}>{titleParts.slice(splitAt).join(" ")}</span>
+              <span style={{ color: ACCENT }}>{titleParts.slice(splitAt).join(" ")}</span>
             </h1>
-            <div className="mt-4 h-1 w-14 rounded-full" style={{ background: GOLD_GRADIENT }} />
+            <div className="mt-4 h-1 w-14 rounded-full" style={{ background: GRADIENT }} />
             {tagline && (
               <p className="mt-5 max-w-md text-sm leading-relaxed text-white/75 md:text-base">
                 {tagline}
@@ -129,9 +128,9 @@ export function FelicitationPage({
               {page?.event_date && (
                 <div
                   className="flex items-center gap-2.5 rounded-xl border px-4 py-2.5"
-                  style={{ borderColor: "color-mix(in oklab, #D9A441 30%, transparent)" }}
+                  style={{ borderColor: "color-mix(in oklab, var(--color-accent-1) 30%, transparent)" }}
                 >
-                  <Calendar size={16} style={{ color: GOLD }} />
+                  <Calendar size={16} style={{ color: ACCENT }} />
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-wide text-white/60">Date</p>
                     <p className="text-xs font-semibold text-white">{page.event_date}</p>
@@ -141,9 +140,9 @@ export function FelicitationPage({
               {page?.venue && (
                 <div
                   className="flex items-center gap-2.5 rounded-xl border px-4 py-2.5"
-                  style={{ borderColor: "color-mix(in oklab, #D9A441 30%, transparent)" }}
+                  style={{ borderColor: "color-mix(in oklab, var(--color-accent-1) 30%, transparent)" }}
                 >
-                  <MapPin size={16} style={{ color: GOLD }} />
+                  <MapPin size={16} style={{ color: ACCENT }} />
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-wide text-white/60">Venue</p>
                     <p className="text-xs font-semibold text-white">{page.venue}</p>
@@ -152,9 +151,9 @@ export function FelicitationPage({
               )}
               <div
                 className="flex items-center gap-2.5 rounded-xl border px-4 py-2.5"
-                style={{ borderColor: "color-mix(in oklab, #D9A441 30%, transparent)" }}
+                style={{ borderColor: "color-mix(in oklab, var(--color-accent-1) 30%, transparent)" }}
               >
-                <Users size={16} style={{ color: GOLD }} />
+                <Users size={16} style={{ color: ACCENT }} />
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wide text-white/60">Who Can Join</p>
                   <p className="text-xs font-semibold text-white">All PUSAB members, alumni &amp; new students</p>
@@ -175,7 +174,7 @@ export function FelicitationPage({
             <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover md:hidden" />
             <div
               className="absolute inset-y-0 left-0 hidden w-2 md:block"
-              style={{ background: GOLD, clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
+              style={{ background: ACCENT, clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
             />
           </div>
         </div>
@@ -186,7 +185,7 @@ export function FelicitationPage({
           {/* Year switcher */}
           {years.length > 1 && page && (
             <div className="mb-10">
-              <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD }}>
+              <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                 <Calendar size={13} /> Browse by year
               </p>
               <div className="flex flex-wrap gap-2">
@@ -203,8 +202,8 @@ export function FelicitationPage({
                       }
                       style={
                         isActive
-                          ? { background: GOLD_GRADIENT }
-                          : { borderColor: "color-mix(in oklab, #D9A441 30%, var(--color-border))" }
+                          ? { background: GRADIENT }
+                          : { borderColor: "color-mix(in oklab, var(--color-accent-1) 30%, var(--color-border))" }
                       }
                     >
                       {y}
@@ -223,7 +222,7 @@ export function FelicitationPage({
                   const FeatureIcon = FEATURE_ICONS[f.icon] ?? Star;
                   return (
                     <div key={f.id} className="flex flex-col items-start gap-2">
-                      <FeatureIcon size={26} style={{ color: GOLD }} />
+                      <FeatureIcon size={26} style={{ color: ACCENT }} />
                       <p className="text-sm font-bold leading-tight">{f.title}</p>
                       {f.description && (
                         <p className="text-xs leading-snug text-muted-foreground">{f.description}</p>
@@ -240,7 +239,7 @@ export function FelicitationPage({
             <div className="rounded-2xl bg-[var(--color-surface-2)] p-6 md:p-8">
               <span
                 className="inline-block rounded-full px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white"
-                style={{ background: GREEN }}
+                style={{ background: ACCENT }}
               >
                 Event Schedule (Tentative)
               </span>
@@ -255,7 +254,7 @@ export function FelicitationPage({
                     )}
                     <div
                       className="relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-full text-white"
-                      style={{ background: GREEN }}
+                      style={{ background: ACCENT }}
                     >
                       <s.icon size={16} />
                     </div>
@@ -274,7 +273,7 @@ export function FelicitationPage({
             <div className="rounded-2xl bg-[var(--color-surface-2)] p-6 md:p-8">
               <span
                 className="inline-block rounded-full px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white"
-                style={{ background: GOLD_GRADIENT }}
+                style={{ background: GRADIENT }}
               >
                 What to Expect
               </span>
@@ -284,7 +283,7 @@ export function FelicitationPage({
                     const ItemIcon = FEATURE_ICONS[item.icon] ?? Sparkles;
                     return (
                       <div key={item.id}>
-                        <ItemIcon size={24} style={{ color: GREEN }} />
+                        <ItemIcon size={24} style={{ color: ACCENT }} />
                         <p className="mt-2.5 text-sm font-bold leading-tight">{item.label}</p>
                         <p className="mt-1 text-xs leading-snug text-muted-foreground">{item.value}</p>
                       </div>
@@ -298,7 +297,7 @@ export function FelicitationPage({
           {/* Gallery with prev/next arrows */}
           {gallery.length > 0 && (
             <div className="mb-14">
-              <p className="mb-6 text-center text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD }}>
+              <p className="mb-6 text-center text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                 Glimpses from Past Events
               </p>
               <div className="relative flex items-center gap-3">
@@ -407,27 +406,24 @@ export function FelicitationPage({
           {/* CTA */}
           <div
             className="flex flex-col items-center gap-5 rounded-2xl p-8 text-center sm:flex-row sm:justify-between sm:text-left"
-            style={{ background: `linear-gradient(120deg, ${GREEN}, ${GREEN_2})` }}
+            style={{ background: GRADIENT }}
           >
             <div className="flex items-center gap-4">
-              <div
-                className="grid h-11 w-11 shrink-0 place-items-center rounded-full"
-                style={{ background: "color-mix(in oklab, #D9A441 20%, transparent)", color: GOLD }}
-              >
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/15 text-white">
                 <PartyPopper size={20} />
               </div>
               <div className="text-white">
                 <h3 className="font-display text-lg font-bold leading-tight">
                   {page?.cta_title || "Be a Part of This Special Day!"}
                 </h3>
-                {page?.cta_subtitle && <p className="mt-1 text-sm text-white/75">{page.cta_subtitle}</p>}
+                {page?.cta_subtitle && <p className="mt-1 text-sm text-white/85">{page.cta_subtitle}</p>}
               </div>
             </div>
             {page?.register_label && (
               <a
                 href={page.register_url || "#"}
-                className="inline-flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-[#1a1a1a] transition-opacity hover:opacity-90"
-                style={{ background: GOLD_GRADIENT }}
+                className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold transition-opacity hover:opacity-90"
+                style={{ color: ACCENT }}
               >
                 {page.register_label} <ArrowRight size={15} />
               </a>

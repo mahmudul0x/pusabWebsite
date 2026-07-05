@@ -28,13 +28,8 @@ const ICONS: Record<string, LucideIcon> = {
   "graduation-cap": GraduationCap,
 };
 
-// This page's palette matches its reference design 1:1 — deep green + cream
-// — rather than the site's usual blue accent tokens, following the same
-// deliberate-match precedent used for the Scholarship page.
-const GREEN = "#1F4D2E";
-const GREEN_2 = "#0F3320";
-const GOLD = "#D9A441";
-const CREAM = "#F7F3E8";
+const ACCENT = "var(--color-accent-1)";
+const ACCENT_2 = "var(--color-accent-2)";
 
 const MISSION_ICONS = [Users, HeartHandshake, Globe2, Sparkles];
 
@@ -46,12 +41,12 @@ function HeroFacts({ objectives }: { objectives: ProgramPage["objectives"] }) {
         const ObjIcon = ICONS[o.icon] ?? Sparkles;
         return (
           <div key={o.id} className="flex items-start gap-2.5">
-            <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full" style={{ background: "color-mix(in oklab, #1F4D2E 10%, transparent)" }}>
-              <ObjIcon size={15} style={{ color: GREEN }} />
+            <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full" style={{ background: "color-mix(in oklab, var(--color-accent-1) 10%, transparent)" }}>
+              <ObjIcon size={15} style={{ color: ACCENT }} />
             </div>
             <div>
-              <p className="text-xs font-bold leading-tight text-[#12251a]">{o.title}</p>
-              {o.description && <p className="mt-1 text-[11px] leading-snug text-[#12251a]/60">{o.description}</p>}
+              <p className="text-xs font-bold leading-tight">{o.title}</p>
+              {o.description && <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{o.description}</p>}
             </div>
           </div>
         );
@@ -101,38 +96,38 @@ export function HumanityPage({
 
   return (
     <>
-      {/* Hero — boxed cream card, image on the right */}
-      <section className="pt-28 pb-10 md:pt-32 md:pb-14" style={{ background: CREAM }}>
+      {/* Hero — boxed light card, image on the right */}
+      <section className="pt-28 pb-10 md:pt-32 md:pb-14" style={{ background: "var(--color-surface-2)" }}>
         <div className="container-page">
-          <nav className="mb-6 flex items-center gap-2 text-xs text-[#12251a]/60">
-            <Link to="/" className="transition-colors hover:text-[#12251a]">
+          <nav className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
+            <Link to="/" className="transition-colors hover:text-foreground">
               Home
             </Link>
             <ChevronRight size={12} className="opacity-60" />
-            <Link to="/programs" className="transition-colors hover:text-[#12251a]">
+            <Link to="/programs" className="transition-colors hover:text-foreground">
               Programs
             </Link>
             <ChevronRight size={12} className="opacity-60" />
-            <span className="text-[#12251a]">{title}</span>
+            <span className="text-foreground">{title}</span>
           </nav>
 
           <div className="grid gap-8 md:grid-cols-2 md:items-center">
             <div>
-              <p className="mb-3 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: GREEN }}>
+              <p className="mb-3 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: ACCENT }}>
                 <HeartHandshake size={13} /> Compassion in Action
               </p>
-              <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-[#12251a] md:text-5xl">
+              <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] md:text-5xl">
                 {title.split(" ").slice(0, -1).join(" ")}{" "}
-                <span style={{ color: GREEN }}>{title.split(" ").slice(-1)}</span>
+                <span style={{ color: ACCENT }}>{title.split(" ").slice(-1)}</span>
               </h1>
-              {tagline && <p className="mt-5 max-w-md text-sm leading-relaxed text-[#12251a]/70 md:text-base">{tagline}</p>}
+              {tagline && <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground md:text-base">{tagline}</p>}
 
               <HeroFacts objectives={page?.objectives ?? []} />
             </div>
 
             <div className="relative aspect-[4/3] overflow-hidden rounded-3xl md:aspect-auto md:h-full md:min-h-[320px]">
               <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
-              <div className="absolute inset-x-0 bottom-0 h-16" style={{ background: `linear-gradient(120deg, ${GREEN}, ${GREEN_2})`, clipPath: "polygon(0 100%, 100% 40%, 100% 100%)" }} />
+              <div className="absolute inset-x-0 bottom-0 h-16" style={{ background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})`, clipPath: "polygon(0 100%, 100% 40%, 100% 100%)" }} />
             </div>
           </div>
         </div>
@@ -143,7 +138,7 @@ export function HumanityPage({
           {/* Year switcher */}
           {years.length > 1 && page && (
             <div className="mb-10">
-              <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GREEN }}>
+              <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                 <Calendar size={13} /> Browse by year
               </p>
               <div className="flex flex-wrap gap-2">
@@ -160,8 +155,8 @@ export function HumanityPage({
                       }
                       style={
                         isActive
-                          ? { background: `linear-gradient(120deg, ${GREEN}, ${GREEN_2})` }
-                          : { borderColor: `color-mix(in oklab, ${GREEN} 30%, var(--color-border))` }
+                          ? { background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})` }
+                          : { borderColor: `color-mix(in oklab, ${ACCENT} 30%, var(--color-border))` }
                       }
                     >
                       {y}
@@ -175,7 +170,7 @@ export function HumanityPage({
           {/* Our Mission — text + button on the left, 4-stat card on the right */}
           <div className="mb-14 grid gap-10 lg:grid-cols-[1fr_1.3fr] lg:items-start">
             <div>
-              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GREEN }}>
+              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                 Our Mission
               </p>
               <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">Humanity is Our Purpose</h2>
@@ -188,7 +183,7 @@ export function HumanityPage({
                 <a
                   href={page.register_url || "#"}
                   className="mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                  style={{ background: `linear-gradient(120deg, ${GREEN}, ${GREEN_2})` }}
+                  style={{ background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})` }}
                 >
                   {page.register_label} <ArrowRight size={15} />
                 </a>
@@ -201,10 +196,10 @@ export function HumanityPage({
                   const StatIcon = MISSION_ICONS[i % MISSION_ICONS.length];
                   return (
                     <div key={s.id} className="bg-[var(--color-surface)] p-5 text-center">
-                      <div className="mx-auto grid h-11 w-11 place-items-center rounded-full" style={{ background: "color-mix(in oklab, #1F4D2E 10%, transparent)" }}>
-                        <StatIcon size={18} style={{ color: GREEN }} />
+                      <div className="mx-auto grid h-11 w-11 place-items-center rounded-full" style={{ background: "color-mix(in oklab, var(--color-accent-1) 10%, transparent)" }}>
+                        <StatIcon size={18} style={{ color: ACCENT }} />
                       </div>
-                      <p className="mt-3 font-display text-2xl font-extrabold" style={{ color: GREEN }}>
+                      <p className="mt-3 font-display text-2xl font-extrabold" style={{ color: ACCENT }}>
                         {s.value}
                       </p>
                       <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{s.label}</p>
@@ -219,7 +214,7 @@ export function HumanityPage({
           {initiatives.length > 0 && (
             <div className="mb-14">
               <div className="text-center">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GREEN }}>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                   What We Do
                 </p>
                 <h2 className="mt-1 font-display text-2xl font-bold tracking-tight md:text-3xl">Our Initiatives</h2>
@@ -230,10 +225,10 @@ export function HumanityPage({
                   return (
                     <div key={item.id} className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
                       <div className="relative aspect-[4/3]">
-                        <div className="absolute inset-0" style={{ background: `linear-gradient(160deg, color-mix(in oklab, ${GREEN} 20%, transparent), transparent)` }} />
+                        <div className="absolute inset-0" style={{ background: `linear-gradient(160deg, color-mix(in oklab, ${ACCENT} 20%, transparent), transparent)` }} />
                         <div
                           className="absolute left-3 top-3 grid h-9 w-9 place-items-center rounded-full text-white shadow-sm"
-                          style={{ background: `linear-gradient(120deg, ${GREEN}, ${GREEN_2})` }}
+                          style={{ background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})` }}
                         >
                           <ItemIcon size={16} />
                         </div>
@@ -251,7 +246,7 @@ export function HumanityPage({
                   <a
                     href={page.register_url || "#"}
                     className="inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-bold transition-colors hover:text-foreground"
-                    style={{ borderColor: `color-mix(in oklab, ${GREEN} 35%, var(--color-border))`, color: GREEN }}
+                    style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))`, color: ACCENT }}
                   >
                     View All Initiatives <ArrowRight size={14} />
                   </a>
@@ -260,10 +255,10 @@ export function HumanityPage({
             </div>
           )}
 
-          {/* Our Impact So Far — dark green banner */}
+          {/* Our Impact So Far — accent gradient banner */}
           {impactStats.length > 0 && (
-            <div className="mb-14 overflow-hidden rounded-2xl" style={{ background: `linear-gradient(120deg, ${GREEN}, ${GREEN_2})` }}>
-              <p className="pt-6 text-center text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: GOLD }}>
+            <div className="mb-14 overflow-hidden rounded-2xl" style={{ background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})` }}>
+              <p className="pt-6 text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">
                 Our Impact So Far
               </p>
               <div className="grid grid-cols-2 gap-4 p-6 sm:grid-cols-5 sm:p-8">
@@ -282,7 +277,7 @@ export function HumanityPage({
             <div className="mb-14">
               <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GREEN }}>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                     Moments That Matter
                   </p>
                   <h2 className="mt-1 font-display text-2xl font-bold tracking-tight md:text-3xl">Humanity in Action</h2>
@@ -403,7 +398,7 @@ export function HumanityPage({
             style={{ background: "var(--color-surface-2)" }}
           >
             <div className="flex items-center gap-4">
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full" style={{ background: `color-mix(in oklab, ${GREEN} 15%, transparent)`, color: GREEN }}>
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full" style={{ background: `color-mix(in oklab, ${ACCENT} 15%, transparent)`, color: ACCENT }}>
                 <Heart size={20} />
               </div>
               <div>
@@ -417,14 +412,14 @@ export function HumanityPage({
               <a
                 href="/support"
                 className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                style={{ background: `linear-gradient(120deg, ${GREEN}, ${GREEN_2})` }}
+                style={{ background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})` }}
               >
                 Get Involved
               </a>
               <a
                 href="/support"
                 className="inline-flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-bold transition-colors hover:bg-[var(--color-background)]"
-                style={{ borderColor: `color-mix(in oklab, ${GREEN} 35%, var(--color-border))`, color: GREEN }}
+                style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))`, color: ACCENT }}
               >
                 Contribute Now <ArrowRight size={15} />
               </a>
