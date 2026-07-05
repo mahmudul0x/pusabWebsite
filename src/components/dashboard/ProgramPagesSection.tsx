@@ -7,6 +7,7 @@ import { SectionHeader, Field, inputCls } from "./primitives";
 import { ImageUpload } from "./ImageUpload";
 
 type Objective = ProgramPage["objectives"][number];
+type InfoItem = ProgramPage["info_items"][number];
 type Stat = ProgramPage["stats"][number];
 type GalleryImage = ProgramPage["gallery"][number];
 type Testimonial = ProgramPage["testimonials"][number];
@@ -27,6 +28,9 @@ const ICON_OPTIONS = [
   { value: "heart", label: "Heart (community)" },
   { value: "music", label: "Music (entertainment)" },
   { value: "sparkles", label: "Sparkles (highlight)" },
+  { value: "target", label: "Target (focus areas)" },
+  { value: "map-pin", label: "Map pin (coverage)" },
+  { value: "graduation-cap", label: "Graduation cap (program type)" },
 ];
 
 function emptyEdition(slug: string, title: string, year: number): ProgramPage {
@@ -49,6 +53,7 @@ function emptyEdition(slug: string, title: string, year: number): ProgramPage {
     cta_title: "",
     cta_subtitle: "",
     objectives: [],
+    info_items: [],
     stats: [],
     gallery: [],
     testimonials: [],
@@ -173,6 +178,7 @@ export function ProgramPagesSection() {
   function validate(f: ProgramPage): string | null {
     if (!f.title.trim()) return "Title is required.";
     if (f.objectives.some((o) => !o.title.trim())) return "Every highlight needs a title.";
+    if (f.info_items.some((i) => !i.label.trim() || !i.value.trim())) return "Every info grid cell needs a label and a value.";
     if (f.stats.some((s) => !s.label.trim() || !s.value.trim())) return "Every stat needs a label and a value.";
     if (f.gallery.some((g) => !g.image_url.trim())) return "Remove empty gallery rows, or add a photo to them.";
     if (f.testimonials.some((t) => !t.name.trim() || !t.quote.trim())) return "Every testimonial needs a name and a quote.";
@@ -208,6 +214,7 @@ export function ProgramPagesSection() {
         objectives: form.objectives.map(({ title, description, icon, image_url, order }) => ({
           title, description, icon, image_url, order,
         })),
+        info_items: form.info_items.map(({ icon, label, value, order }) => ({ icon, label, value, order })),
         stats: form.stats.map(({ label, value, order }) => ({ label, value, order })),
         gallery: form.gallery.map(({ image_url, caption, order }) => ({ image_url, caption, order })),
         testimonials: form.testimonials.map(({ name, role, quote, photo_url, order }) => ({
@@ -479,6 +486,45 @@ export function ProgramPagesSection() {
                     ...form.objectives,
                     { id: nextTempId(), title: "", description: "", icon: "", image_url: "", order: form.objectives.length },
                   ] as Objective[])
+                }
+              />
+            </EditorSection>
+
+            <EditorSection title="Info grid" count={form.info_items.length}>
+              {form.info_items.map((item) => (
+                <RepeatingRow key={item.id} onRemove={() => set("info_items", form.info_items.filter((x) => x.id !== item.id) as InfoItem[])}>
+                  <select
+                    value={item.icon}
+                    onChange={(e) => set("info_items", form.info_items.map((x) => (x.id === item.id ? { ...x, icon: e.target.value } : x)) as InfoItem[])}
+                    className={inputCls + " mt-0"}
+                  >
+                    {ICON_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    value={item.label}
+                    placeholder="Label, e.g. Program Type"
+                    onChange={(e) => set("info_items", form.info_items.map((x) => (x.id === item.id ? { ...x, label: e.target.value } : x)) as InfoItem[])}
+                    className={inputCls + " mt-0"}
+                  />
+                  <input
+                    value={item.value}
+                    placeholder="Value, e.g. Education Support"
+                    onChange={(e) => set("info_items", form.info_items.map((x) => (x.id === item.id ? { ...x, value: e.target.value } : x)) as InfoItem[])}
+                    className={inputCls + " mt-0 sm:col-span-2"}
+                  />
+                </RepeatingRow>
+              ))}
+              <AddRowButton
+                label="Add info cell"
+                onClick={() =>
+                  set("info_items", [
+                    ...form.info_items,
+                    { id: nextTempId(), icon: "", label: "", value: "", order: form.info_items.length },
+                  ] as InfoItem[])
                 }
               />
             </EditorSection>

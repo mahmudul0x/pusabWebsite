@@ -17,6 +17,8 @@ import { PROGRAMS } from "@/lib/site-content";
 import { useProgramEvents, statusOf, type Status } from "@/lib/usePrograms";
 import { themeFor, type ProgramTheme } from "@/lib/programThemes";
 import { ReunionPage } from "@/components/site/ReunionPage";
+import { SchoolingPage } from "@/components/site/SchoolingPage";
+import { ScholarshipPage } from "@/components/site/ScholarshipPage";
 import heroPrograms from "@/assets/hero-programs.jpg";
 
 const STATUS_META: Record<Status, { label: string; Icon: typeof CalendarClock; chip: string }> = {
@@ -457,6 +459,43 @@ function ProgramDetailPage() {
   if (fallback.key === "reunion") {
     return (
       <ReunionPage
+        page={page}
+        fallbackTitle={fallback.title}
+        fallbackDesc={fallback.desc}
+        heroImageFallback={heroPrograms}
+        years={years}
+        currentYear={page?.year ?? new Date().getFullYear()}
+        loadingYear={loadingYear}
+        onSwitchYear={switchYear}
+      />
+    );
+  }
+
+  // Schooling also has a fully bespoke design (icon-facts hero, About +
+  // info-grid card, 5-stat impact row, gallery, testimonial carousel, CTA
+  // banner) matching a specific reference layout.
+  if (fallback.key === "schooling") {
+    return (
+      <SchoolingPage
+        page={page}
+        fallbackTitle={fallback.title}
+        fallbackDesc={fallback.desc}
+        heroImageFallback={heroPrograms}
+        years={years}
+        currentYear={page?.year ?? new Date().getFullYear()}
+        loadingYear={loadingYear}
+        onSwitchYear={switchYear}
+      />
+    );
+  }
+
+  // Scholarship has a fully bespoke design (boxed navy hero, feature icons,
+  // 6-card info grid, dark impact-stats banner, gallery with nav arrows,
+  // numbered application-process panel, CTA banner) matching a specific
+  // reference layout.
+  if (fallback.key === "scholarship") {
+    return (
+      <ScholarshipPage
         page={page}
         fallbackTitle={fallback.title}
         fallbackDesc={fallback.desc}

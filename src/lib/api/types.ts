@@ -134,6 +134,14 @@ export interface ProgramObjective {
   order: number;
 }
 
+export interface ProgramInfoItem {
+  id: number;
+  icon: string;
+  label: string;
+  value: string;
+  order: number;
+}
+
 export interface ProgramStat {
   id: number;
   label: string;
@@ -176,6 +184,7 @@ export interface ProgramPage {
   cta_title: string;
   cta_subtitle: string;
   objectives: ProgramObjective[];
+  info_items: ProgramInfoItem[];
   stats: ProgramStat[];
   gallery: ProgramGalleryImage[];
   testimonials: ProgramTestimonial[];
