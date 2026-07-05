@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import {
   ChevronRight,
@@ -18,6 +18,7 @@ import {
   Heart,
   Music,
   Sparkles,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { optimizeImage, type ProgramPage } from "@/lib/api";
@@ -121,21 +122,22 @@ export function ReunionPage({
   const heroImage = page?.hero_image_url ? optimizeImage(page.hero_image_url, 1600) : heroImageFallback;
 
   const gallery = page?.gallery ?? [];
-  const visibleGallery = gallery.slice(0, 5);
+  const GALLERY_PAGE_SIZE = 8;
+  const [galleryExpanded, setGalleryExpanded] = useState(false);
+  const visibleGallery = galleryExpanded ? gallery : gallery.slice(0, GALLERY_PAGE_SIZE);
   const remainingCount = gallery.length - visibleGallery.length;
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative pt-40 pb-16 md:pb-20 overflow-hidden min-h-[58vh] flex items-end">
+      {/* Hero — a compact, wide banner (not full-viewport): scrim concentrated
+          on the left where the text sits, photo clearly visible on the right. */}
+      <section className="relative pt-28 pb-8 md:pt-32 md:pb-10 overflow-hidden h-[280px] md:h-[360px] flex items-end">
         <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/65 via-slate-950/60 to-slate-950/92" />
-        <div
-          className="absolute inset-0 opacity-40"
-          style={{ background: `radial-gradient(circle at 30% 110%, ${ACCENT}55, transparent 60%)` }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/55 to-slate-950/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
         <div className="container-page relative z-10 [text-shadow:0_2px_30px_rgba(2,6,23,0.5)]">
-          <nav className="mb-6 flex items-center gap-2 text-xs text-white/70">
+          <nav className="mb-4 flex items-center gap-2 text-xs text-white/70">
             <Link to="/" className="transition-colors hover:text-white">
               Home
             </Link>
@@ -147,37 +149,37 @@ export function ReunionPage({
             <span className="text-white">{title}</span>
           </nav>
 
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
             <Users size={13} style={{ color: ACCENT }} />
             Celebration
           </div>
 
-          <h1 className="font-display text-4xl md:text-6xl font-extrabold tracking-[-0.03em] leading-[1.04] max-w-4xl text-white">
+          <h1 className="font-display text-3xl md:text-5xl font-extrabold tracking-[-0.03em] leading-[1.04] max-w-2xl text-white">
             Annual{" "}
             <span style={{ backgroundImage: GRADIENT, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
               Reunion
             </span>
           </h1>
           {tagline && (
-            <p className="mt-5 max-w-2xl text-base md:text-lg leading-relaxed text-white/80">{tagline}</p>
+            <p className="mt-3 max-w-md text-sm md:text-base leading-relaxed text-white/80">{tagline}</p>
           )}
 
           {/* Quick facts row */}
-          <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-3 text-sm text-white/85">
+          <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs md:text-sm text-white/85">
             {page?.event_date && (
               <span className="inline-flex items-center gap-2">
-                <Calendar size={15} style={{ color: ACCENT }} />
+                <Calendar size={14} style={{ color: ACCENT }} />
                 {page.event_date}
               </span>
             )}
             {page?.venue && (
               <span className="inline-flex items-center gap-2">
-                <MapPin size={15} style={{ color: ACCENT }} />
+                <MapPin size={14} style={{ color: ACCENT }} />
                 {page.venue}
               </span>
             )}
             <span className="inline-flex items-center gap-2">
-              <Users size={15} style={{ color: ACCENT }} />
+              <Users size={14} style={{ color: ACCENT }} />
               Open to All Members &amp; Alumni
             </span>
           </div>
@@ -351,50 +353,111 @@ export function ReunionPage({
           {/* Gallery */}
           {gallery.length > 0 && (
             <div className="mb-14">
-              <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
-                    Gallery
-                  </p>
-                  <h2 className="mt-1 font-display text-2xl md:text-3xl font-bold tracking-tight">
-                    Moments from Previous Reunions
-                  </h2>
+              <div className="mb-6">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
+                  Gallery
+                </p>
+                <h2 className="mt-1 font-display text-2xl md:text-3xl font-bold tracking-tight">
+                  Moments from Previous Reunions
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                {visibleGallery.map((g, i) => (
+                  <button
+                    key={g.id}
+                    onClick={() => setLightboxIndex(i)}
+                    className="group relative aspect-square overflow-hidden rounded-xl border border-border"
+                  >
+                    <img
+                      src={optimizeImage(g.image_url, 320)}
+                      alt={g.caption || title}
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    {g.caption && (
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent p-2">
+                        <p className="text-[10px] text-white leading-tight">{g.caption}</p>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+              {remainingCount > 0 && (
+                <div className="mt-6 flex justify-center">
+                  <button
+                    onClick={() => setGalleryExpanded(true)}
+                    className="rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-foreground/80 transition-colors hover:text-foreground"
+                    style={{ borderColor: `color-mix(in oklab, ${ACCENT} 30%, var(--color-border))` }}
+                  >
+                    View more ({remainingCount} more photo{remainingCount === 1 ? "" : "s"})
+                  </button>
                 </div>
-                <Link
-                  to="/moments"
-                  className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground/80 transition-colors hover:text-foreground"
-                >
-                  View All Photos
-                </Link>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-5">
-                {visibleGallery.map((g, i) => {
-                  const isLast = i === visibleGallery.length - 1 && remainingCount > 0;
-                  return (
-                    <div key={g.id} className="group relative aspect-square overflow-hidden rounded-xl border border-border">
-                      <img
-                        src={optimizeImage(g.image_url, 320)}
-                        alt={g.caption || title}
-                        loading="lazy"
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      {isLast && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-slate-950/70 text-white">
-                          <p className="font-display text-xl font-extrabold">+{remainingCount}</p>
-                          <p className="text-[11px] uppercase tracking-[0.1em]">More Photos</p>
-                        </div>
-                      )}
-                      {!isLast && g.caption && (
-                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent p-2">
-                          <p className="text-[10px] text-white leading-tight">{g.caption}</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              )}
             </div>
           )}
+
+          {/* Lightbox */}
+          <AnimatePresence>
+            {lightboxIndex !== null && visibleGallery[lightboxIndex] && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setLightboxIndex(null)}
+                className="fixed inset-0 z-[10000] grid place-items-center bg-black/85 p-6 backdrop-blur-xl"
+              >
+                <motion.div
+                  initial={{ scale: 0.96, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.96, opacity: 0 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="max-w-[92vw]"
+                >
+                  <img
+                    src={optimizeImage(visibleGallery[lightboxIndex].image_url, 1600)}
+                    alt={visibleGallery[lightboxIndex].caption || title}
+                    className="max-h-[80vh] max-w-full rounded-2xl border border-white/10 object-contain"
+                  />
+                  {visibleGallery[lightboxIndex].caption && (
+                    <p className="mt-4 text-center text-sm text-white/85">
+                      {visibleGallery[lightboxIndex].caption}
+                    </p>
+                  )}
+                </motion.div>
+                <button
+                  onClick={() => setLightboxIndex(null)}
+                  aria-label="Close"
+                  className="absolute right-6 top-6 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur"
+                >
+                  <X size={18} />
+                </button>
+                {lightboxIndex > 0 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightboxIndex((i) => (i !== null ? i - 1 : i));
+                    }}
+                    aria-label="Previous photo"
+                    className="absolute left-4 top-1/2 hidden -translate-y-1/2 h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur sm:grid"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                )}
+                {lightboxIndex < visibleGallery.length - 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightboxIndex((i) => (i !== null ? i + 1 : i));
+                    }}
+                    aria-label="Next photo"
+                    className="absolute right-4 top-1/2 hidden -translate-y-1/2 h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur sm:grid"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Testimonials */}
           {page && page.testimonials.length > 0 && (
