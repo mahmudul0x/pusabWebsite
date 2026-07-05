@@ -32,12 +32,9 @@ const FEATURE_ICONS: Record<string, LucideIcon> = {
   award: Award,
 };
 
-// This page's palette matches its reference design 1:1 — deep navy + gold —
-// rather than the site's usual blue accent tokens, by deliberate request.
-const NAVY = "#0B1B3F";
-const NAVY_2 = "#132a5e";
-const GOLD = "#F5A623";
-const GOLD_GRADIENT = `linear-gradient(120deg, ${GOLD}, #E08E1D)`;
+const ACCENT = "var(--color-accent-1)";
+const ACCENT_2 = "var(--color-accent-2)";
+const GRADIENT = `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})`;
 
 const PROCESS_STEPS = [
   { icon: ListChecks, title: "Check Eligibility", desc: "Review the eligibility criteria carefully." },
@@ -57,8 +54,8 @@ function TestimonialCarousel({ testimonials }: { testimonials: ProgramPage["test
     <div className="relative">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((t) => (
-          <div key={t.id} className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-            <Quote size={20} style={{ color: GOLD }} className="opacity-80" />
+          <div key={t.id} className="rounded-2xl border border-border bg-[var(--color-surface)] p-6 shadow-sm">
+            <Quote size={20} style={{ color: ACCENT }} className="opacity-80" />
             <p className="mt-3 text-sm leading-relaxed italic text-foreground/90">{t.quote}</p>
             <div className="mt-4 flex items-center gap-3">
               {t.photo_url ? (
@@ -66,7 +63,7 @@ function TestimonialCarousel({ testimonials }: { testimonials: ProgramPage["test
               ) : (
                 <div
                   className="grid h-9 w-9 place-items-center rounded-full text-xs font-bold text-white"
-                  style={{ background: `linear-gradient(135deg, ${NAVY}, ${NAVY_2})` }}
+                  style={{ background: GRADIENT }}
                 >
                   {t.name.slice(0, 2).toUpperCase()}
                 </div>
@@ -85,7 +82,7 @@ function TestimonialCarousel({ testimonials }: { testimonials: ProgramPage["test
             onClick={() => setStart((s) => Math.max(0, s - perPage))}
             disabled={!canPrev}
             aria-label="Previous testimonials"
-            className="absolute left-0 top-1/2 hidden -translate-x-14 -translate-y-1/2 h-9 w-9 place-items-center rounded-full border border-border bg-white text-foreground transition-colors hover:border-[color-mix(in_oklab,#F5A623_40%,transparent)] disabled:opacity-30 sm:grid"
+            className="absolute left-0 top-1/2 hidden -translate-x-14 -translate-y-1/2 h-9 w-9 place-items-center rounded-full border border-border bg-[var(--color-surface)] text-foreground transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] disabled:opacity-30 sm:grid"
           >
             <ChevronLeft size={16} />
           </button>
@@ -93,7 +90,7 @@ function TestimonialCarousel({ testimonials }: { testimonials: ProgramPage["test
             onClick={() => setStart((s) => (s + perPage < testimonials.length ? s + perPage : s))}
             disabled={!canNext}
             aria-label="Next testimonials"
-            className="absolute right-0 top-1/2 hidden translate-x-14 -translate-y-1/2 h-9 w-9 place-items-center rounded-full border border-border bg-white text-foreground transition-colors hover:border-[color-mix(in_oklab,#F5A623_40%,transparent)] disabled:opacity-30 sm:grid"
+            className="absolute right-0 top-1/2 hidden translate-x-14 -translate-y-1/2 h-9 w-9 place-items-center rounded-full border border-border bg-[var(--color-surface)] text-foreground transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] disabled:opacity-30 sm:grid"
           >
             <ChevronRight size={16} />
           </button>
@@ -141,10 +138,13 @@ export function ScholarshipPage({
 
   return (
     <>
-      {/* Hero — boxed navy card, not full-bleed */}
-      <section className="pt-28 pb-10 md:pt-32 md:pb-14" style={{ background: NAVY }}>
-        <div className="container-page">
-          <nav className="mb-6 flex items-center gap-2 text-xs text-white/60">
+      {/* Hero */}
+      <section className="relative pt-28 pb-10 md:pt-32 md:pb-14 overflow-hidden h-[340px] md:h-[420px] flex items-end">
+        <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/55 to-slate-950/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+        <div className="container-page relative z-10 [text-shadow:0_2px_30px_rgba(2,6,23,0.5)]">
+          <nav className="mb-4 flex items-center gap-2 text-xs text-white/70">
             <Link to="/" className="transition-colors hover:text-white">
               Home
             </Link>
@@ -156,58 +156,29 @@ export function ScholarshipPage({
             <span className="text-white">{title}</span>
           </nav>
 
-          <div
-            className="relative overflow-hidden rounded-3xl border"
-            style={{ borderColor: "color-mix(in oklab, #F5A623 35%, transparent)" }}
-          >
-            <div className="grid gap-8 p-6 md:grid-cols-2 md:items-center md:p-10 lg:p-12">
-              <div>
-                <p
-                  className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em]"
-                  style={{ color: GOLD }}
-                >
-                  Investing in Potential
-                </p>
-                <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-white md:text-5xl">
-                  {title.split(" ").slice(0, -1).join(" ")}{" "}
-                  <span style={{ color: GOLD }}>{title.split(" ").slice(-1)}</span>
-                </h1>
-                {tagline && (
-                  <p className="mt-5 max-w-md text-sm leading-relaxed text-white/75 md:text-base">
-                    {tagline}
-                  </p>
-                )}
-
-                {features.length > 0 && (
-                  <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
-                    {features.slice(0, 3).map((f) => {
-                      const FeatureIcon = FEATURE_ICONS[f.icon] ?? Sparkles;
-                      return (
-                        <div key={f.id} className="flex items-start gap-2.5">
-                          <div
-                            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border"
-                            style={{ borderColor: "color-mix(in oklab, #F5A623 45%, transparent)" }}
-                          >
-                            <FeatureIcon size={14} style={{ color: GOLD }} />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold leading-tight text-white">{f.title}</p>
-                            {f.description && (
-                              <p className="mt-1 text-[11px] leading-snug text-white/60">{f.description}</p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl md:aspect-auto md:h-full md:min-h-[280px]">
-                <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
-              </div>
-            </div>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
+            <Award size={13} style={{ color: ACCENT }} />
+            Investing in Potential
           </div>
+
+          <h1 className="font-display text-3xl md:text-5xl font-extrabold tracking-[-0.03em] leading-[1.04] max-w-2xl text-white">
+            {title}
+          </h1>
+          {tagline && <p className="mt-3 max-w-lg text-sm md:text-base leading-relaxed text-white/80">{tagline}</p>}
+
+          {features.length > 0 && (
+            <div className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3 text-xs md:text-sm text-white/85">
+              {features.slice(0, 3).map((f) => {
+                const FeatureIcon = FEATURE_ICONS[f.icon] ?? Sparkles;
+                return (
+                  <span key={f.id} className="inline-flex items-center gap-2">
+                    <FeatureIcon size={14} style={{ color: ACCENT }} />
+                    {f.title}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -216,7 +187,7 @@ export function ScholarshipPage({
           {/* Year switcher */}
           {years.length > 1 && page && (
             <div className="mb-10">
-              <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD }}>
+              <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                 <Calendar size={13} /> Browse by year
               </p>
               <div className="flex flex-wrap gap-2">
@@ -233,8 +204,8 @@ export function ScholarshipPage({
                       }
                       style={
                         isActive
-                          ? { background: GOLD_GRADIENT }
-                          : { borderColor: "color-mix(in oklab, #F5A623 30%, var(--color-border))" }
+                          ? { background: GRADIENT }
+                          : { borderColor: "color-mix(in oklab, var(--color-accent-1) 30%, var(--color-border))" }
                       }
                     >
                       {y}
@@ -248,7 +219,7 @@ export function ScholarshipPage({
           {/* About + info grid */}
           <div className="mb-14 grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-start">
             <div>
-              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD }}>
+              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                 About the Scholarship
               </p>
               <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">
@@ -275,12 +246,12 @@ export function ScholarshipPage({
                 {infoCards.map((item) => {
                   const ItemIcon = FEATURE_ICONS[item.icon] ?? Sparkles;
                   return (
-                    <div key={item.id} className="bg-white p-5 text-center">
+                    <div key={item.id} className="bg-[var(--color-surface)] p-5 text-center">
                       <div
                         className="mx-auto grid h-12 w-12 place-items-center rounded-full"
                         style={{ background: "color-mix(in oklab, var(--color-accent-1) 10%, transparent)" }}
                       >
-                        <ItemIcon size={20} style={{ color: "var(--color-accent-1)" }} />
+                        <ItemIcon size={20} style={{ color: ACCENT }} />
                       </div>
                       <p className="mt-3 text-sm font-bold leading-tight">{item.label}</p>
                       <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{item.value}</p>
@@ -291,23 +262,19 @@ export function ScholarshipPage({
             )}
           </div>
 
-          {/* Impact stats — dark banner */}
+          {/* Impact stats */}
           {page && page.stats.length > 0 && (
-            <div
-              className="mb-14 overflow-hidden rounded-2xl"
-              style={{ background: `linear-gradient(120deg, ${NAVY}, ${NAVY_2})` }}
-            >
-              <p
-                className="pt-6 text-center text-[11px] font-bold uppercase tracking-[0.2em]"
-                style={{ color: GOLD }}
-              >
-                Our Impact So Far
+            <div className="mb-14 text-center">
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
+                By the numbers
               </p>
-              <div className="grid grid-cols-2 gap-4 p-6 sm:grid-cols-5 sm:p-8">
+              <h2 className="font-display text-2xl md:text-3xl font-bold tracking-tight">Our Impact So Far</h2>
+              <div className="mx-auto mt-2 h-1 w-14 rounded-full" style={{ background: GRADIENT }} />
+              <div className="mt-10 grid grid-cols-2 gap-4 rounded-2xl border border-border bg-[var(--color-surface)] p-6 sm:grid-cols-5">
                 {page.stats.map((s) => (
                   <div key={s.id} className="text-center">
-                    <p className="font-display text-2xl font-extrabold text-white md:text-3xl">{s.value}</p>
-                    <p className="mt-1 text-[11px] uppercase tracking-[0.1em] text-white/60">{s.label}</p>
+                    <p className="font-display text-2xl font-extrabold md:text-3xl" style={{ color: ACCENT }}>{s.value}</p>
+                    <p className="mt-1 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">{s.label}</p>
                   </div>
                 ))}
               </div>
@@ -319,7 +286,7 @@ export function ScholarshipPage({
             <div className="mb-14">
               <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD }}>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                     Scholarship Gallery
                   </p>
                   <h2 className="mt-1 font-display text-2xl font-bold tracking-tight md:text-3xl">
@@ -338,7 +305,7 @@ export function ScholarshipPage({
                   onClick={() => setGalleryStart((s) => Math.max(0, s - GALLERY_STEP))}
                   disabled={!canGalleryPrev}
                   aria-label="Previous photos"
-                  className="hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-white text-foreground transition-colors disabled:opacity-30 sm:grid"
+                  className="hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-[var(--color-surface)] text-foreground transition-colors disabled:opacity-30 sm:grid"
                 >
                   <ChevronLeft size={16} />
                 </button>
@@ -367,7 +334,7 @@ export function ScholarshipPage({
                   onClick={() => setGalleryStart((s) => (s + GALLERY_STEP < gallery.length ? s + GALLERY_STEP : s))}
                   disabled={!canGalleryNext}
                   aria-label="Next photos"
-                  className="hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-white text-foreground transition-colors disabled:opacity-30 sm:grid"
+                  className="hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-[var(--color-surface)] text-foreground transition-colors disabled:opacity-30 sm:grid"
                 >
                   <ChevronRight size={16} />
                 </button>
@@ -489,7 +456,7 @@ export function ScholarshipPage({
           {/* Testimonials */}
           {page && page.testimonials.length > 0 && (
             <div className="mb-14 text-center">
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD }}>
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                 In their words
               </p>
               <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">Voices of Our Scholars</h2>
@@ -499,29 +466,26 @@ export function ScholarshipPage({
             </div>
           )}
 
-          {/* CTA — dark banner */}
+          {/* CTA */}
           <div
             className="flex flex-col items-center gap-5 rounded-2xl p-8 text-center sm:flex-row sm:justify-between sm:text-left"
-            style={{ background: `linear-gradient(120deg, ${NAVY}, ${NAVY_2})` }}
+            style={{ background: GRADIENT }}
           >
             <div className="flex items-center gap-4">
-              <div
-                className="grid h-11 w-11 shrink-0 place-items-center rounded-full"
-                style={{ background: "color-mix(in oklab, #F5A623 20%, transparent)", color: GOLD }}
-              >
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/15 text-white">
                 <BadgeCheck size={20} />
               </div>
               <div className="text-white">
                 <h3 className="font-display text-lg font-bold leading-tight">
                   {page?.cta_title || "Your support can empower a student's future."}
                 </h3>
-                {page?.cta_subtitle && <p className="mt-1 text-sm text-white/75">{page.cta_subtitle}</p>}
+                {page?.cta_subtitle && <p className="mt-1 text-sm text-white/85">{page.cta_subtitle}</p>}
               </div>
             </div>
             <a
               href="/support"
-              className="inline-flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-[#1a1a1a] transition-opacity hover:opacity-90"
-              style={{ background: GOLD_GRADIENT }}
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold transition-opacity hover:opacity-90"
+              style={{ color: ACCENT }}
             >
               Contribute Now <ArrowRight size={15} />
             </a>
