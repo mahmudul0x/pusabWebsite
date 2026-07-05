@@ -236,7 +236,7 @@ export function ProgramPagesSection() {
     );
   }
 
-  const yearOptions = [...new Set([...years, CURRENT_YEAR, CURRENT_YEAR + 1])].sort((a, b) => b - a);
+  const yearOptions = [...new Set([...years, CURRENT_YEAR, CURRENT_YEAR + 1, year])].sort((a, b) => b - a);
 
   return (
     <div>
@@ -272,24 +272,54 @@ export function ProgramPagesSection() {
       </div>
 
       {/* Year switch — everything below belongs to whichever year is picked here */}
-      <div className="mb-4 flex items-center justify-between rounded-xl border border-border bg-[var(--color-surface)] px-3.5 py-2.5">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-[var(--color-surface)] px-3.5 py-2.5">
         <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
           <CalendarClock size={13} /> Year
         </span>
-        <div className="relative">
-          <select
-            value={year}
-            onChange={(e) => switchYear(Number(e.target.value))}
-            className="appearance-none rounded-lg border border-border bg-[var(--color-background)] py-1.5 pl-3 pr-8 text-sm font-bold outline-none"
-            style={{ color: "var(--color-accent-1)" }}
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <select
+              value={year}
+              onChange={(e) => switchYear(Number(e.target.value))}
+              className="appearance-none rounded-lg border border-border bg-[var(--color-background)] py-1.5 pl-3 pr-8 text-sm font-bold outline-none"
+              style={{ color: "var(--color-accent-1)" }}
+            >
+              {yearOptions.map((y) => (
+                <option key={y} value={y}>
+                  {y} {years.includes(y) ? "" : "(new)"}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          </div>
+          <span className="text-xs text-muted-foreground">or</span>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const input = e.currentTarget.elements.namedItem("customYear") as HTMLInputElement;
+              const y = Number(input.value);
+              if (y >= 2000 && y <= 2100) {
+                switchYear(y);
+                input.value = "";
+              } else {
+                toast.error("Enter a valid year, e.g. 2019.");
+              }
+            }}
+            className="flex items-center gap-1.5"
           >
-            {yearOptions.map((y) => (
-              <option key={y} value={y}>
-                {y} {years.includes(y) ? "" : "(new)"}
-              </option>
-            ))}
-          </select>
-          <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              name="customYear"
+              type="number"
+              placeholder="e.g. 2019"
+              className="w-24 rounded-lg border border-border bg-[var(--color-background)] px-2.5 py-1.5 text-sm outline-none"
+            />
+            <button
+              type="submit"
+              className="rounded-lg border border-dashed border-border px-2.5 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] hover:text-foreground"
+            >
+              Go
+            </button>
+          </form>
         </div>
       </div>
 
