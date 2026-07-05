@@ -1,6 +1,6 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   MapPin,
   CalendarClock,
@@ -10,7 +10,6 @@ import {
   ListChecks,
   Quote,
   ChevronRight,
-  ChevronDown,
   AlertTriangle,
 } from "lucide-react";
 import { programPagesApi, optimizeImage, type ProgramPage } from "@/lib/api";
@@ -490,28 +489,9 @@ function ProgramDetailPage() {
             <span className="text-white">{title}</span>
           </nav>
 
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
-              <MoodIcon size={13} style={{ color: colorA }} />
-              {mood}
-            </div>
-            {years.length > 1 && page && (
-              <div className="relative inline-block">
-                <select
-                  value={page.year}
-                  disabled={loadingYear}
-                  onChange={(e) => switchYear(Number(e.target.value))}
-                  className="appearance-none rounded-full border border-white/25 bg-white/10 py-1.5 pl-3.5 pr-8 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur outline-none disabled:opacity-60"
-                >
-                  {years.map((y) => (
-                    <option key={y} value={y} className="text-foreground">
-                      {y}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-white" />
-              </div>
-            )}
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
+            <MoodIcon size={13} style={{ color: colorA }} />
+            {mood}
           </div>
 
           <h1 className="font-display text-4xl md:text-6xl font-extrabold tracking-[-0.03em] leading-[1.04] max-w-4xl text-white">
@@ -525,6 +505,38 @@ function ProgramDetailPage() {
 
       <section className="py-14 md:py-20">
         <div className="container-page">
+          {/* Edition (year) switcher — only shown once more than one year exists */}
+          {years.length > 1 && page && (
+            <div className="mb-10">
+              <SectionLabel icon={<CalendarClock size={13} />} accent={colorA}>
+                Browse by year
+              </SectionLabel>
+              <div className="flex flex-wrap gap-2">
+                {years.map((y) => {
+                  const isActive = y === page.year;
+                  return (
+                    <button
+                      key={y}
+                      onClick={() => switchYear(y)}
+                      disabled={loadingYear}
+                      className={
+                        "rounded-full px-5 py-2.5 text-sm font-bold transition-all disabled:opacity-60 " +
+                        (isActive ? "text-white shadow-md" : "border text-foreground/80 hover:text-foreground")
+                      }
+                      style={
+                        isActive
+                          ? { background: gradient }
+                          : { borderColor: `color-mix(in oklab, ${colorA} 30%, var(--color-border))` }
+                      }
+                    >
+                      {y}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Overview */}
           <div className="mb-10 max-w-2xl">
             <SectionLabel accent={colorA}>About this program</SectionLabel>
