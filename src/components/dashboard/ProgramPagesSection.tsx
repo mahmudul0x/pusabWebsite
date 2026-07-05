@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Save } from "lucide-react";
+import { Plus, Trash2, Save, ChevronDown, CalendarClock } from "lucide-react";
 import { programPagesApi, type ProgramPage } from "@/lib/api";
 import { errMessage } from "./useResource";
 import { SectionHeader, Field, inputCls } from "./primitives";
@@ -14,25 +14,6 @@ let tempId = -1;
 const nextTempId = () => tempId--;
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: 8 }, (_, i) => CURRENT_YEAR + 1 - i);
-
-function YearSelect({ value, onChange }: { value: number | null; onChange: (y: number) => void }) {
-  return (
-    <select
-      value={value ?? ""}
-      onChange={(e) => onChange(Number(e.target.value))}
-      className={inputCls + " mt-0"}
-    >
-      <option value="" disabled>
-        Year…
-      </option>
-      {YEAR_OPTIONS.map((y) => (
-        <option key={y} value={y}>
-          {y}
-        </option>
-      ))}
-    </select>
-  );
-}
 
 function RepeatingRow({ children, onRemove }: { children: React.ReactNode; onRemove: () => void }) {
   return (
@@ -50,37 +31,15 @@ function RepeatingRow({ children, onRemove }: { children: React.ReactNode; onRem
   );
 }
 
-/** Requires a year to be picked before the "Add" action is available — the
- * dashboard's rule for stats/gallery/testimonials is: pick the edition year
- * first, then fill in the rest. */
-function AddWithYear({ label, onAdd }: { label: string; onAdd: (year: number) => void }) {
-  const [year, setYear] = useState<number | "">("");
+function AddRowButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <div className="flex items-center gap-2">
-      <select
-        value={year}
-        onChange={(e) => setYear(e.target.value ? Number(e.target.value) : "")}
-        className="rounded-lg border border-border bg-[var(--color-background)] px-2.5 py-1.5 text-xs outline-none"
-      >
-        <option value="">Year…</option>
-        {YEAR_OPTIONS.map((y) => (
-          <option key={y} value={y}>
-            {y}
-          </option>
-        ))}
-      </select>
-      <button
-        type="button"
-        disabled={!year}
-        onClick={() => {
-          if (year) onAdd(year);
-          setYear("");
-        }}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-border px-2.5 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        <Plus size={12} /> {label}
-      </button>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-border px-2.5 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] hover:text-foreground"
+    >
+      <Plus size={12} /> {label}
+    </button>
   );
 }
 
@@ -111,6 +70,7 @@ export function ProgramPagesSection() {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [form, setForm] = useState<ProgramPage | null>(null);
   const [saving, setSaving] = useState(false);
+  const [year, setYear] = useState<number>(CURRENT_YEAR);
 
   function load() {
     programPagesApi
@@ -132,12 +92,16 @@ export function ProgramPagesSection() {
   const set = <K extends keyof ProgramPage>(k: K, v: ProgramPage[K]) =>
     setForm((f) => (f ? { ...f, [k]: v } : f));
 
+  // Everything below the basics is scoped to the year picked up top —
+  // items are still there and saved either way, just hidden while editing
+  // a different year.
+  const yearStats = useMemo(() => form?.stats.filter((s) => s.year === year) ?? [], [form, year]);
+  const yearGallery = useMemo(() => form?.gallery.filter((g) => g.year === year) ?? [], [form, year]);
+  const yearTestimonials = useMemo(() => form?.testimonials.filter((t) => t.year === year) ?? [], [form, year]);
+
   function validate(f: ProgramPage): string | null {
-    if (f.stats.some((s) => !s.year)) return "Pick a year for every stat.";
     if (f.stats.some((s) => !s.label.trim() || !s.value.trim())) return "Every stat needs a label and a value.";
-    if (f.gallery.some((g) => !g.year)) return "Pick a year for every gallery photo.";
     if (f.gallery.some((g) => !g.image_url.trim())) return "Remove empty gallery rows, or add a photo to them.";
-    if (f.testimonials.some((t) => !t.year)) return "Pick a year for every testimonial.";
     if (f.testimonials.some((t) => !t.name.trim() || !t.quote.trim())) return "Every testimonial needs a name and a quote.";
     return null;
   }
@@ -159,10 +123,10 @@ export function ProgramPagesSection() {
         eligibility: form.eligibility,
         process: form.process,
         schedule_note: form.schedule_note,
-        stats: form.stats.map(({ year, label, value, order }) => ({ year, label, value, order })),
-        gallery: form.gallery.map(({ year, image_url, caption, order }) => ({ year, image_url, caption, order })),
-        testimonials: form.testimonials.map(({ year, name, role, quote, photo_url, order }) => ({
-          year, name, role, quote, photo_url, order,
+        stats: form.stats.map(({ year: y, label, value, order }) => ({ year: y, label, value, order })),
+        gallery: form.gallery.map(({ year: y, image_url, caption, order }) => ({ year: y, image_url, caption, order })),
+        testimonials: form.testimonials.map(({ year: y, name, role, quote, photo_url, order }) => ({
+          year: y, name, role, quote, photo_url, order,
         })),
       } as never);
       setPages((prev) => prev?.map((p) => (p.slug === updated.slug ? updated : p)) ?? prev);
@@ -272,15 +236,33 @@ export function ProgramPagesSection() {
             </Field>
           </div>
 
-          {/* Collapsible repeatable lists */}
+          {/* Single year switch — everything below belongs to this year */}
+          <div className="flex items-center justify-between rounded-xl border border-border bg-[var(--color-background)] px-3.5 py-2.5">
+            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+              <CalendarClock size={13} /> Editing year
+            </span>
+            <div className="relative">
+              <select
+                value={year}
+                onChange={(e) => setYear(Number(e.target.value))}
+                className="appearance-none rounded-lg border border-border bg-[var(--color-surface)] py-1.5 pl-3 pr-8 text-sm font-bold outline-none"
+                style={{ color: "var(--color-accent-1)" }}
+              >
+                {YEAR_OPTIONS.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            </div>
+          </div>
+
+          {/* Everything below is scoped to the year selected above */}
           <div className="space-y-2.5">
-            <EditorSection title="Stat tiles" count={form.stats.length}>
-              {form.stats.map((s) => (
+            <EditorSection title={`Stat tiles — ${year}`} count={yearStats.length}>
+              {yearStats.map((s) => (
                 <RepeatingRow key={s.id} onRemove={() => set("stats", form.stats.filter((x) => x.id !== s.id) as Stat[])}>
-                  <YearSelect
-                    value={s.year}
-                    onChange={(y) => set("stats", form.stats.map((x) => (x.id === s.id ? { ...x, year: y } : x)) as Stat[])}
-                  />
                   <input
                     value={s.value}
                     placeholder="Value, e.g. 500+"
@@ -291,18 +273,18 @@ export function ProgramPagesSection() {
                     value={s.label}
                     placeholder="Label, e.g. Members reached"
                     onChange={(e) => set("stats", form.stats.map((x) => (x.id === s.id ? { ...x, label: e.target.value } : x)) as Stat[])}
-                    className={inputCls + " mt-0 sm:col-span-2"}
+                    className={inputCls + " mt-0"}
                   />
                 </RepeatingRow>
               ))}
-              <AddWithYear
+              <AddRowButton
                 label="Add stat"
-                onAdd={(year) => set("stats", [...form.stats, { id: nextTempId(), year, label: "", value: "", order: form.stats.length }] as Stat[])}
+                onClick={() => set("stats", [...form.stats, { id: nextTempId(), year, label: "", value: "", order: form.stats.length }] as Stat[])}
               />
             </EditorSection>
 
-            <EditorSection title="Gallery" count={form.gallery.length}>
-              {form.gallery.map((g) => (
+            <EditorSection title={`Gallery — ${year}`} count={yearGallery.length}>
+              {yearGallery.map((g) => (
                 <RepeatingRow key={g.id} onRemove={() => set("gallery", form.gallery.filter((x) => x.id !== g.id) as GalleryImage[])}>
                   <div className="sm:col-span-2">
                     <ImageUpload
@@ -311,26 +293,22 @@ export function ProgramPagesSection() {
                       folder="programs"
                     />
                   </div>
-                  <YearSelect
-                    value={g.year}
-                    onChange={(y) => set("gallery", form.gallery.map((x) => (x.id === g.id ? { ...x, year: y } : x)) as GalleryImage[])}
-                  />
                   <input
                     value={g.caption}
                     placeholder="Caption (optional)"
                     onChange={(e) => set("gallery", form.gallery.map((x) => (x.id === g.id ? { ...x, caption: e.target.value } : x)) as GalleryImage[])}
-                    className={inputCls + " mt-0"}
+                    className={inputCls + " mt-0 sm:col-span-2"}
                   />
                 </RepeatingRow>
               ))}
-              <AddWithYear
+              <AddRowButton
                 label="Add photo"
-                onAdd={(year) => set("gallery", [...form.gallery, { id: nextTempId(), year, image_url: "", caption: "", order: form.gallery.length }] as GalleryImage[])}
+                onClick={() => set("gallery", [...form.gallery, { id: nextTempId(), year, image_url: "", caption: "", order: form.gallery.length }] as GalleryImage[])}
               />
             </EditorSection>
 
-            <EditorSection title="Testimonials" count={form.testimonials.length}>
-              {form.testimonials.map((t) => (
+            <EditorSection title={`Testimonials — ${year}`} count={yearTestimonials.length}>
+              {yearTestimonials.map((t) => (
                 <RepeatingRow key={t.id} onRemove={() => set("testimonials", form.testimonials.filter((x) => x.id !== t.id) as Testimonial[])}>
                   <input
                     value={t.name}
@@ -338,15 +316,11 @@ export function ProgramPagesSection() {
                     onChange={(e) => set("testimonials", form.testimonials.map((x) => (x.id === t.id ? { ...x, name: e.target.value } : x)) as Testimonial[])}
                     className={inputCls + " mt-0"}
                   />
-                  <YearSelect
-                    value={t.year}
-                    onChange={(y) => set("testimonials", form.testimonials.map((x) => (x.id === t.id ? { ...x, year: y } : x)) as Testimonial[])}
-                  />
                   <input
                     value={t.role}
                     placeholder="Role / context (optional)"
                     onChange={(e) => set("testimonials", form.testimonials.map((x) => (x.id === t.id ? { ...x, role: e.target.value } : x)) as Testimonial[])}
-                    className={inputCls + " mt-0 sm:col-span-2"}
+                    className={inputCls + " mt-0"}
                   />
                   <textarea
                     rows={2}
@@ -364,9 +338,9 @@ export function ProgramPagesSection() {
                   </div>
                 </RepeatingRow>
               ))}
-              <AddWithYear
+              <AddRowButton
                 label="Add testimonial"
-                onAdd={(year) =>
+                onClick={() =>
                   set("testimonials", [
                     ...form.testimonials,
                     { id: nextTempId(), year, name: "", role: "", quote: "", photo_url: "", order: form.testimonials.length },
