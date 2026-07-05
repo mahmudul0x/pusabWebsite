@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, ChevronDown, CalendarClock } from "lucide-react";
 import { programPagesApi, type ProgramPage } from "@/lib/api";
@@ -13,7 +13,26 @@ type Testimonial = ProgramPage["testimonials"][number];
 let tempId = -1;
 const nextTempId = () => tempId--;
 const CURRENT_YEAR = new Date().getFullYear();
-const YEAR_OPTIONS = Array.from({ length: 8 }, (_, i) => CURRENT_YEAR + 1 - i);
+
+function emptyEdition(slug: string, title: string, year: number): ProgramPage {
+  return {
+    id: 0,
+    slug,
+    year,
+    title,
+    tagline: "",
+    hero_image_url: "",
+    overview: "",
+    eligibility: "",
+    process: "",
+    schedule_note: "",
+    objectives: [],
+    stats: [],
+    gallery: [],
+    testimonials: [],
+    updated_at: "",
+  };
+}
 
 function RepeatingRow({ children, onRemove }: { children: React.ReactNode; onRemove: () => void }) {
   return (
@@ -68,9 +87,12 @@ function EditorSection({
 export function ProgramPagesSection() {
   const [pages, setPages] = useState<ProgramPage[] | null>(null);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
-  const [form, setForm] = useState<ProgramPage | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [years, setYears] = useState<number[]>([]);
   const [year, setYear] = useState<number>(CURRENT_YEAR);
+  const [form, setForm] = useState<ProgramPage | null>(null);
+  const [isNewEdition, setIsNewEdition] = useState(false);
+  const [loadingEdition, setLoadingEdition] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   function load() {
     programPagesApi
@@ -84,22 +106,50 @@ export function ProgramPagesSection() {
 
   useEffect(load, []);
 
+  // When the active program (slug) changes, load its latest edition and
+  // remember which years already exist for it.
   useEffect(() => {
-    const page = pages?.find((p) => p.slug === activeSlug) ?? null;
-    setForm(page ? { ...page } : null);
-  }, [activeSlug, pages]);
+    if (!activeSlug) return;
+    setLoadingEdition(true);
+    programPagesApi
+      .get(activeSlug)
+      .then((page) => {
+        setYears(page.years ?? [page.year]);
+        setYear(page.year);
+        setForm(page);
+        setIsNewEdition(false);
+      })
+      .catch((e) => toast.error(errMessage(e)))
+      .finally(() => setLoadingEdition(false));
+  }, [activeSlug]);
+
+  // Switching the year re-fetches that edition if it exists, or drops into
+  // a blank "new edition" form (pre-filled from the current one) if not.
+  function switchYear(y: number) {
+    setYear(y);
+    if (!activeSlug) return;
+    if (years.includes(y)) {
+      setLoadingEdition(true);
+      programPagesApi
+        .get(activeSlug, y)
+        .then((page) => {
+          setForm(page);
+          setIsNewEdition(false);
+        })
+        .catch((e) => toast.error(errMessage(e)))
+        .finally(() => setLoadingEdition(false));
+    } else {
+      const activePage = pages?.find((p) => p.slug === activeSlug);
+      setForm(emptyEdition(activeSlug, activePage?.title ?? "", y));
+      setIsNewEdition(true);
+    }
+  }
 
   const set = <K extends keyof ProgramPage>(k: K, v: ProgramPage[K]) =>
     setForm((f) => (f ? { ...f, [k]: v } : f));
 
-  // Everything below the basics is scoped to the year picked up top —
-  // items are still there and saved either way, just hidden while editing
-  // a different year.
-  const yearStats = useMemo(() => form?.stats.filter((s) => s.year === year) ?? [], [form, year]);
-  const yearGallery = useMemo(() => form?.gallery.filter((g) => g.year === year) ?? [], [form, year]);
-  const yearTestimonials = useMemo(() => form?.testimonials.filter((t) => t.year === year) ?? [], [form, year]);
-
   function validate(f: ProgramPage): string | null {
+    if (!f.title.trim()) return "Title is required.";
     if (f.stats.some((s) => !s.label.trim() || !s.value.trim())) return "Every stat needs a label and a value.";
     if (f.gallery.some((g) => !g.image_url.trim())) return "Remove empty gallery rows, or add a photo to them.";
     if (f.testimonials.some((t) => !t.name.trim() || !t.quote.trim())) return "Every testimonial needs a name and a quote.";
@@ -115,7 +165,9 @@ export function ProgramPagesSection() {
     }
     setSaving(true);
     try {
-      const updated = await programPagesApi.update(form.slug, {
+      const body = {
+        slug: form.slug,
+        year: form.year,
         title: form.title,
         tagline: form.tagline,
         hero_image_url: form.hero_image_url,
@@ -123,14 +175,19 @@ export function ProgramPagesSection() {
         eligibility: form.eligibility,
         process: form.process,
         schedule_note: form.schedule_note,
-        stats: form.stats.map(({ year: y, label, value, order }) => ({ year: y, label, value, order })),
-        gallery: form.gallery.map(({ year: y, image_url, caption, order }) => ({ year: y, image_url, caption, order })),
-        testimonials: form.testimonials.map(({ year: y, name, role, quote, photo_url, order }) => ({
-          year: y, name, role, quote, photo_url, order,
+        stats: form.stats.map(({ label, value, order }) => ({ label, value, order })),
+        gallery: form.gallery.map(({ image_url, caption, order }) => ({ image_url, caption, order })),
+        testimonials: form.testimonials.map(({ name, role, quote, photo_url, order }) => ({
+          name, role, quote, photo_url, order,
         })),
-      } as never);
-      setPages((prev) => prev?.map((p) => (p.slug === updated.slug ? updated : p)) ?? prev);
-      toast.success("Saved");
+      };
+      const saved = isNewEdition
+        ? await programPagesApi.create(body as never)
+        : await programPagesApi.update(form.slug, form.year, body as never);
+      setForm(saved);
+      setIsNewEdition(false);
+      setYears((prev) => (prev.includes(saved.year) ? prev : [...prev, saved.year].sort((a, b) => b - a)));
+      toast.success(isNewEdition ? "Edition created" : "Saved");
     } catch (err) {
       toast.error(errMessage(err));
     } finally {
@@ -146,11 +203,13 @@ export function ProgramPagesSection() {
     );
   }
 
+  const yearOptions = [...new Set([...years, CURRENT_YEAR, CURRENT_YEAR + 1])].sort((a, b) => b - a);
+
   return (
     <div>
       <SectionHeader
         title="Program Pages"
-        subtitle="Content shown on each /programs/<slug> detail page."
+        subtitle="Content shown on each /programs/<slug> detail page. Pick a year, then edit that edition."
         count={pages.length}
         onNew={load}
         newLabel="Refresh"
@@ -179,89 +238,107 @@ export function ProgramPagesSection() {
         ))}
       </div>
 
-      {form && (
+      {/* Year switch — everything below belongs to whichever year is picked here */}
+      <div className="mb-4 flex items-center justify-between rounded-xl border border-border bg-[var(--color-surface)] px-3.5 py-2.5">
+        <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+          <CalendarClock size={13} /> Year
+        </span>
+        <div className="relative">
+          <select
+            value={year}
+            onChange={(e) => switchYear(Number(e.target.value))}
+            className="appearance-none rounded-lg border border-border bg-[var(--color-background)] py-1.5 pl-3 pr-8 text-sm font-bold outline-none"
+            style={{ color: "var(--color-accent-1)" }}
+          >
+            {yearOptions.map((y) => (
+              <option key={y} value={y}>
+                {y} {years.includes(y) ? "" : "(new)"}
+              </option>
+            ))}
+          </select>
+          <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        </div>
+      </div>
+
+      {loadingEdition && (
+        <div className="rounded-2xl border border-border bg-[var(--color-surface)] p-6 text-center text-sm text-muted-foreground">
+          Loading…
+        </div>
+      )}
+
+      {!loadingEdition && form && (
         <div className="space-y-4 rounded-2xl border border-border bg-[var(--color-surface)] p-4 md:p-5">
-          {/* Basics */}
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="sm:w-32">
-              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/70">
-                Hero image
-              </span>
-              <div className="mt-1">
-                <ImageUpload value={form.hero_image_url} onChange={(u) => set("hero_image_url", u)} folder="programs" />
-              </div>
-            </div>
-            <div className="grid flex-1 gap-2.5 sm:grid-cols-2">
-              <Field label="Title">
-                <input value={form.title} onChange={(e) => set("title", e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="Tagline" hint="Line under the title in the hero">
-                <input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="Schedule note" hint='e.g. "Held once a year, in December"' full>
-                <input
-                  value={form.schedule_note}
-                  onChange={(e) => set("schedule_note", e.target.value)}
-                  className={inputCls}
-                />
-              </Field>
-            </div>
-          </div>
+          {isNewEdition && (
+            <p className="rounded-lg border border-dashed border-border bg-[var(--color-background)] px-3 py-2 text-xs text-muted-foreground">
+              No content yet for {year} — fill this in and save to create this edition.
+            </p>
+          )}
 
-          <Field label="Overview" full>
-            <textarea
-              rows={3}
-              value={form.overview}
-              onChange={(e) => set("overview", e.target.value)}
-              className={inputCls}
-            />
-          </Field>
-
-          <div className="grid gap-2.5 sm:grid-cols-2">
-            <Field label="Who can join (eligibility)">
-              <textarea
-                rows={2}
-                value={form.eligibility}
-                onChange={(e) => set("eligibility", e.target.value)}
-                className={inputCls}
-              />
-            </Field>
-            <Field label="How it works (process)">
-              <textarea
-                rows={2}
-                value={form.process}
-                onChange={(e) => set("process", e.target.value)}
-                className={inputCls}
-              />
-            </Field>
-          </div>
-
-          {/* Single year switch — everything below belongs to this year */}
-          <div className="flex items-center justify-between rounded-xl border border-border bg-[var(--color-background)] px-3.5 py-2.5">
-            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-              <CalendarClock size={13} /> Editing year
-            </span>
-            <div className="relative">
-              <select
-                value={year}
-                onChange={(e) => setYear(Number(e.target.value))}
-                className="appearance-none rounded-lg border border-border bg-[var(--color-surface)] py-1.5 pl-3 pr-8 text-sm font-bold outline-none"
-                style={{ color: "var(--color-accent-1)" }}
-              >
-                {YEAR_OPTIONS.map((y) => (
-                  <option key={y} value={y}>
-                    {y}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            </div>
-          </div>
-
-          {/* Everything below is scoped to the year selected above */}
+          {/* Everything for this edition, grouped into clear collapsible sections */}
           <div className="space-y-2.5">
-            <EditorSection title={`Stat tiles — ${year}`} count={yearStats.length}>
-              {yearStats.map((s) => (
+            <details className="group rounded-xl border border-border" open>
+              <summary className="flex cursor-pointer list-none items-center px-3.5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground [&::-webkit-details-marker]:hidden">
+                Basics
+              </summary>
+              <div className="space-y-3.5 border-t border-border p-3.5">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/70">
+                    Hero image
+                  </span>
+                  <div className="mt-1.5">
+                    <ImageUpload value={form.hero_image_url} onChange={(u) => set("hero_image_url", u)} folder="programs" />
+                  </div>
+                </div>
+
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  <Field label="Title">
+                    <input value={form.title} onChange={(e) => set("title", e.target.value)} className={inputCls} />
+                  </Field>
+                  <Field label="Tagline" hint="Line under the title in the hero">
+                    <input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} className={inputCls} />
+                  </Field>
+                </div>
+
+                <Field label="Schedule note" hint='e.g. "Held once a year, in December"'>
+                  <input
+                    value={form.schedule_note}
+                    onChange={(e) => set("schedule_note", e.target.value)}
+                    className={inputCls}
+                  />
+                </Field>
+
+                <Field label="Overview">
+                  <textarea
+                    rows={3}
+                    value={form.overview}
+                    onChange={(e) => set("overview", e.target.value)}
+                    className={inputCls}
+                  />
+                </Field>
+
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  <Field label="Who can join (eligibility)">
+                    <textarea
+                      rows={2}
+                      value={form.eligibility}
+                      onChange={(e) => set("eligibility", e.target.value)}
+                      className={inputCls}
+                    />
+                  </Field>
+                  <Field label="How it works (process)">
+                    <textarea
+                      rows={2}
+                      value={form.process}
+                      onChange={(e) => set("process", e.target.value)}
+                      className={inputCls}
+                    />
+                  </Field>
+                </div>
+              </div>
+            </details>
+
+            <EditorSection title="Stat tiles" count={form.stats.length}>
+              {form.stats.map((s) => (
                 <RepeatingRow key={s.id} onRemove={() => set("stats", form.stats.filter((x) => x.id !== s.id) as Stat[])}>
                   <input
                     value={s.value}
@@ -279,12 +356,12 @@ export function ProgramPagesSection() {
               ))}
               <AddRowButton
                 label="Add stat"
-                onClick={() => set("stats", [...form.stats, { id: nextTempId(), year, label: "", value: "", order: form.stats.length }] as Stat[])}
+                onClick={() => set("stats", [...form.stats, { id: nextTempId(), label: "", value: "", order: form.stats.length }] as Stat[])}
               />
             </EditorSection>
 
-            <EditorSection title={`Gallery — ${year}`} count={yearGallery.length}>
-              {yearGallery.map((g) => (
+            <EditorSection title="Gallery" count={form.gallery.length}>
+              {form.gallery.map((g) => (
                 <RepeatingRow key={g.id} onRemove={() => set("gallery", form.gallery.filter((x) => x.id !== g.id) as GalleryImage[])}>
                   <div className="sm:col-span-2">
                     <ImageUpload
@@ -303,12 +380,12 @@ export function ProgramPagesSection() {
               ))}
               <AddRowButton
                 label="Add photo"
-                onClick={() => set("gallery", [...form.gallery, { id: nextTempId(), year, image_url: "", caption: "", order: form.gallery.length }] as GalleryImage[])}
+                onClick={() => set("gallery", [...form.gallery, { id: nextTempId(), image_url: "", caption: "", order: form.gallery.length }] as GalleryImage[])}
               />
             </EditorSection>
 
-            <EditorSection title={`Testimonials — ${year}`} count={yearTestimonials.length}>
-              {yearTestimonials.map((t) => (
+            <EditorSection title="Testimonials" count={form.testimonials.length}>
+              {form.testimonials.map((t) => (
                 <RepeatingRow key={t.id} onRemove={() => set("testimonials", form.testimonials.filter((x) => x.id !== t.id) as Testimonial[])}>
                   <input
                     value={t.name}
@@ -343,7 +420,7 @@ export function ProgramPagesSection() {
                 onClick={() =>
                   set("testimonials", [
                     ...form.testimonials,
-                    { id: nextTempId(), year, name: "", role: "", quote: "", photo_url: "", order: form.testimonials.length },
+                    { id: nextTempId(), name: "", role: "", quote: "", photo_url: "", order: form.testimonials.length },
                   ] as Testimonial[])
                 }
               />
@@ -357,7 +434,7 @@ export function ProgramPagesSection() {
               className="inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg disabled:opacity-50 active:scale-[0.98]"
               style={{ background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))" }}
             >
-              <Save size={14} /> {saving ? "Saving…" : "Save changes"}
+              <Save size={14} /> {saving ? "Saving…" : isNewEdition ? "Create edition" : "Save changes"}
             </button>
           </div>
         </div>

@@ -103,7 +103,10 @@ export const settingsApi = {
     apiFetch<SiteSettings>("/api/settings/", { method: "PATCH", body: JSON.stringify(body) }),
 };
 
-// Program detail pages — looked up by slug (matches the /programs/<slug> route).
+// Program detail pages — looked up by slug (matches the /programs/<slug>
+// route). Each slug now has one row per edition year; omitting ?year=
+// returns the latest edition, and the response always includes a `years`
+// array listing every edition that exists for that slug.
 export const programPagesApi = {
   listAll: async (): Promise<ProgramPage[]> => {
     const page = await apiFetch<Paginated<ProgramPage>>(
@@ -113,10 +116,21 @@ export const programPagesApi = {
     );
     return page.results;
   },
-  get: (slug: string) =>
-    apiFetch<ProgramPage>(`/api/program-pages/${slug}/`, {}, { auth: false }),
-  update: (slug: string, body: Partial<ProgramPage>) =>
-    apiFetch<ProgramPage>(`/api/program-pages/${slug}/`, {
+  /** Latest edition (or a specific `year`) for a slug. */
+  get: (slug: string, year?: number) =>
+    apiFetch<ProgramPage>(
+      `/api/program-pages/${slug}/${year ? `?year=${year}` : ""}`,
+      {},
+      { auth: false },
+    ),
+  /** Creates a brand-new edition (slug + year combination). */
+  create: (body: Partial<ProgramPage> & { slug: string; year: number }) =>
+    apiFetch<ProgramPage>("/api/program-pages/", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  update: (slug: string, year: number, body: Partial<ProgramPage>) =>
+    apiFetch<ProgramPage>(`/api/program-pages/${slug}/?year=${year}`, {
       method: "PATCH",
       body: JSON.stringify(body),
     }),

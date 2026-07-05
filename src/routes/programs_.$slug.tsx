@@ -127,58 +127,15 @@ function StatChips({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) 
   );
 }
 
-function YearFilter({
-  years,
-  year,
-  onChange,
-  accent,
-}: {
-  years: number[];
-  year: number | "all";
-  onChange: (y: number | "all") => void;
-  accent: string;
-}) {
-  if (years.length === 0) return null;
-  return (
-    <div className="relative inline-block">
-      <select
-        value={year}
-        onChange={(e) => onChange(e.target.value === "all" ? "all" : Number(e.target.value))}
-        className="appearance-none rounded-full border bg-[var(--color-surface)] py-2 pl-4 pr-9 text-sm font-semibold outline-none transition-colors"
-        style={{ borderColor: `color-mix(in oklab, ${accent} 30%, var(--color-border))` }}
-      >
-        <option value="all">All years</option>
-        {years.map((y) => (
-          <option key={y} value={y}>
-            {y}
-          </option>
-        ))}
-      </select>
-      <ChevronDown size={13} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-    </div>
-  );
-}
-
 /**
  * Reunion — a once-a-year gathering: everyone who's ever been part of PUSAB
  * comes back, and the day is remembered through its photos. So the page
  * leads with that framing, then puts the photo wall front and center
- * (bigger and earlier than any other layout), filterable by edition/year
- * since a new set of photos and numbers exists for every year it's held.
+ * (bigger and earlier than any other layout). The whole edition (title,
+ * overview, stats, gallery — everything) can differ year to year; the year
+ * switcher lives in the page header, not here.
  */
 function TimelineLayout({ page, theme }: { page: ProgramPage; theme: ProgramTheme }) {
-  const years = useMemo(() => {
-    const set = new Set<number>();
-    page.gallery.forEach((g) => g.year && set.add(g.year));
-    page.stats.forEach((s) => s.year && set.add(s.year));
-    return [...set].sort((a, b) => b - a);
-  }, [page.gallery, page.stats]);
-
-  const [year, setYear] = useState<number | "all">(years[0] ?? "all");
-
-  const gallery = year === "all" ? page.gallery : page.gallery.filter((g) => g.year === year);
-  const stats = year === "all" ? page.stats : page.stats.filter((s) => s.year === year);
-
   return (
     <>
       <div
@@ -196,24 +153,15 @@ function TimelineLayout({ page, theme }: { page: ProgramPage; theme: ProgramThem
         </p>
       </div>
 
-      {years.length > 0 && (
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <SectionLabel icon={<CalendarClock size={13} />} accent={theme.colorA}>
-            Browse by edition
-          </SectionLabel>
-          <YearFilter years={years} year={year} onChange={setYear} accent={theme.colorA} />
-        </div>
-      )}
+      <StatBanner page={page} theme={theme} />
 
-      <StatBanner page={{ ...page, stats }} theme={theme} />
-
-      {gallery.length > 0 && (
+      {page.gallery.length > 0 && (
         <div className="mb-10">
           <SectionLabel icon={<theme.Icon size={13} />} accent={theme.colorA}>
             Faces from the night
           </SectionLabel>
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-            {gallery.map((g, i) => (
+            {page.gallery.map((g, i) => (
               <div
                 key={g.id}
                 className={
@@ -479,11 +427,28 @@ const LAYOUTS: Record<ProgramTheme["layout"], (props: { page: ProgramPage; theme
 };
 
 function ProgramDetailPage() {
-  const { fallback, page } = Route.useLoaderData();
+  const { fallback, page: initialPage } = Route.useLoaderData();
   const { events, now } = useProgramEvents();
   const theme = themeFor(fallback.key);
   const { Icon: MoodIcon, colorA, colorB, mood, layout } = theme;
   const gradient = `linear-gradient(120deg, ${colorA}, ${colorB})`;
+
+  const [page, setPage] = useState(initialPage);
+  const [loadingYear, setLoadingYear] = useState(false);
+  const years = page?.years ?? [];
+
+  async function switchYear(y: number) {
+    if (!page || y === page.year) return;
+    setLoadingYear(true);
+    try {
+      const edition = await programPagesApi.get(fallback.key, y);
+      setPage(edition);
+    } catch {
+      // Leave the current edition showing if the fetch fails.
+    } finally {
+      setLoadingYear(false);
+    }
+  }
 
   const title = page?.title || fallback.title;
   const tagline = page?.tagline || fallback.desc;
@@ -525,9 +490,28 @@ function ProgramDetailPage() {
             <span className="text-white">{title}</span>
           </nav>
 
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
-            <MoodIcon size={13} style={{ color: colorA }} />
-            {mood}
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
+              <MoodIcon size={13} style={{ color: colorA }} />
+              {mood}
+            </div>
+            {years.length > 1 && page && (
+              <div className="relative inline-block">
+                <select
+                  value={page.year}
+                  disabled={loadingYear}
+                  onChange={(e) => switchYear(Number(e.target.value))}
+                  className="appearance-none rounded-full border border-white/25 bg-white/10 py-1.5 pl-3.5 pr-8 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur outline-none disabled:opacity-60"
+                >
+                  {years.map((y) => (
+                    <option key={y} value={y} className="text-foreground">
+                      {y}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-white" />
+              </div>
+            )}
           </div>
 
           <h1 className="font-display text-4xl md:text-6xl font-extrabold tracking-[-0.03em] leading-[1.04] max-w-4xl text-white">

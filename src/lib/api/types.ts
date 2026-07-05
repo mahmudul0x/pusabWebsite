@@ -135,7 +135,6 @@ export interface ProgramObjective {
 
 export interface ProgramStat {
   id: number;
-  year: number | null;
   label: string;
   value: string;
   order: number;
@@ -143,7 +142,6 @@ export interface ProgramStat {
 
 export interface ProgramGalleryImage {
   id: number;
-  year: number | null;
   image_url: string;
   caption: string;
   order: number;
@@ -151,7 +149,6 @@ export interface ProgramGalleryImage {
 
 export interface ProgramTestimonial {
   id: number;
-  year: number | null;
   name: string;
   role: string;
   quote: string;
@@ -162,6 +159,7 @@ export interface ProgramTestimonial {
 export interface ProgramPage {
   id: number;
   slug: string;
+  year: number;
   title: string;
   tagline: string;
   hero_image_url: string;
@@ -173,5 +171,8 @@ export interface ProgramPage {
   stats: ProgramStat[];
   gallery: ProgramGalleryImage[];
   testimonials: ProgramTestimonial[];
+  /** Every edition year that exists for this slug, newest first. Only
+   * present on GET responses (added by the backend view), not on writes. */
+  years?: number[];
   updated_at: string;
 }
