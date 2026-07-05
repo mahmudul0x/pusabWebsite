@@ -38,8 +38,6 @@ const FEATURE_ICONS: Record<string, LucideIcon> = {
 const ACCENT = "var(--color-accent-1)";
 const ACCENT_2 = "var(--color-accent-2)";
 const GRADIENT = `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})`;
-const DARK_PANEL = "#0B1220";
-const DARK_PANEL_2 = "#151E33";
 
 const SCHEDULE = [
   { time: "03:00 PM – 03:30 PM", title: "Registration & Meet Up", desc: "Check-in and meet fellow members.", icon: ClipboardList },
@@ -88,10 +86,13 @@ export function FelicitationPage({
 
   return (
     <>
-      {/* Hero — boxed dark card with a diagonal accent-edge split */}
-      <section className="pt-28 pb-10 md:pt-32 md:pb-0" style={{ background: DARK_PANEL }}>
-        <div className="container-page">
-          <nav className="mb-6 flex items-center gap-2 text-xs text-white/60">
+      {/* Hero */}
+      <section className="relative pt-28 pb-10 md:pt-32 md:pb-14 overflow-hidden h-[340px] md:h-[420px] flex items-end">
+        <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/55 to-slate-950/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+        <div className="container-page relative z-10 [text-shadow:0_2px_30px_rgba(2,6,23,0.5)]">
+          <nav className="mb-4 flex items-center gap-2 text-xs text-white/70">
             <Link to="/" className="transition-colors hover:text-white">
               Home
             </Link>
@@ -102,80 +103,48 @@ export function FelicitationPage({
             <ChevronRight size={12} className="opacity-60" />
             <span className="text-white">{title}</span>
           </nav>
-        </div>
 
-        <div className="relative overflow-hidden md:grid md:grid-cols-2 md:items-stretch">
-          <div className="container-page md:mx-0 md:max-w-none py-8 md:py-16 md:pr-12 lg:pr-20">
-            <p
-              className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em]"
-              style={{ color: ACCENT }}
-            >
-              Celebrating Achievements. Welcoming New Journeys.
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">
+            Celebrating Achievements. Welcoming New Journeys.
+          </p>
+          <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-white md:text-5xl">
+            {titleParts.slice(0, splitAt).join(" ")}
+            {" "}
+            <span style={{ color: ACCENT }}>{titleParts.slice(splitAt).join(" ")}</span>
+          </h1>
+          <div className="mt-4 h-1 w-14 rounded-full" style={{ background: GRADIENT }} />
+          {tagline && (
+            <p className="mt-5 max-w-md text-sm leading-relaxed text-white/80 md:text-base">
+              {tagline}
             </p>
-            <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-white md:text-5xl">
-              {titleParts.slice(0, splitAt).join(" ")}
-              {" "}
-              <span style={{ color: ACCENT }}>{titleParts.slice(splitAt).join(" ")}</span>
-            </h1>
-            <div className="mt-4 h-1 w-14 rounded-full" style={{ background: GRADIENT }} />
-            {tagline && (
-              <p className="mt-5 max-w-md text-sm leading-relaxed text-white/75 md:text-base">
-                {tagline}
-              </p>
-            )}
+          )}
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              {page?.event_date && (
-                <div
-                  className="flex items-center gap-2.5 rounded-xl border px-4 py-2.5"
-                  style={{ borderColor: "color-mix(in oklab, var(--color-accent-1) 30%, transparent)" }}
-                >
-                  <Calendar size={16} style={{ color: ACCENT }} />
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-white/60">Date</p>
-                    <p className="text-xs font-semibold text-white">{page.event_date}</p>
-                  </div>
-                </div>
-              )}
-              {page?.venue && (
-                <div
-                  className="flex items-center gap-2.5 rounded-xl border px-4 py-2.5"
-                  style={{ borderColor: "color-mix(in oklab, var(--color-accent-1) 30%, transparent)" }}
-                >
-                  <MapPin size={16} style={{ color: ACCENT }} />
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-white/60">Venue</p>
-                    <p className="text-xs font-semibold text-white">{page.venue}</p>
-                  </div>
-                </div>
-              )}
-              <div
-                className="flex items-center gap-2.5 rounded-xl border px-4 py-2.5"
-                style={{ borderColor: "color-mix(in oklab, var(--color-accent-1) 30%, transparent)" }}
-              >
-                <Users size={16} style={{ color: ACCENT }} />
+          <div className="mt-8 flex flex-wrap gap-3">
+            {page?.event_date && (
+              <div className="flex items-center gap-2.5 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 backdrop-blur">
+                <Calendar size={16} style={{ color: ACCENT }} />
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-white/60">Who Can Join</p>
-                  <p className="text-xs font-semibold text-white">All PUSAB members, alumni &amp; new students</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-white/60">Date</p>
+                  <p className="text-xs font-semibold text-white">{page.event_date}</p>
                 </div>
               </div>
+            )}
+            {page?.venue && (
+              <div className="flex items-center gap-2.5 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 backdrop-blur">
+                <MapPin size={16} style={{ color: ACCENT }} />
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-white/60">Venue</p>
+                  <p className="text-xs font-semibold text-white">{page.venue}</p>
+                </div>
+              </div>
+            )}
+            <div className="flex items-center gap-2.5 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 backdrop-blur">
+              <Users size={16} style={{ color: ACCENT }} />
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wide text-white/60">Who Can Join</p>
+                <p className="text-xs font-semibold text-white">All PUSAB members, alumni &amp; new students</p>
+              </div>
             </div>
-          </div>
-
-          <div className="relative h-[280px] md:h-auto">
-            <div
-              className="absolute inset-0 hidden md:block"
-              style={{
-                clipPath: "polygon(6% 0, 100% 0, 100% 100%, 0% 100%)",
-              }}
-            >
-              <img src={heroImage} alt={title} className="h-full w-full object-cover" />
-            </div>
-            <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover md:hidden" />
-            <div
-              className="absolute inset-y-0 left-0 hidden w-2 md:block"
-              style={{ background: ACCENT, clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
-            />
           </div>
         </div>
       </section>
