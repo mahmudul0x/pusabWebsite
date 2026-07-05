@@ -70,8 +70,17 @@ export const Route = createFileRoute("/programs_/$slug")({
       links: [{ rel: "canonical", href: `/programs/${slug}` }],
     };
   },
-  component: ProgramDetailPage,
+  component: ProgramDetailPageRoute,
 });
+
+// Route-level wrapper: keying by slug forces a full remount when navigating
+// between two program pages client-side (e.g. schooling -> scholarship),
+// so state initialized from loader data (`useState(initialPage)` etc. below)
+// doesn't leak from the previous slug's page into the new one.
+function ProgramDetailPageRoute() {
+  const { fallback } = Route.useLoaderData();
+  return <ProgramDetailPage key={fallback.key} />;
+}
 
 function SectionLabel({
   icon,
