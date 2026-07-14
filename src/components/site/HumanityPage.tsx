@@ -36,32 +36,6 @@ const GRADIENT = `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})`;
 
 const MISSION_ICONS = [Users, HeartHandshake, Globe2, Sparkles];
 
-function HeroFacts({ objectives }: { objectives: ProgramPage["objectives"] }) {
-  if (objectives.length === 0) return null;
-  return (
-    <div className="mt-9 grid gap-3 sm:grid-cols-3">
-      {objectives.slice(0, 3).map((o, i) => {
-        const ObjIcon = ICONS[o.icon] ?? Sparkles;
-        return (
-          <motion.div
-            key={o.id}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.35 + i * 0.1, ease: "easeOut" }}
-            className="rounded-2xl border border-border bg-[var(--color-surface)] p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-          >
-            <div className="grid h-9 w-9 place-items-center rounded-xl text-white shadow-sm" style={{ background: GRADIENT }}>
-              <ObjIcon size={15} />
-            </div>
-            <p className="mt-3 text-sm font-bold leading-tight">{o.title}</p>
-            {o.description && <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{o.description}</p>}
-          </motion.div>
-        );
-      })}
-    </div>
-  );
-}
-
 export function HumanityPage({
   page,
   fallbackTitle,
@@ -102,120 +76,65 @@ export function HumanityPage({
 
   return (
     <>
-      {/* Hero — decorative light canvas, editorial split with layered image */}
-      <section className="relative overflow-hidden pt-28 pb-12 md:pt-32 md:pb-16" style={{ background: "var(--color-surface-2)" }}>
-        {/* Soft accent glows */}
-        <div
-          className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] rounded-full blur-3xl"
-          style={{ background: `color-mix(in oklab, ${ACCENT} 13%, transparent)` }}
-        />
-        <div
-          className="pointer-events-none absolute -bottom-32 -left-24 h-[360px] w-[360px] rounded-full blur-3xl"
-          style={{ background: `color-mix(in oklab, ${ACCENT_2} 11%, transparent)` }}
-        />
-        {/* Dot grid, fading downward */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            backgroundImage: `radial-gradient(color-mix(in oklab, ${ACCENT} 16%, transparent) 1px, transparent 1px)`,
-            backgroundSize: "26px 26px",
-            maskImage: "linear-gradient(to bottom, black, transparent 75%)",
-            WebkitMaskImage: "linear-gradient(to bottom, black, transparent 75%)",
-          }}
-        />
+      {/* Hero — full-cover photo header (site's standard full-photo hero pattern) */}
+      <section className="relative flex h-[400px] items-end overflow-hidden pt-28 pb-10 md:h-[480px] md:pt-32 md:pb-14">
+        <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/55 to-slate-950/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
 
-        <div className="container-page relative">
-          <nav className="mb-8 flex items-center gap-2 text-xs text-muted-foreground">
-            <Link to="/" className="transition-colors hover:text-foreground">
+        <div className="container-page relative z-10 [text-shadow:0_2px_30px_rgba(2,6,23,0.5)]">
+          <nav className="mb-4 flex items-center gap-2 text-xs text-white/70">
+            <Link to="/" className="transition-colors hover:text-white">
               Home
             </Link>
             <ChevronRight size={12} className="opacity-60" />
-            <Link to="/programs" className="transition-colors hover:text-foreground">
+            <Link to="/programs" className="transition-colors hover:text-white">
               Programs
             </Link>
             <ChevronRight size={12} className="opacity-60" />
-            <span className="text-foreground">{title}</span>
+            <span className="text-white">{title}</span>
           </nav>
 
-          <div className="grid gap-10 md:grid-cols-[1.05fr_1fr] md:items-center lg:gap-14">
-            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: "easeOut" }}>
-              <span
-                className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] backdrop-blur"
-                style={{
-                  color: ACCENT,
-                  borderColor: `color-mix(in oklab, ${ACCENT} 30%, transparent)`,
-                  background: `color-mix(in oklab, ${ACCENT} 7%, var(--color-surface))`,
-                }}
-              >
-                <HeartHandshake size={13} /> Compassion in Action
-              </span>
-
-              <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.04] tracking-[-0.02em] md:text-[3.4rem]">
-                {title.split(" ").slice(0, -1).join(" ")}{" "}
-                <span className="bg-clip-text text-transparent" style={{ backgroundImage: GRADIENT }}>
-                  {title.split(" ").slice(-1)}
-                </span>
-              </h1>
-
-              {tagline && (
-                <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground md:text-base">{tagline}</p>
-              )}
-
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-                <a
-                  href={page?.register_url || "/support"}
-                  className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
-                  style={{ background: GRADIENT }}
-                >
-                  {page?.register_label || "Get Involved"} <ArrowRight size={15} />
-                </a>
-                <a
-                  href="/support"
-                  className="inline-flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-bold transition-colors hover:bg-[var(--color-surface)]"
-                  style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))`, color: ACCENT }}
-                >
-                  Contribute Now
-                </a>
-              </div>
-
-              <HeroFacts objectives={page?.objectives ?? []} />
-            </motion.div>
-
-            {/* Layered image composition */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.97, y: 18 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
-              className="relative"
-            >
-              {/* Offset gradient frame behind the photo */}
-              <div
-                className="absolute -bottom-3.5 -right-3.5 hidden h-full w-full rounded-[1.75rem] opacity-90 sm:block"
-                style={{ background: GRADIENT }}
-              />
-              <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] border border-border shadow-2xl">
-                <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/35 via-transparent to-transparent" />
-              </div>
-
-              {/* Floating glass caption card */}
-              <motion.div
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.55, ease: "easeOut" }}
-                className="absolute -bottom-5 left-4 flex items-center gap-3 rounded-2xl border border-border p-3.5 pr-5 shadow-xl backdrop-blur-md sm:left-6"
-                style={{ background: "color-mix(in oklab, var(--color-surface) 88%, transparent)" }}
-              >
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-white" style={{ background: GRADIENT }}>
-                  <Heart size={17} />
-                </div>
-                <div>
-                  <p className="text-sm font-bold leading-tight">Driven by volunteers</p>
-                  <p className="text-[11px] text-muted-foreground">Powered by empathy, since 2014</p>
-                </div>
-              </motion.div>
-            </motion.div>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
+            <HeartHandshake size={13} style={{ color: ACCENT }} />
+            Compassion in Action
           </div>
+
+          <h1 className="max-w-2xl font-display text-3xl font-extrabold leading-[1.04] tracking-[-0.03em] text-white md:text-5xl">
+            {title.split(" ").slice(0, -1).join(" ")}{" "}
+            <span style={{ color: ACCENT }}>{title.split(" ").slice(-1)}</span>
+          </h1>
+          {tagline && <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/80 md:text-base">{tagline}</p>}
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <a
+              href={page?.register_url || "/support"}
+              className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
+              style={{ background: GRADIENT }}
+            >
+              {page?.register_label || "Get Involved"} <ArrowRight size={15} />
+            </a>
+            <a
+              href="/support"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/40 bg-white/10 px-5 py-2.5 text-sm font-bold text-white backdrop-blur transition-colors hover:bg-white/20"
+            >
+              Contribute Now
+            </a>
+          </div>
+
+          {(page?.objectives ?? []).length > 0 && (
+            <div className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3 text-xs text-white/85 md:text-sm">
+              {(page?.objectives ?? []).slice(0, 3).map((o) => {
+                const ObjIcon = ICONS[o.icon] ?? Sparkles;
+                return (
+                  <span key={o.id} className="inline-flex items-center gap-2">
+                    <ObjIcon size={14} style={{ color: ACCENT }} />
+                    {o.title}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
