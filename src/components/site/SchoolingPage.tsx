@@ -17,6 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { optimizeImage, type ProgramPage } from "@/lib/api";
+import { EventCard } from "./EventCard";
 
 const INFO_ICONS: Record<string, LucideIcon> = {
   users: Users,
@@ -391,6 +392,26 @@ export function SchoolingPage({
               <h2 className="font-display text-2xl md:text-3xl font-bold tracking-tight">Hear from Our Students</h2>
               <div className="mt-10 text-left">
                 <TestimonialCarousel testimonials={page.testimonials} />
+              </div>
+            </div>
+          )}
+
+          {/* Online events / sessions */}
+          {page && page.webinars.length > 0 && (
+            <div className="mb-14">
+              <div className="mb-8 text-center">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
+                  Events &amp; Sessions
+                </p>
+                <h2 className="mt-1 font-display text-2xl md:text-3xl font-bold tracking-tight">
+                  Upcoming &amp; Live Events
+                </h2>
+                <div className="mx-auto mt-2 h-1 w-14 rounded-full" style={{ background: GRADIENT }} />
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {page.webinars.map((w) => (
+                  <EventCard key={w.id} w={w} />
+                ))}
               </div>
             </div>
           )}
