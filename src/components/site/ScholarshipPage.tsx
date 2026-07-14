@@ -18,6 +18,8 @@ import {
   FileCheck2,
   BadgeCheck,
   X,
+  ZoomIn,
+  ChevronDown,
   type LucideIcon,
 } from "lucide-react";
 import { optimizeImage, type ProgramPage } from "@/lib/api";
@@ -125,11 +127,10 @@ export function ScholarshipPage({
   const heroImage = page?.hero_image_url ? optimizeImage(page.hero_image_url, 1200) : heroImageFallback;
 
   const gallery = page?.gallery ?? [];
-  const GALLERY_STEP = 5;
-  const [galleryStart, setGalleryStart] = useState(0);
-  const galleryPage = gallery.slice(galleryStart, galleryStart + GALLERY_STEP);
-  const canGalleryPrev = galleryStart > 0;
-  const canGalleryNext = galleryStart + GALLERY_STEP < gallery.length;
+  const GALLERY_INITIAL = 8;
+  const [galleryVisible, setGalleryVisible] = useState(GALLERY_INITIAL);
+  const visibleGallery = gallery.slice(0, galleryVisible);
+  const galleryAllShown = galleryVisible >= gallery.length;
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const overviewParagraphs = overview.split(/\n{2,}/).filter(Boolean);
@@ -281,7 +282,7 @@ export function ScholarshipPage({
             </div>
           )}
 
-          {/* Gallery with prev/next arrows */}
+          {/* Gallery — 4-up grid, 8 photos initially, show-more below */}
           {gallery.length > 0 && (
             <div className="mb-14">
               <div className="mb-6 flex items-center justify-between">
@@ -300,45 +301,64 @@ export function ScholarshipPage({
                   View All Photos
                 </button>
               </div>
-              <div className="relative flex items-center gap-3">
-                <button
-                  onClick={() => setGalleryStart((s) => Math.max(0, s - GALLERY_STEP))}
-                  disabled={!canGalleryPrev}
-                  aria-label="Previous photos"
-                  className="hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-[var(--color-surface)] text-foreground transition-colors disabled:opacity-30 sm:grid"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <div className="grid flex-1 grid-cols-2 gap-2.5 sm:grid-cols-5">
-                  {galleryPage.map((g, i) => (
-                    <button
-                      key={g.id}
-                      onClick={() => setLightboxIndex(galleryStart + i)}
-                      className="group relative aspect-square overflow-hidden rounded-xl border border-border"
-                    >
-                      <img
-                        src={optimizeImage(g.image_url, 320)}
-                        alt={g.caption || title}
-                        loading="lazy"
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      {g.caption && (
-                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent p-2">
-                          <p className="text-[10px] text-white leading-tight">{g.caption}</p>
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setGalleryStart((s) => (s + GALLERY_STEP < gallery.length ? s + GALLERY_STEP : s))}
-                  disabled={!canGalleryNext}
-                  aria-label="Next photos"
-                  className="hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-[var(--color-surface)] text-foreground transition-colors disabled:opacity-30 sm:grid"
-                >
-                  <ChevronRight size={16} />
-                </button>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {visibleGallery.map((g, i) => (
+                  <motion.button
+                    key={g.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ duration: 0.45, delay: (i % 4) * 0.07, ease: "easeOut" }}
+                    onClick={() => setLightboxIndex(i)}
+                    className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-border shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                  >
+                    <img
+                      src={optimizeImage(g.image_url, 480)}
+                      alt={g.caption || title}
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.07]"
+                    />
+                    {/* Hover veil */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/15 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    {/* Photo counter chip */}
+                    <span className="absolute left-2.5 top-2.5 rounded-full bg-slate-950/55 px-2.5 py-1 text-[10px] font-bold tracking-wider text-white/90 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
+                      {String(i + 1).padStart(2, "0")} / {gallery.length}
+                    </span>
+                    {/* Zoom hint */}
+                    <span className="absolute right-2.5 top-2.5 grid h-7 w-7 scale-75 place-items-center rounded-full bg-white/15 text-white opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:scale-100 group-hover:opacity-100">
+                      <ZoomIn size={13} />
+                    </span>
+                    {/* Caption slides up on hover */}
+                    {g.caption && (
+                      <p className="absolute inset-x-0 bottom-0 translate-y-2 p-3 text-left text-[11px] font-medium leading-snug text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                        {g.caption}
+                      </p>
+                    )}
+                  </motion.button>
+                ))}
               </div>
+
+              {gallery.length > GALLERY_INITIAL && (
+                <div className="mt-7 flex justify-center">
+                  <button
+                    onClick={() =>
+                      setGalleryVisible((c) =>
+                        galleryAllShown ? GALLERY_INITIAL : Math.min(c + GALLERY_INITIAL, gallery.length),
+                      )
+                    }
+                    className="inline-flex items-center gap-2 rounded-full border px-6 py-2.5 text-sm font-bold text-foreground/85 transition-colors hover:text-foreground"
+                    style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))` }}
+                  >
+                    {galleryAllShown ? "Show less" : `Show more (${gallery.length - galleryVisible} more)`}
+                    <ChevronDown
+                      size={15}
+                      className={"transition-transform duration-300 " + (galleryAllShown ? "rotate-180" : "")}
+                      style={{ color: ACCENT }}
+                    />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
