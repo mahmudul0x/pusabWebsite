@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   Calendar,
   ArrowRight,
   Users,
@@ -14,6 +15,7 @@ import {
   GraduationCap,
   Globe2,
   HeartHandshake,
+  ZoomIn,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -30,25 +32,30 @@ const ICONS: Record<string, LucideIcon> = {
 
 const ACCENT = "var(--color-accent-1)";
 const ACCENT_2 = "var(--color-accent-2)";
+const GRADIENT = `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})`;
 
 const MISSION_ICONS = [Users, HeartHandshake, Globe2, Sparkles];
 
 function HeroFacts({ objectives }: { objectives: ProgramPage["objectives"] }) {
   if (objectives.length === 0) return null;
   return (
-    <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-3">
-      {objectives.slice(0, 3).map((o) => {
+    <div className="mt-9 grid gap-3 sm:grid-cols-3">
+      {objectives.slice(0, 3).map((o, i) => {
         const ObjIcon = ICONS[o.icon] ?? Sparkles;
         return (
-          <div key={o.id} className="flex items-start gap-2.5">
-            <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full" style={{ background: "color-mix(in oklab, var(--color-accent-1) 10%, transparent)" }}>
-              <ObjIcon size={15} style={{ color: ACCENT }} />
+          <motion.div
+            key={o.id}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.35 + i * 0.1, ease: "easeOut" }}
+            className="rounded-2xl border border-border bg-[var(--color-surface)] p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+          >
+            <div className="grid h-9 w-9 place-items-center rounded-xl text-white shadow-sm" style={{ background: GRADIENT }}>
+              <ObjIcon size={15} />
             </div>
-            <div>
-              <p className="text-xs font-bold leading-tight">{o.title}</p>
-              {o.description && <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{o.description}</p>}
-            </div>
-          </div>
+            <p className="mt-3 text-sm font-bold leading-tight">{o.title}</p>
+            {o.description && <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{o.description}</p>}
+          </motion.div>
         );
       })}
     </div>
@@ -85,21 +92,40 @@ export function HumanityPage({
   const initiatives = page?.info_items ?? [];
 
   const gallery = page?.gallery ?? [];
-  const GALLERY_STEP = 5;
-  const [galleryStart, setGalleryStart] = useState(0);
-  const galleryPage = gallery.slice(galleryStart, galleryStart + GALLERY_STEP);
-  const canGalleryPrev = galleryStart > 0;
-  const canGalleryNext = galleryStart + GALLERY_STEP < gallery.length;
+  const GALLERY_INITIAL = 8;
+  const [galleryVisible, setGalleryVisible] = useState(GALLERY_INITIAL);
+  const visibleGallery = gallery.slice(0, galleryVisible);
+  const galleryAllShown = galleryVisible >= gallery.length;
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const overviewParagraphs = overview.split(/\n{2,}/).filter(Boolean);
 
   return (
     <>
-      {/* Hero — boxed light card, image on the right */}
-      <section className="pt-28 pb-10 md:pt-32 md:pb-14" style={{ background: "var(--color-surface-2)" }}>
-        <div className="container-page">
-          <nav className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
+      {/* Hero — decorative light canvas, editorial split with layered image */}
+      <section className="relative overflow-hidden pt-28 pb-12 md:pt-32 md:pb-16" style={{ background: "var(--color-surface-2)" }}>
+        {/* Soft accent glows */}
+        <div
+          className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] rounded-full blur-3xl"
+          style={{ background: `color-mix(in oklab, ${ACCENT} 13%, transparent)` }}
+        />
+        <div
+          className="pointer-events-none absolute -bottom-32 -left-24 h-[360px] w-[360px] rounded-full blur-3xl"
+          style={{ background: `color-mix(in oklab, ${ACCENT_2} 11%, transparent)` }}
+        />
+        {/* Dot grid, fading downward */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(color-mix(in oklab, ${ACCENT} 16%, transparent) 1px, transparent 1px)`,
+            backgroundSize: "26px 26px",
+            maskImage: "linear-gradient(to bottom, black, transparent 75%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black, transparent 75%)",
+          }}
+        />
+
+        <div className="container-page relative">
+          <nav className="mb-8 flex items-center gap-2 text-xs text-muted-foreground">
             <Link to="/" className="transition-colors hover:text-foreground">
               Home
             </Link>
@@ -111,24 +137,84 @@ export function HumanityPage({
             <span className="text-foreground">{title}</span>
           </nav>
 
-          <div className="grid gap-8 md:grid-cols-2 md:items-center">
-            <div>
-              <p className="mb-3 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: ACCENT }}>
+          <div className="grid gap-10 md:grid-cols-[1.05fr_1fr] md:items-center lg:gap-14">
+            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: "easeOut" }}>
+              <span
+                className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] backdrop-blur"
+                style={{
+                  color: ACCENT,
+                  borderColor: `color-mix(in oklab, ${ACCENT} 30%, transparent)`,
+                  background: `color-mix(in oklab, ${ACCENT} 7%, var(--color-surface))`,
+                }}
+              >
                 <HeartHandshake size={13} /> Compassion in Action
-              </p>
-              <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] md:text-5xl">
+              </span>
+
+              <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.04] tracking-[-0.02em] md:text-[3.4rem]">
                 {title.split(" ").slice(0, -1).join(" ")}{" "}
-                <span style={{ color: ACCENT }}>{title.split(" ").slice(-1)}</span>
+                <span className="bg-clip-text text-transparent" style={{ backgroundImage: GRADIENT }}>
+                  {title.split(" ").slice(-1)}
+                </span>
               </h1>
-              {tagline && <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground md:text-base">{tagline}</p>}
+
+              {tagline && (
+                <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground md:text-base">{tagline}</p>
+              )}
+
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                <a
+                  href={page?.register_url || "/support"}
+                  className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
+                  style={{ background: GRADIENT }}
+                >
+                  {page?.register_label || "Get Involved"} <ArrowRight size={15} />
+                </a>
+                <a
+                  href="/support"
+                  className="inline-flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-bold transition-colors hover:bg-[var(--color-surface)]"
+                  style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))`, color: ACCENT }}
+                >
+                  Contribute Now
+                </a>
+              </div>
 
               <HeroFacts objectives={page?.objectives ?? []} />
-            </div>
+            </motion.div>
 
-            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl md:aspect-auto md:h-full md:min-h-[320px]">
-              <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
-              <div className="absolute inset-x-0 bottom-0 h-16" style={{ background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})`, clipPath: "polygon(0 100%, 100% 40%, 100% 100%)" }} />
-            </div>
+            {/* Layered image composition */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97, y: 18 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
+              className="relative"
+            >
+              {/* Offset gradient frame behind the photo */}
+              <div
+                className="absolute -bottom-3.5 -right-3.5 hidden h-full w-full rounded-[1.75rem] opacity-90 sm:block"
+                style={{ background: GRADIENT }}
+              />
+              <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] border border-border shadow-2xl">
+                <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/35 via-transparent to-transparent" />
+              </div>
+
+              {/* Floating glass caption card */}
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.55, ease: "easeOut" }}
+                className="absolute -bottom-5 left-4 flex items-center gap-3 rounded-2xl border border-border p-3.5 pr-5 shadow-xl backdrop-blur-md sm:left-6"
+                style={{ background: "color-mix(in oklab, var(--color-surface) 88%, transparent)" }}
+              >
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-white" style={{ background: GRADIENT }}>
+                  <Heart size={17} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold leading-tight">Driven by volunteers</p>
+                  <p className="text-[11px] text-muted-foreground">Powered by empathy, since 2014</p>
+                </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -155,7 +241,7 @@ export function HumanityPage({
                       }
                       style={
                         isActive
-                          ? { background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})` }
+                          ? { background: GRADIENT }
                           : { borderColor: `color-mix(in oklab, ${ACCENT} 30%, var(--color-border))` }
                       }
                     >
@@ -167,13 +253,14 @@ export function HumanityPage({
             </div>
           )}
 
-          {/* Our Mission — text + button on the left, 4-stat card on the right */}
-          <div className="mb-14 grid gap-10 lg:grid-cols-[1fr_1.3fr] lg:items-start">
+          {/* Our Mission — text left, elevated stat cards right */}
+          <div className="mb-16 grid gap-10 lg:grid-cols-[1fr_1.25fr] lg:items-center">
             <div>
               <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                 Our Mission
               </p>
               <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">Humanity is Our Purpose</h2>
+              <div className="mt-2 h-1 w-14 rounded-full" style={{ background: GRADIENT }} />
               {overviewParagraphs.map((p, i) => (
                 <p key={i} className="mt-4 text-muted-foreground leading-relaxed">
                   {p}
@@ -183,7 +270,7 @@ export function HumanityPage({
                 <a
                   href={page.register_url || "#"}
                   className="mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                  style={{ background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})` }}
+                  style={{ background: GRADIENT }}
                 >
                   {page.register_label} <ArrowRight size={15} />
                 </a>
@@ -191,53 +278,72 @@ export function HumanityPage({
             </div>
 
             {missionStats.length > 0 && (
-              <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3">
                 {missionStats.map((s, i) => {
                   const StatIcon = MISSION_ICONS[i % MISSION_ICONS.length];
                   return (
-                    <div key={s.id} className="bg-[var(--color-surface)] p-5 text-center">
-                      <div className="mx-auto grid h-11 w-11 place-items-center rounded-full" style={{ background: "color-mix(in oklab, var(--color-accent-1) 10%, transparent)" }}>
-                        <StatIcon size={18} style={{ color: ACCENT }} />
+                    <motion.div
+                      key={s.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-40px" }}
+                      transition={{ duration: 0.45, delay: i * 0.08, ease: "easeOut" }}
+                      className="rounded-2xl border border-border bg-[var(--color-surface)] p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                    >
+                      <div
+                        className="grid h-10 w-10 place-items-center rounded-xl"
+                        style={{ background: `color-mix(in oklab, ${ACCENT} 10%, transparent)`, color: ACCENT }}
+                      >
+                        <StatIcon size={17} />
                       </div>
-                      <p className="mt-3 font-display text-2xl font-extrabold" style={{ color: ACCENT }}>
+                      <p className="mt-3 font-display text-3xl font-extrabold bg-clip-text text-transparent" style={{ backgroundImage: GRADIENT }}>
                         {s.value}
                       </p>
-                      <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{s.label}</p>
-                    </div>
+                      <p className="mt-1 text-xs leading-snug text-muted-foreground">{s.label}</p>
+                    </motion.div>
                   );
                 })}
               </div>
             )}
           </div>
 
-          {/* Our Initiatives */}
+          {/* Our Initiatives — numbered cards with reveal accent line */}
           {initiatives.length > 0 && (
-            <div className="mb-14">
+            <div className="mb-16">
               <div className="text-center">
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                   What We Do
                 </p>
                 <h2 className="mt-1 font-display text-2xl font-bold tracking-tight md:text-3xl">Our Initiatives</h2>
+                <div className="mx-auto mt-2 h-1 w-14 rounded-full" style={{ background: GRADIENT }} />
               </div>
-              <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                {initiatives.map((item) => {
+              <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+                {initiatives.map((item, idx) => {
                   const ItemIcon = ICONS[item.icon] ?? Sparkles;
                   return (
-                    <div key={item.id} className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
-                      <div className="relative aspect-[4/3]">
-                        <div className="absolute inset-0" style={{ background: `linear-gradient(160deg, color-mix(in oklab, ${ACCENT} 20%, transparent), transparent)` }} />
-                        <div
-                          className="absolute left-3 top-3 grid h-9 w-9 place-items-center rounded-full text-white shadow-sm"
-                          style={{ background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})` }}
-                        >
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-40px" }}
+                      transition={{ duration: 0.45, delay: (idx % 5) * 0.07, ease: "easeOut" }}
+                      className="group relative overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                    >
+                      <span
+                        className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+                        style={{ background: GRADIENT }}
+                      />
+                      <div className="flex items-start justify-between">
+                        <div className="grid h-10 w-10 place-items-center rounded-xl text-white shadow-sm" style={{ background: GRADIENT }}>
                           <ItemIcon size={16} />
                         </div>
+                        <span className="font-display text-2xl font-extrabold leading-none text-foreground/10">
+                          {String(idx + 1).padStart(2, "0")}
+                        </span>
                       </div>
-                      <div className="p-4">
-                        <p className="text-sm font-bold leading-tight">{item.label}</p>
-                        <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{item.value}</p>
-                      </div>
-                    </div>
+                      <p className="mt-4 text-sm font-bold leading-tight">{item.label}</p>
+                      <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{item.value}</p>
+                    </motion.div>
                   );
                 })}
               </div>
@@ -255,26 +361,36 @@ export function HumanityPage({
             </div>
           )}
 
-          {/* Our Impact So Far — accent gradient banner */}
+          {/* Our Impact So Far — gradient banner with decorative rings */}
           {impactStats.length > 0 && (
-            <div className="mb-14 overflow-hidden rounded-2xl" style={{ background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})` }}>
-              <p className="pt-6 text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">
+            <div className="relative mb-16 overflow-hidden rounded-3xl" style={{ background: GRADIENT }}>
+              <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10" />
+              <div className="pointer-events-none absolute -bottom-24 -left-12 h-64 w-64 rounded-full bg-white/[0.07]" />
+              <div className="pointer-events-none absolute right-24 bottom-6 h-16 w-16 rounded-full border-2 border-white/15" />
+              <p className="relative pt-8 text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">
                 Our Impact So Far
               </p>
-              <div className="grid grid-cols-2 gap-4 p-6 sm:grid-cols-5 sm:p-8">
-                {impactStats.map((s) => (
-                  <div key={s.id} className="text-center">
-                    <p className="font-display text-2xl font-extrabold text-white md:text-3xl">{s.value}</p>
-                    <p className="mt-1 text-[11px] uppercase tracking-[0.1em] text-white/70">{s.label}</p>
-                  </div>
+              <div className="relative grid grid-cols-2 gap-6 p-8 sm:grid-cols-5 sm:p-10">
+                {impactStats.map((s, i) => (
+                  <motion.div
+                    key={s.id}
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ duration: 0.45, delay: i * 0.08, ease: "easeOut" }}
+                    className="text-center"
+                  >
+                    <p className="font-display text-3xl font-extrabold text-white md:text-4xl">{s.value}</p>
+                    <p className="mt-1.5 text-[11px] uppercase tracking-[0.1em] text-white/75">{s.label}</p>
+                  </motion.div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Gallery with prev/next arrows */}
+          {/* Gallery — 4-up grid, 8 photos initially, show-more below */}
           {gallery.length > 0 && (
-            <div className="mb-14">
+            <div className="mb-16">
               <div className="mb-6 flex items-center justify-between">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
@@ -289,45 +405,60 @@ export function HumanityPage({
                   View All Photos
                 </button>
               </div>
-              <div className="relative flex items-center gap-3">
-                <button
-                  onClick={() => setGalleryStart((s) => Math.max(0, s - GALLERY_STEP))}
-                  disabled={!canGalleryPrev}
-                  aria-label="Previous photos"
-                  className="hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-[var(--color-surface)] text-foreground transition-colors disabled:opacity-30 sm:grid"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <div className="grid flex-1 grid-cols-2 gap-2.5 sm:grid-cols-5">
-                  {galleryPage.map((g, i) => (
-                    <button
-                      key={g.id}
-                      onClick={() => setLightboxIndex(galleryStart + i)}
-                      className="group relative aspect-square overflow-hidden rounded-xl border border-border"
-                    >
-                      <img
-                        src={optimizeImage(g.image_url, 320)}
-                        alt={g.caption || title}
-                        loading="lazy"
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      {g.caption && (
-                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent p-2">
-                          <p className="text-[10px] text-white leading-tight">{g.caption}</p>
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setGalleryStart((s) => (s + GALLERY_STEP < gallery.length ? s + GALLERY_STEP : s))}
-                  disabled={!canGalleryNext}
-                  aria-label="Next photos"
-                  className="hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-[var(--color-surface)] text-foreground transition-colors disabled:opacity-30 sm:grid"
-                >
-                  <ChevronRight size={16} />
-                </button>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {visibleGallery.map((g, i) => (
+                  <motion.button
+                    key={g.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ duration: 0.45, delay: (i % 4) * 0.07, ease: "easeOut" }}
+                    onClick={() => setLightboxIndex(i)}
+                    className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-border shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                  >
+                    <img
+                      src={optimizeImage(g.image_url, 480)}
+                      alt={g.caption || title}
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.07]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/15 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <span className="absolute left-2.5 top-2.5 rounded-full bg-slate-950/55 px-2.5 py-1 text-[10px] font-bold tracking-wider text-white/90 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
+                      {String(i + 1).padStart(2, "0")} / {gallery.length}
+                    </span>
+                    <span className="absolute right-2.5 top-2.5 grid h-7 w-7 scale-75 place-items-center rounded-full bg-white/15 text-white opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:scale-100 group-hover:opacity-100">
+                      <ZoomIn size={13} />
+                    </span>
+                    {g.caption && (
+                      <p className="absolute inset-x-0 bottom-0 translate-y-2 p-3 text-left text-[11px] font-medium leading-snug text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                        {g.caption}
+                      </p>
+                    )}
+                  </motion.button>
+                ))}
               </div>
+
+              {gallery.length > GALLERY_INITIAL && (
+                <div className="mt-7 flex justify-center">
+                  <button
+                    onClick={() =>
+                      setGalleryVisible((c) =>
+                        galleryAllShown ? GALLERY_INITIAL : Math.min(c + GALLERY_INITIAL, gallery.length),
+                      )
+                    }
+                    className="inline-flex items-center gap-2 rounded-full border px-6 py-2.5 text-sm font-bold text-foreground/85 transition-colors hover:text-foreground"
+                    style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))` }}
+                  >
+                    {galleryAllShown ? "Show less" : `Show more (${gallery.length - galleryVisible} more)`}
+                    <ChevronDown
+                      size={15}
+                      className={"transition-transform duration-300 " + (galleryAllShown ? "rotate-180" : "")}
+                      style={{ color: ACCENT }}
+                    />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -392,37 +523,37 @@ export function HumanityPage({
             )}
           </AnimatePresence>
 
-          {/* CTA — dark green banner */}
-          <div
-            className="flex flex-col items-center gap-5 rounded-2xl p-8 text-center sm:flex-row sm:justify-between sm:text-left"
-            style={{ background: "var(--color-surface-2)" }}
-          >
-            <div className="flex items-center gap-4">
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full" style={{ background: `color-mix(in oklab, ${ACCENT} 15%, transparent)`, color: ACCENT }}>
-                <Heart size={20} />
+          {/* CTA — gradient banner with decorative rings */}
+          <div className="relative overflow-hidden rounded-3xl p-8 md:p-10" style={{ background: GRADIENT }}>
+            <div className="pointer-events-none absolute -right-14 -top-14 h-48 w-48 rounded-full bg-white/10" />
+            <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-white/[0.07]" />
+            <div className="relative flex flex-col items-center gap-6 text-center sm:flex-row sm:justify-between sm:text-left">
+              <div className="flex items-center gap-4">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/15 text-white backdrop-blur-sm">
+                  <Heart size={20} />
+                </div>
+                <div className="text-white">
+                  <h3 className="font-display text-xl font-bold leading-tight md:text-2xl">
+                    {page?.cta_title || "Be a Part of the Change"}
+                  </h3>
+                  {page?.cta_subtitle && <p className="mt-1 text-sm text-white/85">{page.cta_subtitle}</p>}
+                </div>
               </div>
-              <div>
-                <h3 className="font-display text-lg font-bold leading-tight">
-                  {page?.cta_title || "Be a Part of the Change"}
-                </h3>
-                {page?.cta_subtitle && <p className="mt-1 text-sm text-muted-foreground">{page.cta_subtitle}</p>}
+              <div className="flex shrink-0 items-center gap-3">
+                <a
+                  href="/support"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold shadow-md transition-opacity hover:opacity-90"
+                  style={{ color: ACCENT }}
+                >
+                  Get Involved
+                </a>
+                <a
+                  href="/support"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/40 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10"
+                >
+                  Contribute Now <ArrowRight size={15} />
+                </a>
               </div>
-            </div>
-            <div className="flex shrink-0 items-center gap-3">
-              <a
-                href="/support"
-                className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                style={{ background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})` }}
-              >
-                Get Involved
-              </a>
-              <a
-                href="/support"
-                className="inline-flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-bold transition-colors hover:bg-[var(--color-background)]"
-                style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))`, color: ACCENT }}
-              >
-                Contribute Now <ArrowRight size={15} />
-              </a>
             </div>
           </div>
         </div>
