@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, ChevronDown, CalendarClock } from "lucide-react";
-import { programPagesApi, type ProgramPage } from "@/lib/api";
+import { Plus, Trash2, Save, ChevronDown, CalendarClock, ImagePlus, Loader2, X } from "lucide-react";
+import { programPagesApi, uploadImage, optimizeImage, isUploadConfigured, type ProgramPage } from "@/lib/api";
 import { errMessage } from "./useResource";
 import { SectionHeader, Field, inputCls } from "./primitives";
 import { ImageUpload } from "./ImageUpload";
@@ -96,6 +96,72 @@ function AddRowButton({ label, onClick }: { label: string; onClick: () => void }
   );
 }
 
+// Multi-file picker for the gallery: choose 5–10+ photos at once, they upload
+// to Cloudinary in parallel (3 at a time) and are appended as gallery rows.
+function BulkPhotoUpload({ onUploaded }: { onUploaded: (urls: string[]) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+
+  async function handleFiles(list: FileList | null) {
+    const files = list ? Array.from(list) : [];
+    if (inputRef.current) inputRef.current.value = "";
+    if (files.length === 0) return;
+    setProgress({ done: 0, total: files.length });
+    const urls: (string | null)[] = new Array(files.length).fill(null);
+    const failed: string[] = [];
+    let next = 0;
+    const worker = async () => {
+      while (next < files.length) {
+        const i = next++;
+        try {
+          urls[i] = await uploadImage(files[i], "programs");
+        } catch {
+          failed.push(files[i].name);
+        }
+        setProgress((p) => (p ? { ...p, done: p.done + 1 } : p));
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(3, files.length) }, worker));
+    setProgress(null);
+    const ok = urls.filter((u): u is string => u !== null);
+    if (ok.length > 0) {
+      onUploaded(ok);
+      toast.success(
+        `${ok.length} photo${ok.length > 1 ? "s" : ""} added — click "Save changes" to publish.`,
+      );
+    }
+    if (failed.length > 0) {
+      toast.error(`Couldn't upload ${failed.length} photo${failed.length > 1 ? "s" : ""}: ${failed.join(", ")}`);
+    }
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      <button
+        type="button"
+        disabled={!!progress}
+        onClick={() => inputRef.current?.click()}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-border px-2.5 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] hover:text-foreground disabled:opacity-60"
+      >
+        {progress ? <Loader2 size={12} className="animate-spin" /> : <ImagePlus size={12} />}
+        {progress ? `Uploading ${progress.done}/${progress.total}…` : "Add photos"}
+      </button>
+      <span className="text-[11px] text-muted-foreground">
+        Select several at once (Ctrl / Shift-click) · PNG or JPG · stored on Cloudinary
+      </span>
+      {!isUploadConfigured() && <span className="text-[11px] text-amber-600">Cloudinary not configured.</span>}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={(e) => handleFiles(e.target.files)}
+      />
+    </div>
+  );
+}
+
 function EditorSection({
   title,
   count,
@@ -181,6 +247,26 @@ export function ProgramPagesSection() {
 
   const set = <K extends keyof ProgramPage>(k: K, v: ProgramPage[K]) =>
     setForm((f) => (f ? { ...f, [k]: v } : f));
+
+  // Append freshly uploaded photos to the gallery. Uses a functional update so
+  // captions typed while an upload is still running are never overwritten.
+  const appendGalleryPhotos = (urls: string[]) =>
+    setForm((f) =>
+      f
+        ? {
+            ...f,
+            gallery: [
+              ...f.gallery,
+              ...urls.map((url, i) => ({
+                id: nextTempId(),
+                image_url: url,
+                caption: "",
+                order: f.gallery.length + i,
+              })),
+            ] as GalleryImage[],
+          }
+        : f,
+    );
 
   function validate(f: ProgramPage): string | null {
     if (!f.title.trim()) return "Title is required.";
@@ -566,27 +652,36 @@ export function ProgramPagesSection() {
             </EditorSection>
 
             <EditorSection title="Gallery" count={form.gallery.length}>
-              {form.gallery.map((g) => (
-                <RepeatingRow key={g.id} onRemove={() => set("gallery", form.gallery.filter((x) => x.id !== g.id) as GalleryImage[])}>
-                  <div className="sm:col-span-2">
-                    <ImageUpload
-                      value={g.image_url}
-                      onChange={(u) => set("gallery", form.gallery.map((x) => (x.id === g.id ? { ...x, image_url: u } : x)) as GalleryImage[])}
-                      folder="programs"
-                    />
-                  </div>
-                  <input
-                    value={g.caption}
-                    placeholder="Caption (optional)"
-                    onChange={(e) => set("gallery", form.gallery.map((x) => (x.id === g.id ? { ...x, caption: e.target.value } : x)) as GalleryImage[])}
-                    className={inputCls + " mt-0 sm:col-span-2"}
-                  />
-                </RepeatingRow>
-              ))}
-              <AddRowButton
-                label="Add photo"
-                onClick={() => set("gallery", [...form.gallery, { id: nextTempId(), image_url: "", caption: "", order: form.gallery.length }] as GalleryImage[])}
-              />
+              {form.gallery.length > 0 && (
+                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+                  {form.gallery.map((g) => (
+                    <div key={g.id} className="overflow-hidden rounded-lg border border-border bg-[var(--color-background)]">
+                      <div className="relative aspect-[4/3]">
+                        <img
+                          src={optimizeImage(g.image_url, 480)}
+                          alt={g.caption || "Gallery photo"}
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => set("gallery", form.gallery.filter((x) => x.id !== g.id) as GalleryImage[])}
+                          className="absolute right-1.5 top-1.5 rounded-md bg-black/55 p-1 text-white transition-colors hover:bg-red-600"
+                          aria-label="Remove photo"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                      <input
+                        value={g.caption}
+                        placeholder="Caption (optional)"
+                        onChange={(e) => set("gallery", form.gallery.map((x) => (x.id === g.id ? { ...x, caption: e.target.value } : x)) as GalleryImage[])}
+                        className="w-full border-t border-border bg-transparent px-2 py-1.5 text-xs outline-none placeholder:text-muted-foreground/60"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+              <BulkPhotoUpload onUploaded={appendGalleryPhotos} />
             </EditorSection>
 
             <EditorSection title="Testimonials" count={form.testimonials.length}>
