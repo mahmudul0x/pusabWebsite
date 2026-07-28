@@ -235,15 +235,6 @@ export function ScholarshipPage({
                   {p}
                 </p>
               ))}
-              {page?.register_label && (
-                <a
-                  href={page.register_url || "#"}
-                  className="mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                  style={{ background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))" }}
-                >
-                  {page.register_label} <ArrowRight size={15} />
-                </a>
-              )}
             </div>
 
             {infoCards.length > 0 && (
@@ -442,15 +433,6 @@ export function ScholarshipPage({
                     If you are a deserving student who is passionate about learning and need
                     financial support, we encourage you to apply for the PUSAB Scholarship.
                   </p>
-                  {page?.register_label && (
-                    <a
-                      href={page.register_url || "#"}
-                      className="mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                      style={{ background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))" }}
-                    >
-                      {page.register_label} <ArrowRight size={15} />
-                    </a>
-                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-4">

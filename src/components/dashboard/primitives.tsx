@@ -194,6 +194,7 @@ export function StatCard({
   sub,
   onClick,
   accent,
+  fill,
 }: {
   label: string;
   value: ReactNode;
@@ -201,13 +202,16 @@ export function StatCard({
   sub?: ReactNode;
   onClick?: () => void;
   accent?: boolean;
+  /** Stretch to fill the height of its grid cell — for bento-style layouts. */
+  fill?: boolean;
 }) {
   const Tag = onClick ? "button" : "div";
   return (
     <Tag
       onClick={onClick}
       className={
-        "group relative overflow-hidden rounded-2xl border p-5 text-left transition-all " +
+        "group relative flex w-full flex-col overflow-hidden rounded-2xl border p-5 text-left transition-all " +
+        (fill ? "h-full " : "") +
         (accent
           ? "border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] bg-[color-mix(in_oklab,var(--color-accent-1)_6%,var(--color-surface))]"
           : "border-border bg-[var(--color-surface)]") +
@@ -236,7 +240,7 @@ export function StatCard({
         </span>
       </div>
       <p className="mt-4 font-display text-3xl font-black leading-none tabular-nums">{value}</p>
-      {sub && <div className="mt-1.5 text-xs text-muted-foreground">{sub}</div>}
+      {sub && <div className={"mt-1.5 text-xs text-muted-foreground " + (fill ? "mt-auto pt-1.5" : "")}>{sub}</div>}
     </Tag>
   );
 }

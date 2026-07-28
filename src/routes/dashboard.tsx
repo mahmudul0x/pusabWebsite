@@ -584,143 +584,164 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
   const hour = now.getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
+  const quickActions = [
+    { key: "moments", label: "Add a photo", Icon: ImageIcon, desc: "Upload to gallery" },
+    { key: "publicity", label: "Write a post", Icon: Newspaper, desc: "Create publicity post" },
+    { key: "executive-committee", label: "Add a member", Icon: Users, desc: "Update committee" },
+    { key: "programs", label: "Add a program", Icon: CalendarRange, desc: "Schedule event" },
+  ] as const;
+
+  const sitePages = [
+    { label: "Leadership", to: "/leadership" },
+    { label: "Honor Board", to: "/honor-board" },
+    { label: "Programs", to: "/programs" },
+    { label: "Moments", to: "/moments" },
+  ];
+
   return (
-    <div className="space-y-8">
-      {/* Greeting banner */}
+    <div className="grid auto-rows-min gap-4 md:grid-cols-6">
+      {/* Greeting hero — spans wide, merges welcome + a live snapshot line */}
       <div
-        className="relative overflow-hidden rounded-3xl p-6 md:p-8"
+        className="relative col-span-full overflow-hidden rounded-3xl p-6 md:col-span-4 md:p-8"
         style={{ background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))" }}
       >
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 80% 50%, white 0%, transparent 60%)" }} />
-        <p className="text-sm font-semibold text-white/70 uppercase tracking-[0.18em]">{greeting}</p>
-        <h2 className="font-display text-3xl font-black tracking-tight text-white mt-1">Welcome back</h2>
-        <p className="mt-1.5 text-sm text-white/70">
-          {now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-        </p>
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 80% 30%, white 0%, transparent 60%)" }} />
+        <div className="relative flex h-full flex-col justify-between gap-6">
+          <div>
+            <p className="text-sm font-semibold text-white/70 uppercase tracking-[0.18em]">{greeting}</p>
+            <h2 className="font-display text-3xl font-black tracking-tight text-white mt-1 md:text-4xl">Welcome back</h2>
+            <p className="mt-1.5 text-sm text-white/70">
+              {now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-white/85">
+            <span className="text-xs">
+              <span className="font-display text-lg font-black tabular-nums">{loading ? "—" : pub.length}</span> publicity posts
+            </span>
+            <span className="text-xs">
+              <span className="font-display text-lg font-black tabular-nums">{loading ? "—" : data!.committee.count}</span> committee members
+            </span>
+            <span className="text-xs">
+              <span className="font-display text-lg font-black tabular-nums">{loading ? "—" : prog.length}</span> programs
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Photos" icon={<ImageIcon size={16} />}
-          value={loading ? "—" : data!.moments.length}
-          sub="In the Moments gallery" onClick={() => onJump("moments")} />
-        <StatCard label="Publicity Posts" icon={<Newspaper size={16} />}
-          value={loading ? "—" : pub.length}
-          sub={loading ? "" : `${published} published · ${pub.length - published} drafts`}
-          onClick={() => onJump("publicity")} />
+      {/* Featured stat tile — Committee, tall accent card beside the hero */}
+      <div className="col-span-full md:col-span-2 md:row-span-2">
         <StatCard label="Committee" icon={<Users size={16} />}
           value={loading ? "—" : data!.committee.count}
           sub={loading ? "" : `${data!.committee.sessions} sessions · ${data!.committee.current} current`}
-          onClick={() => onJump("executive-committee")} accent />
+          onClick={() => onJump("executive-committee")} accent fill />
+      </div>
+
+      {/* Remaining stat tiles */}
+      <div className="col-span-full sm:col-span-1 md:col-span-2">
+        <StatCard label="Photos" icon={<ImageIcon size={16} />}
+          value={loading ? "—" : data!.moments.length}
+          sub="In the Moments gallery" onClick={() => onJump("moments")} fill />
+      </div>
+      <div className="col-span-full sm:col-span-1 md:col-span-2">
+        <StatCard label="Publicity Posts" icon={<Newspaper size={16} />}
+          value={loading ? "—" : pub.length}
+          sub={loading ? "" : `${published} published · ${pub.length - published} drafts`}
+          onClick={() => onJump("publicity")} fill />
+      </div>
+      <div className="col-span-full sm:col-span-2 md:col-span-2">
         <StatCard label="Programs" icon={<CalendarRange size={16} />}
           value={loading ? "—" : prog.length}
           sub={loading ? "" : `${upcoming} upcoming · ${ongoing} ongoing`}
-          onClick={() => onJump("programs")} />
+          onClick={() => onJump("programs")} fill />
       </div>
 
-      {/* Bottom */}
-      <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
-        {/* Recent activity */}
-        <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
-          <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
-            <div className="flex items-center gap-2.5">
-              <span className="grid h-7 w-7 place-items-center rounded-lg text-white" style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}>
-                <Clock size={13} />
-              </span>
-              <h3 className="font-display text-sm font-bold">Recent activity</h3>
-            </div>
-            <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground tabular-nums">{recent.length}</span>
+      {/* Recent activity — tall left tile */}
+      <div className="col-span-full overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] md:col-span-4 md:row-span-2">
+        <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-7 w-7 place-items-center rounded-lg text-white" style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}>
+              <Clock size={13} />
+            </span>
+            <h3 className="font-display text-sm font-bold">Recent activity</h3>
           </div>
-          {loading ? (
-            <div className="space-y-1 p-3">
-              {[0,1,2,3,4].map((i) => (
-                <div key={i} className="h-14 animate-pulse rounded-xl bg-[var(--color-background)]" style={{ animationDelay: `${i*60}ms` }} />
-              ))}
-            </div>
-          ) : recent.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">Nothing yet.</p>
-          ) : (
-            <ul>
-              {recent.map((r) => (
-                <li key={r.id}
-                  className="group flex cursor-pointer items-center gap-3 px-5 py-3 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)] border-b border-border last:border-0"
-                  onClick={() => onJump(r.section)}
-                >
-                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-[var(--color-background)] border border-border">
-                    {r.image ? <img src={r.image} alt="" className="h-full w-full object-cover" /> : (
-                      <div className="grid h-full w-full place-items-center text-muted-foreground/30">
-                        <ImageIcon size={14} />
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold leading-tight">{r.title}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      <span className="font-bold" style={{ color: "var(--color-accent-1)" }}>{r.kind}</span>
-                      {" · "}
-                      {new Date(r.at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                    </p>
-                  </div>
-                  <ArrowUpRight size={13} className="shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                </li>
-              ))}
-            </ul>
-          )}
+          <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground tabular-nums">{recent.length}</span>
         </div>
+        {loading ? (
+          <div className="space-y-1 p-3">
+            {[0,1,2,3,4].map((i) => (
+              <div key={i} className="h-14 animate-pulse rounded-xl bg-[var(--color-background)]" style={{ animationDelay: `${i*60}ms` }} />
+            ))}
+          </div>
+        ) : recent.length === 0 ? (
+          <p className="py-16 text-center text-sm text-muted-foreground">Nothing yet.</p>
+        ) : (
+          <ul>
+            {recent.map((r) => (
+              <li key={r.id}
+                className="group flex cursor-pointer items-center gap-3 px-5 py-3 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)] border-b border-border last:border-0"
+                onClick={() => onJump(r.section)}
+              >
+                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-[var(--color-background)] border border-border">
+                  {r.image ? <img src={r.image} alt="" className="h-full w-full object-cover" /> : (
+                    <div className="grid h-full w-full place-items-center text-muted-foreground/30">
+                      <ImageIcon size={14} />
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold leading-tight">{r.title}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <span className="font-bold" style={{ color: "var(--color-accent-1)" }}>{r.kind}</span>
+                    {" · "}
+                    {new Date(r.at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                  </p>
+                </div>
+                <ArrowUpRight size={13} className="shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
-        {/* Right column */}
-        <div className="flex flex-col gap-4">
-          {/* Quick actions */}
-          <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
-            <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
-              <span className="grid h-7 w-7 place-items-center rounded-lg text-white" style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}>
-                <TrendingUp size={13} />
+      {/* Quick actions */}
+      <div className="col-span-full overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] md:col-span-2">
+        <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
+          <span className="grid h-7 w-7 place-items-center rounded-lg text-white" style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}>
+            <TrendingUp size={13} />
+          </span>
+          <h3 className="font-display text-sm font-bold">Quick actions</h3>
+        </div>
+        <div className="p-2 space-y-0.5">
+          {quickActions.map(({ key, label, Icon, desc }) => (
+            <button key={key} onClick={() => onJump(key)}
+              className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all hover:bg-[color-mix(in_oklab,var(--color-accent-1)_6%,transparent)]"
+            >
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border bg-[var(--color-background)] text-muted-foreground transition-colors group-hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] group-hover:text-[var(--color-accent-1)]">
+                <Icon size={14} />
               </span>
-              <h3 className="font-display text-sm font-bold">Quick actions</h3>
-            </div>
-            <div className="p-2 space-y-0.5">
-              {([
-                { key: "moments", label: "Add a photo", Icon: ImageIcon, desc: "Upload to gallery" },
-                { key: "publicity", label: "Write a post", Icon: Newspaper, desc: "Create publicity post" },
-                { key: "executive-committee", label: "Add a member", Icon: Users, desc: "Update committee" },
-                { key: "programs", label: "Add a program", Icon: CalendarRange, desc: "Schedule event" },
-              ] as const).map(({ key, label, Icon, desc }) => (
-                <button key={key} onClick={() => onJump(key)}
-                  className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all hover:bg-[color-mix(in_oklab,var(--color-accent-1)_6%,transparent)]"
-                >
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border bg-[var(--color-background)] text-muted-foreground transition-colors group-hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] group-hover:text-[var(--color-accent-1)]">
-                    <Icon size={14} />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold leading-tight">{label}</p>
-                    <p className="text-[11px] text-muted-foreground">{desc}</p>
-                  </div>
-                  <Plus size={13} className="shrink-0 text-muted-foreground/40 group-hover:text-[var(--color-accent-1)] transition-colors" />
-                </button>
-              ))}
-            </div>
-          </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold leading-tight">{label}</p>
+                <p className="text-[11px] text-muted-foreground">{desc}</p>
+              </div>
+              <Plus size={13} className="shrink-0 text-muted-foreground/40 group-hover:text-[var(--color-accent-1)] transition-colors" />
+            </button>
+          ))}
+        </div>
+      </div>
 
-          {/* Site links */}
-          <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
-            <div className="border-b border-border px-5 py-3.5">
-              <h3 className="font-display text-sm font-bold">View site pages</h3>
-            </div>
-            <div className="divide-y divide-border">
-              {[
-                { label: "Leadership", to: "/leadership" },
-                { label: "Honor Board", to: "/honor-board" },
-                { label: "Programs", to: "/programs" },
-                { label: "Moments", to: "/moments" },
-              ].map(({ label, to }) => (
-                <Link key={to} to={to} target="_blank"
-                  className="flex items-center justify-between gap-2 px-5 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)] hover:text-foreground"
-                >
-                  {label} <ExternalLink size={11} className="text-muted-foreground/50" />
-                </Link>
-              ))}
-            </div>
-          </div>
+      {/* Site links */}
+      <div className="col-span-full overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] md:col-span-2">
+        <div className="border-b border-border px-5 py-3.5">
+          <h3 className="font-display text-sm font-bold">View site pages</h3>
+        </div>
+        <div className="divide-y divide-border">
+          {sitePages.map(({ label, to }) => (
+            <Link key={to} to={to} target="_blank"
+              className="flex items-center justify-between gap-2 px-5 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)] hover:text-foreground"
+            >
+              {label} <ExternalLink size={11} className="text-muted-foreground/50" />
+            </Link>
+          ))}
         </div>
       </div>
     </div>
