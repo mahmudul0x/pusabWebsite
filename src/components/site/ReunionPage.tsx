@@ -271,15 +271,6 @@ export function ReunionPage({
                     </div>
                   )}
                 </div>
-                {page.register_label && (
-                  <a
-                    href={page.register_url || "#"}
-                    className="mt-5 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                    style={{ background: GRADIENT }}
-                  >
-                    {page.register_label} <ArrowRight size={15} />
-                  </a>
-                )}
               </div>
             )}
           </div>
@@ -300,31 +291,46 @@ export function ReunionPage({
 
           {/* Highlights */}
           {page && page.objectives.length > 0 && (
-            <div className="mb-14 text-center">
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
-                What to expect
-              </p>
-              <h2 className="font-display text-2xl md:text-3xl font-bold tracking-tight">Reunion Highlights</h2>
-              <div className="mx-auto mt-2 h-1 w-14 rounded-full" style={{ background: GRADIENT }} />
-              <div className="mt-10 grid gap-8 sm:grid-cols-3 lg:grid-cols-6">
-                {page.objectives.map((o) => {
+            <div className="mb-14">
+              <div className="text-center">
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
+                  What to expect
+                </p>
+                <h2 className="font-display text-2xl md:text-3xl font-bold tracking-tight">Reunion Highlights</h2>
+                <div className="mx-auto mt-2 h-1 w-14 rounded-full" style={{ background: GRADIENT }} />
+              </div>
+              <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {page.objectives.map((o, i) => {
                   const HighlightIcon = HIGHLIGHT_ICONS[o.icon] ?? Sparkles;
                   return (
-                    <div key={o.id} className="flex flex-col items-center text-center">
-                      <div
-                        className="grid h-16 w-16 place-items-center rounded-full"
-                        style={{ background: `color-mix(in oklab, ${ACCENT} 12%, transparent)` }}
+                    <div
+                      key={o.id}
+                      className="group relative overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-6 transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_35%,var(--color-border))]"
+                    >
+                      <span
+                        className="pointer-events-none absolute -right-3 -top-3 font-display text-6xl font-extrabold opacity-[0.06] transition-opacity group-hover:opacity-[0.1]"
+                        style={{ color: ACCENT }}
                       >
-                        {o.image_url ? (
-                          <img src={optimizeImage(o.image_url, 120)} alt={o.title} className="h-full w-full rounded-full object-cover" />
-                        ) : (
-                          <HighlightIcon size={24} style={{ color: ACCENT }} />
-                        )}
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <div className="relative flex items-start gap-4">
+                        <div
+                          className="grid h-12 w-12 shrink-0 place-items-center rounded-xl"
+                          style={{ background: `color-mix(in oklab, ${ACCENT} 12%, transparent)` }}
+                        >
+                          {o.image_url ? (
+                            <img src={optimizeImage(o.image_url, 96)} alt={o.title} className="h-full w-full rounded-xl object-cover" />
+                          ) : (
+                            <HighlightIcon size={20} style={{ color: ACCENT }} />
+                          )}
+                        </div>
+                        <div className="min-w-0 pt-1">
+                          <h3 className="text-sm font-semibold leading-tight">{o.title}</h3>
+                          {o.description && (
+                            <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{o.description}</p>
+                          )}
+                        </div>
                       </div>
-                      <h3 className="mt-4 text-sm font-semibold leading-tight">{o.title}</h3>
-                      {o.description && (
-                        <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{o.description}</p>
-                      )}
                     </div>
                   );
                 })}
