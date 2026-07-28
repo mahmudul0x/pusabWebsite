@@ -49,7 +49,7 @@ export function LeadershipPreview() {
     >
       <div className="container-page">
         <div className="mb-16 max-w-xl">
-          <p className="text-label mb-3">Meet the people</p>
+          <p className="text-label mb-3">The people behind PUSAB</p>
           <AnimatedHeading
             as="h2"
             className="font-display text-4xl md:text-5xl font-bold tracking-tight"
@@ -120,11 +120,16 @@ export function LeadershipPreview() {
                       {msg.name}
                     </p>
 
-                    {msg.quote?.trim() && (
-                      <p className="relative mt-5 line-clamp-3 font-display text-lg md:text-xl italic leading-relaxed text-foreground/85">
-                        "{msg.quote}"
-                      </p>
-                    )}
+                    {(() => {
+                      const excerpt = (msg.body?.trim() || msg.quote?.trim() || "").replace(/\n+/g, " ");
+                      return (
+                        excerpt && (
+                          <p className="relative mt-5 line-clamp-6 text-[15px] leading-[1.8] text-foreground/85">
+                            {excerpt}
+                          </p>
+                        )
+                      );
+                    })()}
 
                     <span
                       className="relative mt-7 inline-flex w-fit items-center gap-1.5 text-sm font-semibold"
