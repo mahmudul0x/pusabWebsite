@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ComponentType } from "react";
 import { programPagesApi, optimizeImage } from "@/lib/api";
@@ -12,10 +12,10 @@ type Activity = {
   slug?: string;
 };
 
-/** Interactive tabs — the list of focus areas on the left drives a detail
- *  panel on the right. Hero photos come from the program pages managed in
- *  the dashboard; the panel falls back to an icon treatment when a program
- *  has no photo yet. */
+/** Focus areas. Desktop: a list on the left drives a detail panel on the
+ *  right. Mobile: the same list becomes an accordion, expanding the detail
+ *  inline under the tapped row. Selection is by click/tap — hovering never
+ *  changes it, so moving the cursor away can't leave the wrong item active. */
 export function ActivitiesBento({ activities }: { activities: Activity[] }) {
   const [active, setActive] = useState(0);
   const [images, setImages] = useState<Record<string, string>>({});
@@ -41,26 +41,24 @@ export function ActivitiesBento({ activities }: { activities: Activity[] }) {
     };
   }, []);
 
+  const imageFor = (a: Activity) => (a.slug ? images[a.slug] : undefined);
   const current = activities[active];
-  const CurrentIcon = current.Icon;
-  const heroUrl = current.slug ? images[current.slug] : undefined;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,20rem)_1fr] lg:gap-10">
-      {/* Selector */}
+      {/* Selector — accordion on mobile, tab list on desktop */}
       <ul className="flex flex-col">
-        {activities.map(({ Icon, title }, i) => {
+        {activities.map((activity, i) => {
+          const { Icon, title } = activity;
           const isActive = i === active;
           return (
-            <li key={title}>
+            <li key={title} className="border-b border-border">
               <button
                 type="button"
-                onMouseEnter={() => setActive(i)}
-                onFocus={() => setActive(i)}
                 onClick={() => setActive(i)}
-                aria-selected={isActive}
+                aria-expanded={isActive}
                 className={
-                  "group relative flex w-full items-center gap-3.5 border-b border-border py-4 pl-4 pr-3 text-left transition-colors duration-200 " +
+                  "relative flex w-full items-center gap-3.5 py-4 pl-4 pr-3 text-left transition-colors duration-200 " +
                   (isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground")
                 }
               >
@@ -83,20 +81,44 @@ export function ActivitiesBento({ activities }: { activities: Activity[] }) {
                 </span>
                 <span
                   className={
-                    "font-display text-[11px] font-bold tabular-nums transition-colors " +
+                    "hidden font-display text-[11px] font-bold tabular-nums transition-colors lg:inline " +
                     (isActive ? "text-[var(--color-accent-1)]" : "text-muted-foreground/35")
                   }
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
+                <ChevronDown
+                  size={16}
+                  className={
+                    "shrink-0 text-muted-foreground/50 transition-transform duration-300 lg:hidden " +
+                    (isActive ? "rotate-180" : "")
+                  }
+                />
               </button>
+
+              {/* Inline detail — mobile only */}
+              <AnimatePresence initial={false}>
+                {isActive && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="overflow-hidden lg:hidden"
+                  >
+                    <div className="pb-6 pl-4 pr-3">
+                      <Panel activity={activity} heroUrl={imageFor(activity)} stacked />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </li>
           );
         })}
       </ul>
 
-      {/* Detail panel */}
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
+      {/* Detail panel — desktop only */}
+      <div className="relative hidden overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] lg:block">
         <AnimatePresence mode="wait">
           <motion.div
             key={current.title}
@@ -104,50 +126,90 @@ export function ActivitiesBento({ activities }: { activities: Activity[] }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="grid h-full sm:grid-cols-2"
+            className="h-full"
           >
-            {/* Photo */}
-            <div className="relative min-h-[13rem] overflow-hidden bg-[var(--color-surface-2)] sm:min-h-[21rem]">
-              {heroUrl ? (
-                <img
-                  src={optimizeImage(heroUrl, 900)}
-                  alt={current.title}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              ) : (
-                <div className="absolute inset-0 grid place-items-center bg-[linear-gradient(140deg,var(--color-accent-1),var(--color-accent-2))]">
-                  <div className="absolute inset-0 opacity-[0.09] [background-image:linear-gradient(rgba(255,255,255,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.5)_1px,transparent_1px)] [background-size:24px_24px]" />
-                  <CurrentIcon size={54} className="relative text-white/90" />
-                </div>
-              )}
-            </div>
-
-            {/* Copy */}
-            <div className="flex flex-col p-8 md:p-10">
-              <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-white">
-                <CurrentIcon size={19} />
-              </div>
-
-              <h3 className="mt-6 font-display text-2xl font-bold tracking-tight">
-                {current.title}
-              </h3>
-              <p className="mt-3.5 flex-1 text-[15px] leading-[1.75] text-muted-foreground">
-                {current.desc}
-              </p>
-
-              <Link
-                to="/programs"
-                className="group mt-7 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-[var(--color-accent-1)]"
-              >
-                Explore this program
-                <ArrowUpRight
-                  size={15}
-                  className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                />
-              </Link>
-            </div>
+            <Panel activity={current} heroUrl={imageFor(current)} />
           </motion.div>
         </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+function Panel({
+  activity,
+  heroUrl,
+  stacked = false,
+}: {
+  activity: Activity;
+  heroUrl?: string;
+  stacked?: boolean;
+}) {
+  const { Icon, title, desc } = activity;
+  return (
+    <div
+      className={
+        stacked
+          ? "overflow-hidden rounded-xl border border-border bg-[var(--color-surface)]"
+          : "grid h-full sm:grid-cols-2"
+      }
+    >
+      {/* Photo */}
+      <div
+        className={
+          "relative overflow-hidden bg-[var(--color-surface-2)] " +
+          (stacked ? "aspect-[16/10]" : "min-h-[13rem] sm:min-h-[21rem]")
+        }
+      >
+        {heroUrl ? (
+          <img
+            src={optimizeImage(heroUrl, 900)}
+            alt={title}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 grid place-items-center bg-[linear-gradient(140deg,var(--color-accent-1),var(--color-accent-2))]">
+            <div className="absolute inset-0 opacity-[0.09] [background-image:linear-gradient(rgba(255,255,255,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.5)_1px,transparent_1px)] [background-size:24px_24px]" />
+            <Icon size={stacked ? 40 : 54} className="relative text-white/90" />
+          </div>
+        )}
+      </div>
+
+      {/* Copy */}
+      <div className={stacked ? "p-5" : "flex flex-col p-8 md:p-10"}>
+        {!stacked && (
+          <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-white">
+            <Icon size={19} />
+          </div>
+        )}
+
+        {!stacked && (
+          <h3 className="mt-6 font-display text-2xl font-bold tracking-tight">{title}</h3>
+        )}
+
+        <p
+          className={
+            "text-muted-foreground " +
+            (stacked ? "text-sm leading-relaxed" : "mt-3.5 flex-1 text-[15px] leading-[1.75]")
+          }
+        >
+          {desc}
+        </p>
+
+        <Link
+          to="/programs"
+          className={
+            "group inline-flex w-fit items-center gap-1.5 font-semibold text-[var(--color-accent-1)] " +
+            (stacked ? "mt-4 text-[13px]" : "mt-7 text-sm")
+          }
+        >
+          Explore this program
+          <ArrowUpRight
+            size={stacked ? 13 : 15}
+            className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          />
+        </Link>
       </div>
     </div>
   );
