@@ -19,7 +19,7 @@ import { Link } from "@tanstack/react-router";
 import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { GradientButton } from "@/components/site/GradientButton";
 import { StatCounter } from "@/components/site/StatCounter";
-import { GlowCard } from "@/components/site/GlowCard";
+import { ActivitiesBento } from "@/components/site/ActivitiesBento";
 import { Timeline } from "@/components/site/Timeline";
 import { LocationMap } from "@/components/site/LocationMap";
 import { LatestNews } from "@/components/site/LatestNews";
@@ -270,20 +270,7 @@ function Index() {
             </Link>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {ACTIVITIES.map(({ Icon, title, desc }, i) => (
-              <GlowCard key={title} delay={i * 0.06}>
-                <div className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-white">
-                  <Icon size={20} />
-                </div>
-                <h3 className="mt-6 font-display text-xl font-semibold">{title}</h3>
-                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{desc}</p>
-                <div className="mt-6 flex items-center text-sm text-[var(--color-accent-1)] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
-                  Learn more <ArrowRight size={14} className="ml-1" />
-                </div>
-              </GlowCard>
-            ))}
-          </div>
+          <ActivitiesBento activities={ACTIVITIES} />
         </div>
       </section>
 
