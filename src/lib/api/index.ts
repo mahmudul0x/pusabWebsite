@@ -17,6 +17,7 @@ export {
   leaderMessageApi,
   programPagesApi,
   testimonialsApi,
+  pageHeroApi,
 } from "./resources";
 export { AuthProvider, useAuth } from "./AuthContext";
 export { uploadImage, isUploadConfigured, optimizeImage } from "./upload";

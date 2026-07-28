@@ -26,13 +26,14 @@ export interface GalleryItem {
 
 export interface PublicityPost {
   id: number;
-  type: "news" | "press" | "event";
+  type: "news" | "press" | "event" | "blog";
   title: string;
   excerpt: string;
   body: string;
   link: string;
   image_url: string;
   date: string | null;
+  author: string;
   published: boolean;
   created_at: string;
 }
@@ -111,6 +112,32 @@ export interface LeaderMessage {
   photo_url: string;
   quote: string;
   body: string;
+  updated_at: string;
+}
+
+export interface PageHeroImage {
+  id: number;
+  image_url: string;
+  alt_text: string;
+  order: number;
+}
+
+export type PageHeroKey =
+  | "home"
+  | "about"
+  | "programs"
+  | "leadership"
+  | "moments"
+  | "publicity"
+  | "convening-committee"
+  | "honor-board";
+
+export interface PageHero {
+  id: number;
+  page: PageHeroKey;
+  title: string;
+  lede: string;
+  images: PageHeroImage[];
   updated_at: string;
 }
 

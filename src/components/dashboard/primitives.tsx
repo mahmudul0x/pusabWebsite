@@ -18,7 +18,9 @@ export function Field({
 }) {
   return (
     <label className={"block " + (full ? "sm:col-span-2" : "")}>
-      <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">{label}</span>
+      <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
+        {label}
+      </span>
       {children}
       {hint && <span className="mt-1.5 block text-[11px] text-muted-foreground">{hint}</span>}
     </label>
@@ -46,7 +48,9 @@ export function SectionHeader({
           {count !== undefined && (
             <span
               className="rounded-full px-2.5 py-0.5 text-[11px] font-bold tabular-nums text-white"
-              style={{ background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))" }}
+              style={{
+                background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))",
+              }}
             >
               {count}
             </span>
@@ -57,7 +61,9 @@ export function SectionHeader({
       <button
         onClick={onNew}
         className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg hover:opacity-90 active:scale-[0.98]"
-        style={{ background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))" }}
+        style={{
+          background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))",
+        }}
       >
         <Plus size={15} /> {newLabel}
       </button>
@@ -79,7 +85,10 @@ export function Toolbar({
   return (
     <div className="mb-5 flex flex-wrap items-center gap-3">
       <div className="relative min-w-[200px] flex-1">
-        <Search size={14} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60" />
+        <Search
+          size={14}
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60"
+        />
         <input
           value={query}
           onChange={(e) => onQuery(e.target.value)}
@@ -109,10 +118,15 @@ export function FilterSelect({
         className="appearance-none rounded-xl border border-border bg-[var(--color-surface)] py-2.5 pl-3.5 pr-8 text-sm font-medium outline-none transition-all focus:border-[var(--color-accent-1)] focus:ring-2 focus:ring-[color-mix(in_oklab,var(--color-accent-1)_15%,transparent)]"
       >
         {options.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
         ))}
       </select>
-      <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+      <ChevronDown
+        size={13}
+        className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+      />
     </div>
   );
 }
@@ -136,11 +150,20 @@ export function ListSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="space-y-2.5">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 rounded-2xl border border-border bg-[var(--color-surface)] p-4">
+        <div
+          key={i}
+          className="flex items-center gap-4 rounded-2xl border border-border bg-[var(--color-surface)] p-4"
+        >
           <div className="h-10 w-10 animate-pulse rounded-xl bg-border" />
           <div className="flex-1 space-y-2">
-            <div className="h-3 w-2/5 animate-pulse rounded-full bg-border" style={{ animationDelay: `${i * 60}ms` }} />
-            <div className="h-2.5 w-3/5 animate-pulse rounded-full bg-border/70" style={{ animationDelay: `${i * 60 + 80}ms` }} />
+            <div
+              className="h-3 w-2/5 animate-pulse rounded-full bg-border"
+              style={{ animationDelay: `${i * 60}ms` }}
+            />
+            <div
+              className="h-2.5 w-3/5 animate-pulse rounded-full bg-border/70"
+              style={{ animationDelay: `${i * 60 + 80}ms` }}
+            />
           </div>
           <div className="h-8 w-16 animate-pulse rounded-xl bg-border" />
         </div>
@@ -154,7 +177,11 @@ export function SkeletonGrid({ cols = 4, rows = 8 }: { cols?: number; rows?: num
   return (
     <div className={"grid gap-4 sm:grid-cols-2 " + colClass}>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="animate-pulse rounded-2xl border border-border bg-[var(--color-surface)]" style={{ height: 180, animationDelay: `${i * 40}ms` }} />
+        <div
+          key={i}
+          className="animate-pulse rounded-2xl border border-border bg-[var(--color-surface)]"
+          style={{ height: 180, animationDelay: `${i * 40}ms` }}
+        />
       ))}
     </div>
   );
@@ -184,21 +211,29 @@ export function StatCard({
         (accent
           ? "border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] bg-[color-mix(in_oklab,var(--color-accent-1)_6%,var(--color-surface))]"
           : "border-border bg-[var(--color-surface)]") +
-        (onClick ? " hover:border-[color-mix(in_oklab,var(--color-accent-1)_50%,transparent)] hover:shadow-lg hover:shadow-[color-mix(in_oklab,var(--color-accent-1)_8%,transparent)] cursor-pointer" : "")
+        (onClick
+          ? " hover:border-[color-mix(in_oklab,var(--color-accent-1)_50%,transparent)] hover:shadow-lg hover:shadow-[color-mix(in_oklab,var(--color-accent-1)_8%,transparent)] cursor-pointer"
+          : "")
       }
     >
       <div
         className="absolute right-0 top-0 h-20 w-20 rounded-bl-full opacity-[0.07]"
-        style={{ background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))" }}
+        style={{
+          background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
+        }}
       />
       <div className="flex items-start justify-between gap-3">
         <span
           className="inline-grid h-9 w-9 place-items-center rounded-xl text-white shadow-sm"
-          style={{ background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))" }}
+          style={{
+            background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
+          }}
         >
           {icon}
         </span>
-        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60 mt-1">{label}</span>
+        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60 mt-1">
+          {label}
+        </span>
       </div>
       <p className="mt-4 font-display text-3xl font-black leading-none tabular-nums">{value}</p>
       {sub && <div className="mt-1.5 text-xs text-muted-foreground">{sub}</div>}
@@ -235,6 +270,7 @@ export function Modal({
   onSubmit,
   saving,
   submitLabel = "Save changes",
+  hideFooter,
 }: {
   open: boolean;
   onClose: () => void;
@@ -243,6 +279,8 @@ export function Modal({
   onSubmit: () => void;
   saving?: boolean;
   submitLabel?: string;
+  /** Hide Cancel/Save — for a picker step where choosing an option advances instead. */
+  hideFooter?: boolean;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -271,7 +309,10 @@ export function Modal({
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             onClick={(e) => e.stopPropagation()}
-            onSubmit={(e) => { e.preventDefault(); onSubmit(); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              onSubmit();
+            }}
             className="flex max-h-[92vh] w-full max-w-xl flex-col overflow-hidden rounded-t-3xl border border-border bg-[var(--color-surface)] shadow-2xl sm:rounded-3xl"
           >
             {/* Header */}
@@ -295,23 +336,28 @@ export function Modal({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-2.5 border-t border-border bg-[color-mix(in_oklab,var(--color-background)_60%,var(--color-surface))] px-6 py-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-[var(--color-background)] hover:text-foreground"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg disabled:opacity-50 active:scale-[0.98]"
-                style={{ background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))" }}
-              >
-                {saving ? "Saving…" : submitLabel}
-              </button>
-            </div>
+            {!hideFooter && (
+              <div className="flex items-center justify-end gap-2.5 border-t border-border bg-[color-mix(in_oklab,var(--color-background)_60%,var(--color-surface))] px-6 py-4">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-[var(--color-background)] hover:text-foreground"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg disabled:opacity-50 active:scale-[0.98]"
+                  style={{
+                    background:
+                      "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))",
+                  }}
+                >
+                  {saving ? "Saving…" : submitLabel}
+                </button>
+              </div>
+            )}
           </motion.form>
         </motion.div>
       )}

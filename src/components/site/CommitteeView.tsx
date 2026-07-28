@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { optimizeImage } from "@/lib/api";
 import { useCurrentMembers, useMembersByYear } from "@/lib/useCommittee";
+import { sessionSpan } from "@/lib/session";
 import { Crown, Gavel, GraduationCap, Users, Building2 } from "lucide-react";
 
 type Member = {
@@ -180,7 +181,7 @@ export function CommitteeView({
                     color: "transparent",
                   }}
                 >
-                  {sessionYear}
+                  {sessionSpan(sessionYear)}
                 </span>
                 .
               </>

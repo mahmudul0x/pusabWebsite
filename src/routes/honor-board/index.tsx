@@ -5,6 +5,8 @@ import { optimizeImage } from "@/lib/api";
 import { useAllMembers } from "@/lib/useCommittee";
 import { Crown, Gavel, Award, GraduationCap } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
+import { ecSessionLabel } from "@/lib/session";
+import { usePageHero } from "@/lib/usePageHero";
 
 export const Route = createFileRoute("/honor-board/")({
   head: () => ({
@@ -44,26 +46,6 @@ function initials(name: string) {
     .slice(0, 2)
     .join("")
     .toUpperCase();
-}
-
-/** Format a session year as a span, e.g. 2022 -> "2022-23". */
-function sessionLabel(year: number) {
-  const next = String((year + 1) % 100).padStart(2, "0");
-  return `${year}-${next}`;
-}
-
-const FOUNDING_YEAR = 2014;
-
-const ORDINAL_WORDS = [
-  "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth",
-  "Ninth", "Tenth", "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth",
-];
-
-/** "2014" -> "First EC (2014-15)" */
-function ecSessionLabel(year: number) {
-  const n = year - FOUNDING_YEAR + 1;
-  const word = ORDINAL_WORDS[n - 1] ?? `${n}th`;
-  return `${word} EC (${sessionLabel(year)})`;
 }
 
 const isPresident = (m: Member) =>
@@ -200,6 +182,7 @@ function SessionRow({
 }
 
 function HonorBoardPage() {
+  const hero = usePageHero("honor-board");
   const { data, isLoading } = useAllMembers();
   const members = data ?? [];
 
@@ -218,15 +201,18 @@ function HonorBoardPage() {
   return (
     <>
       <PageHero
-        title="Honor Board"
-        lede="With gratitude to those who led PUSAB — the names that shaped the journey, session by session."
+        title={hero.title ?? "Honor Board"}
+        lede={
+          hero.lede ??
+          "With gratitude to those who led PUSAB — the names that shaped the journey, session by session."
+        }
         crumbs={[
           { label: "Home", to: "/" },
           { label: "Leadership" },
           { label: "Honor Board" },
         ]}
-        image={heroLeadership}
-        imageAlt="PUSAB honor board"
+        image={hero.image ?? heroLeadership}
+        imageAlt={hero.imageAlt ?? "PUSAB honor board"}
       />
 
       <section className="py-16 md:py-24">

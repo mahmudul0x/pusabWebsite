@@ -146,7 +146,7 @@ export function LeadershipMessagesSection() {
             value={form.session}
             onChange={(e) => set("session", e.target.value)}
             className={inputCls}
-            placeholder="Session 2026"
+            placeholder="Session 2026-2027"
           />
         </Field>
         <Field label="Pull quote (highlighted)" full hint="One short, punchy line shown big.">

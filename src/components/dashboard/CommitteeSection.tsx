@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { committeeApi, optimizeImage, type EcMember } from "@/lib/api";
+import { ecSessionLabel, sessionLabel } from "@/lib/session";
 import { useResource, errMessage } from "./useResource";
 import {
   Field,
@@ -230,7 +231,7 @@ function ExecutiveCommitteeView({
           onChange={setYearFilter}
           options={[
             { value: "all", label: "All sessions" },
-            ...allYears.map((y) => ({ value: String(y), label: `Session ${y}` })),
+            ...allYears.map((y) => ({ value: String(y), label: sessionLabel(y) })),
           ]}
         />
       </Toolbar>
@@ -242,7 +243,7 @@ function ExecutiveCommitteeView({
             {years.map((year) => (
               <div key={year}>
                 <div className="mb-3 flex items-center gap-3">
-                  <h3 className="font-display text-lg font-bold">Session {year}</h3>
+                  <h3 className="font-display text-lg font-bold">{sessionLabel(year)}</h3>
                   {byYear.get(year)!.some((m) => m.is_current) && (
                     <span className="rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
                       Current
@@ -318,17 +319,7 @@ function ExecutiveCommitteeView({
 }
 
 // ── Honor Board view ─────────────────────────────────────────────────────────
-const FOUNDING_YEAR = 2014;
-const ORDINAL_WORDS = [
-  "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth",
-  "Ninth", "Tenth", "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth",
-];
-function ecLabel(year: number) {
-  const n = year - FOUNDING_YEAR + 1;
-  const word = n >= 1 ? (ORDINAL_WORDS[n - 1] ?? `${n}th`) : null;
-  const span = `${year}-${String((year + 1) % 100).padStart(2, "0")}`;
-  return word ? `${word} EC (${span})` : `Session ${span}`;
-}
+const ecLabel = ecSessionLabel;
 
 const HONOR_SESSIONS_PER_PAGE = 5;
 

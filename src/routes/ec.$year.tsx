@@ -3,24 +3,10 @@ import { PageHero } from "@/components/site/PageHero";
 import { CommitteeView } from "@/components/site/CommitteeView";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
-const FOUNDING_YEAR = 2014;
+import { ecOrdinal, sessionSpan } from "@/lib/session";
 
-function ordinal(n: number) {
-  const s = ["th", "st", "nd", "rd"];
-  const v = n % 100;
-  return n + (s[(v - 20) % 10] || s[v] || s[0]);
-}
-
-/** "2014" -> "1st", "2015" -> "2nd" ... */
-export function ecOrdinal(year: number) {
-  return ordinal(year - FOUNDING_YEAR + 1);
-}
-
-/** "2014" -> "2014-15" */
-export function sessionSpan(year: number) {
-  const next = String((year + 1) % 100).padStart(2, "0");
-  return `${year}-${next}`;
-}
+// Re-exported for the pages that already import these from this route module.
+export { ecOrdinal, sessionSpan };
 
 export const Route = createFileRoute("/ec/$year")({
   head: ({ params }) => {

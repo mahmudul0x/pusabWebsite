@@ -42,6 +42,7 @@ import {
   Quote,
   FileText,
   MessageSquareQuote,
+  GalleryHorizontal,
 } from "lucide-react";
 import logoPusab from "@/assets/logo-pusab.png";
 import { StatCard } from "@/components/dashboard/primitives";
@@ -57,6 +58,7 @@ import { SettingsSection } from "@/components/dashboard/SettingsSection";
 import { FelicitationSection } from "@/components/dashboard/FelicitationSection";
 import { ProgramPagesSection } from "@/components/dashboard/ProgramPagesSection";
 import { TestimonialsSection } from "@/components/dashboard/TestimonialsSection";
+import { PageHeroesSection } from "@/components/dashboard/PageHeroesSection";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -198,6 +200,7 @@ function LoginScreen() {
 
 const NAV = [
   { key: "overview", label: "Overview", Icon: LayoutDashboard, group: "main" },
+  { key: "page-heroes", label: "Page Heroes", Icon: GalleryHorizontal, group: "content" },
   { key: "moments", label: "Moments", Icon: ImageIcon, group: "content" },
   { key: "publicity", label: "Publicity", Icon: Newspaper, group: "content" },
   { key: "executive-committee", label: "Executive Committee", Icon: ShieldCheck, group: "content" },
@@ -500,6 +503,7 @@ function DashboardShell() {
 
         <main className="flex-1 p-5 sm:p-7">
           {section === "overview" && <Overview onJump={pick} />}
+          {section === "page-heroes" && <PageHeroesSection />}
           {section === "moments" && <MomentsSection />}
           {section === "publicity" && <PublicitySection />}
           {section === "executive-committee" && <CommitteeSection view="executive-committee" />}

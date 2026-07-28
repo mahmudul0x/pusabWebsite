@@ -21,6 +21,7 @@ import {
 import { PageHero } from "@/components/site/PageHero";
 import { GlowCard } from "@/components/site/GlowCard";
 import { OBJECTIVES, SITE } from "@/lib/site-content";
+import { usePageHero } from "@/lib/usePageHero";
 import heroAbout from "@/assets/hero-about.jpg";
 import aboutMission from "@/assets/about-mission.jpg";
 
@@ -72,14 +73,18 @@ export const Route = createFileRoute("/about")({
 });
 
 function AboutPage() {
+  const hero = usePageHero("about");
   return (
     <>
       <PageHero
-        title="About PUSAB"
-        lede="Public University Students' Association of Bishwambarpur is a non-political, non-profit student body representing students from public universities, medical and engineering colleges."
+        title={hero.title ?? "About PUSAB"}
+        lede={
+          hero.lede ??
+          "Public University Students' Association of Bishwambarpur is a non-political, non-profit student body representing students from public universities, medical and engineering colleges."
+        }
         crumbs={[{ label: "Home", to: "/" }, { label: "About" }]}
-        image={heroAbout}
-        imageAlt="PUSAB members gathered in Bishwambarpur"
+        image={hero.image ?? heroAbout}
+        imageAlt={hero.imageAlt ?? "PUSAB members gathered in Bishwambarpur"}
       />
 
       {/* At a glance */}

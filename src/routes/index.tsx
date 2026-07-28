@@ -28,6 +28,7 @@ import { LeadershipPreview } from "@/components/site/LeadershipPreview";
 import { TestimonialsCarousel } from "@/components/site/TestimonialsCarousel";
 import { SITE, buildStats } from "@/lib/site-content";
 import { settingsApi, type SiteSettings } from "@/lib/api";
+import { usePageHero } from "@/lib/usePageHero";
 import homeHero1 from "@/assets/home-hero-1.png";
 import homeHero2 from "@/assets/home-hero-2.png";
 import sayorHome from "@/assets/sayor-home.png";
@@ -136,22 +137,27 @@ function MagazineTilt() {
 
 function Index() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const hero = usePageHero("home");
+  const slides = hero.images.length > 0 ? hero.images.map((img) => img.image_url) : HERO_SLIDES;
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
   }, []);
 
   useEffect(() => {
-    settingsApi.get().then(setSettings).catch(() => setSettings(null));
+    settingsApi
+      .get()
+      .then(setSettings)
+      .catch(() => setSettings(null));
   }, []);
 
   return (
     <>
       {/* HERO */}
       <section className="relative min-h-[100dvh] flex items-center overflow-hidden">
-        <HeroSlideshow />
+        <HeroSlideshow slides={slides} />
         <div className="container-page relative z-10 pt-40 pb-28 md:pt-32">
-          <div className="mx-auto max-w-4xl text-center [text-shadow:0_2px_30px_rgba(2,6,23,0.55)]">
+          <div className="mx-auto max-w-4xl text-center [text-shadow:0_2px_8px_rgba(2,6,23,0.55)]">
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
@@ -163,25 +169,38 @@ function Index() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-accent-1)] opacity-60" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--color-accent-1)]" />
                 </span>
-                <span className="tracking-wide">Student-led · Non-political · Community-focused</span>
+                <span className="tracking-wide">
+                  Student-led · Non-political · Community-focused
+                </span>
               </div>
             </motion.div>
 
             <div className="mt-7">
-              <AnimatedHeading
-                as="h1"
-                className="font-display text-[44px] leading-[1.02] sm:text-6xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.045em] text-white"
-              >
-                Building a stronger
-              </AnimatedHeading>
-              <motion.span
-                initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ delay: 0.55, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="block font-display text-[44px] leading-[1.02] sm:text-6xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.045em] text-white/90"
-              >
-                future for Bishwambarpur<span className="text-[var(--color-accent-2)]">.</span>
-              </motion.span>
+              {hero.title ? (
+                <AnimatedHeading
+                  as="h1"
+                  className="font-display text-[44px] leading-[1.1] sm:text-6xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.045em] text-white"
+                >
+                  {hero.title}
+                </AnimatedHeading>
+              ) : (
+                <>
+                  <AnimatedHeading
+                    as="h1"
+                    className="font-display text-[44px] leading-[1.1] sm:text-6xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.045em] text-white"
+                  >
+                    Building a stronger
+                  </AnimatedHeading>
+                  <motion.span
+                    initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    transition={{ delay: 0.55, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    className="block font-display text-[44px] leading-[1.02] sm:text-6xl md:text-7xl lg:text-[80px] font-extrabold tracking-[-0.045em] text-white/90"
+                  >
+                    future for Bishwambarpur<span className="text-[var(--color-accent-2)]">.</span>
+                  </motion.span>
+                </>
+              )}
             </div>
 
             <motion.p
@@ -190,9 +209,8 @@ function Index() {
               transition={{ delay: 0.9, duration: 0.7 }}
               className="mt-7 mx-auto max-w-xl text-base md:text-lg text-white/85 leading-relaxed"
             >
-              PUSAB brings together {SITE.members} students from public universities, medical and
-              engineering colleges to support learning, leadership, and community development in
-              Bishwambarpur.
+              {hero.lede ??
+                `PUSAB brings together ${SITE.members} students from public universities, medical and engineering colleges to support learning, leadership, and community development in Bishwambarpur.`}
             </motion.p>
 
             <motion.div
@@ -261,6 +279,8 @@ function Index() {
         </div>
       </section>
 
+      <LeadershipPreview />
+
       <Timeline />
 
       {/* ACTIVITIES */}
@@ -288,8 +308,6 @@ function Index() {
 
       <UpcomingPrograms />
 
-      <LatestNews />
-
       {/* SAYOR */}
       <section className="py-28 md:py-32 relative overflow-hidden bg-[var(--color-surface-2)]">
         <div className="absolute -left-32 top-1/3 h-[40vh] w-[40vh] rounded-full bg-[var(--color-accent-2)] opacity-10 blur-[120px]" />
@@ -314,7 +332,7 @@ function Index() {
         </div>
       </section>
 
-      <LeadershipPreview />
+      <LatestNews />
 
       <TestimonialsCarousel />
 
@@ -371,20 +389,24 @@ function Index() {
   );
 }
 
-function HeroSlideshow() {
+function HeroSlideshow({ slides }: { slides: string[] }) {
   const [i, setI] = useState(0);
+  // Reset to the first slide if the slide list itself changes (e.g. once the
+  // dashboard-managed images finish loading in).
+  useEffect(() => setI(0), [slides]);
   useEffect(() => {
-    const id = setInterval(() => setI((v) => (v + 1) % HERO_SLIDES.length), 6000);
+    if (slides.length < 2) return;
+    const id = setInterval(() => setI((v) => (v + 1) % slides.length), 6000);
     return () => clearInterval(id);
-  }, []);
-  const prev = () => setI((v) => (v - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
-  const next = () => setI((v) => (v + 1) % HERO_SLIDES.length);
+  }, [slides.length]);
+  const prev = () => setI((v) => (v - 1 + slides.length) % slides.length);
+  const next = () => setI((v) => (v + 1) % slides.length);
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       <AnimatePresence>
         <motion.img
           key={i}
-          src={HERO_SLIDES[i]}
+          src={slides[i]}
           alt=""
           initial={{ opacity: 0, scale: 1.08 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -402,32 +424,36 @@ function HeroSlideshow() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(2,6,23,0.22),transparent_65%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(124,58,237,0.14),transparent_55%)]" />
 
-      {/* Prev / next arrows */}
-      <button
-        onClick={prev}
-        aria-label="Previous slide"
-        className="absolute left-3 top-1/2 z-10 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/35 md:left-6 md:h-12 md:w-12"
-      >
-        <ChevronLeft size={20} />
-      </button>
-      <button
-        onClick={next}
-        aria-label="Next slide"
-        className="absolute right-3 top-1/2 z-10 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/35 md:right-6 md:h-12 md:w-12"
-      >
-        <ChevronRight size={20} />
-      </button>
-
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
-        {HERO_SLIDES.map((_, idx) => (
+      {slides.length > 1 && (
+        <>
+          {/* Prev / next arrows */}
           <button
-            key={idx}
-            onClick={() => setI(idx)}
-            aria-label={`Slide ${idx + 1}`}
-            className={`h-1 rounded-full transition-all ${idx === i ? "w-10 bg-[var(--color-accent-1)]" : "w-5 bg-foreground/30 hover:bg-foreground/50"}`}
-          />
-        ))}
-      </div>
+            onClick={prev}
+            aria-label="Previous slide"
+            className="absolute left-3 top-1/2 z-10 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/35 md:left-6 md:h-12 md:w-12"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            onClick={next}
+            aria-label="Next slide"
+            className="absolute right-3 top-1/2 z-10 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/35 md:right-6 md:h-12 md:w-12"
+          >
+            <ChevronRight size={20} />
+          </button>
+
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setI(idx)}
+                aria-label={`Slide ${idx + 1}`}
+                className={`h-1 rounded-full transition-all ${idx === i ? "w-10 bg-[var(--color-accent-1)]" : "w-5 bg-foreground/30 hover:bg-foreground/50"}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { PageHero } from "@/components/site/PageHero";
 import { GradientButton } from "@/components/site/GradientButton";
 import { useProgramEvents, statusOf, type IconType, type Status } from "@/lib/usePrograms";
+import { usePageHero } from "@/lib/usePageHero";
 import { ArrowUpRight, CalendarClock, CheckCircle2, Clock, MapPin } from "lucide-react";
 import heroPrograms from "@/assets/hero-programs.jpg";
 
@@ -99,6 +100,7 @@ const FILTERS: { key: "all" | Status; label: string }[] = [
 function ProgramsPage() {
   const [filter, setFilter] = useState<"all" | Status>("all");
   const { events: source, now } = useProgramEvents();
+  const hero = usePageHero("programs");
 
   const { ordered, counts } = useMemo(() => {
     const rank: Record<Status, number> = { upcoming: 0, ongoing: 1, completed: 2 };
@@ -124,11 +126,14 @@ function ProgramsPage() {
   return (
     <>
       <PageHero
-        title="Programs & Activities"
-        lede="From annual reunions to scholarships, medical camps to humanitarian response — here's what PUSAB has delivered, what's running now, and what's next."
+        title={hero.title ?? "Programs & Activities"}
+        lede={
+          hero.lede ??
+          "From annual reunions to scholarships, medical camps to humanitarian response — here's what PUSAB has delivered, what's running now, and what's next."
+        }
         crumbs={[{ label: "Home", to: "/" }, { label: "Programs" }]}
-        image={heroPrograms}
-        imageAlt="PUSAB scholarship handover ceremony"
+        image={hero.image ?? heroPrograms}
+        imageAlt={hero.imageAlt ?? "PUSAB scholarship handover ceremony"}
       />
 
       <section className="py-16 md:py-24">

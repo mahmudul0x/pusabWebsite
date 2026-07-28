@@ -40,7 +40,7 @@ function PresidentMessagePage() {
       msg={msg}
       loaded={loaded}
       fallbackName="[President Name]"
-      roleLabel="Current President"
+      roleLabel="President"
       headerLabel="Message from the President"
       pageTitle="President's Message"
       lede="A word from the President of PUSAB — on purpose, people, and the path ahead."

@@ -10,6 +10,8 @@ import type {
   GalleryItem,
   LeaderMessage,
   Paginated,
+  PageHero,
+  PageHeroKey,
   Program,
   ProgramPage,
   PublicityPost,
@@ -103,6 +105,27 @@ export const settingsApi = {
   get: () => apiFetch<SiteSettings>("/api/settings/", {}, { auth: false }),
   update: (body: Partial<SiteSettings>) =>
     apiFetch<SiteSettings>("/api/settings/", { method: "PATCH", body: JSON.stringify(body) }),
+};
+
+// Page heroes (banner title/lede/image(s)) — looked up by page key. Writing
+// `images` always replaces the full ordered list, so `id` is optional.
+type PageHeroImageInput = Omit<PageHero["images"][number], "id"> & { id?: number };
+type PageHeroUpdateBody = Partial<Pick<PageHero, "title" | "lede">> & {
+  images?: PageHeroImageInput[];
+};
+
+export const pageHeroApi = {
+  listAll: async (): Promise<PageHero[]> => {
+    const page = await apiFetch<Paginated<PageHero>>("/api/page-heroes/", {}, { auth: false });
+    return page.results;
+  },
+  get: (page: PageHeroKey) =>
+    apiFetch<PageHero>(`/api/page-heroes/${page}/`, {}, { auth: false }),
+  update: (page: PageHeroKey, body: PageHeroUpdateBody) =>
+    apiFetch<PageHero>(`/api/page-heroes/${page}/`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
 };
 
 // Program detail pages — looked up by slug (matches the /programs/<slug>

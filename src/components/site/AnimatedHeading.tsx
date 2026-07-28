@@ -22,9 +22,14 @@ export function AnimatedHeading({ children, as = "h1", className = "", delay = 0
       className={className}
     >
       {words.map((word, i) => (
-        <span key={i} className="inline-block overflow-hidden align-bottom mr-[0.25em]">
+        <span
+          key={i}
+          className="inline-block overflow-hidden align-bottom mr-[0.25em]"
+          style={{ isolation: "isolate" }}
+        >
           <motion.span
             className="inline-block"
+            style={{ willChange: "transform, filter, opacity" }}
             variants={{
               hidden: { y: "110%", opacity: 0, filter: "blur(8px)" },
               show: {

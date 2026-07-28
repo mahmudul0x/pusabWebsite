@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
 import { committeeApi, optimizeImage } from "@/lib/api";
+import { usePageHero } from "@/lib/usePageHero";
 import { Users, GraduationCap, Star } from "lucide-react";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
@@ -137,6 +138,7 @@ function MemberRow({ m, index }: { m: Member; index: number }) {
 }
 
 function ConveningCommitteePage() {
+  const hero = usePageHero("convening-committee");
   const [members, setMembers] = useState<Member[] | null>(null);
 
   useEffect(() => {
@@ -163,15 +165,18 @@ function ConveningCommitteePage() {
   return (
     <>
       <PageHero
-        title="Convening Committee"
-        lede="The founding committee that established PUSAB on 30 July 2014 — the pioneers who started it all."
+        title={hero.title ?? "Convening Committee"}
+        lede={
+          hero.lede ??
+          "The founding committee that established PUSAB on 30 July 2014 — the pioneers who started it all."
+        }
         crumbs={[
           { label: "Home", to: "/" },
           { label: "Leadership" },
           { label: "Convening Committee" },
         ]}
-        image={heroLeadership}
-        imageAlt="PUSAB Convening Committee"
+        image={hero.image ?? heroLeadership}
+        imageAlt={hero.imageAlt ?? "PUSAB Convening Committee"}
       />
 
       <section className="py-16 md:py-24">
@@ -190,7 +195,7 @@ function ConveningCommitteePage() {
               Founding Legacy
             </p>
             <h2 className="font-display text-4xl font-extrabold tracking-tight md:text-5xl">
-              30 July –{" "}
+              30 July 2014 to{" "}
               <span
                 style={{
                   background:
@@ -203,11 +208,6 @@ function ConveningCommitteePage() {
                 27 Sep 2014.
               </span>
             </h2>
-            <p className="mt-4 leading-relaxed text-muted-foreground">
-              Before any executive committee, there was a convening committee — a group of
-              dedicated students who formally founded PUSAB and laid the groundwork for
-              everything that followed.
-            </p>
           </motion.div>
 
           {loading ? (
