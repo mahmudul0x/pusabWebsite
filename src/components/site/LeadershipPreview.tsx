@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Quote } from "lucide-react";
 import { leaderMessageApi, optimizeImage, type LeaderMessage } from "@/lib/api";
 import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { useEffect, useState } from "react";
@@ -58,11 +58,13 @@ export function LeadershipPreview() {
           </AnimatedHeading>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="space-y-6">
           {populated.map(({ role, letter, accent, roleLabel, to }, i) => {
             const msg = leaders[role]!;
             const c1 = accent === "1" ? "var(--color-accent-1)" : "var(--color-accent-2)";
             const c2 = accent === "1" ? "var(--color-accent-2)" : "var(--color-accent-1)";
+            const imageOnRight = i % 2 === 1;
+
             return (
               <motion.div
                 key={role}
@@ -73,14 +75,19 @@ export function LeadershipPreview() {
               >
                 <Link
                   to={to}
-                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] transition-all duration-300 hover:-translate-y-1.5"
+                  className="group grid overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] transition-all duration-300 hover:-translate-y-1 md:grid-cols-2"
                   style={{ borderColor: `color-mix(in oklab, ${c1} 18%, var(--color-border, transparent))` }}
                 >
-                  {/* Large photo banner */}
-                  <div className="relative aspect-[4/3] w-full overflow-hidden">
+                  {/* Photo */}
+                  <div
+                    className={
+                      "relative aspect-[4/3] w-full overflow-hidden md:aspect-auto md:min-h-[320px] " +
+                      (imageOnRight ? "md:order-2" : "")
+                    }
+                  >
                     {msg.photo_url ? (
                       <img
-                        src={optimizeImage(msg.photo_url, 800)}
+                        src={optimizeImage(msg.photo_url, 900)}
                         alt={msg.name}
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
@@ -89,33 +96,40 @@ export function LeadershipPreview() {
                         className="absolute inset-0 grid place-items-center"
                         style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
                       >
-                        <span className="text-6xl font-bold text-white select-none">{letter}</span>
+                        <span className="text-7xl font-bold text-white select-none">{letter}</span>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/10 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-6">
-                      <p
-                        className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/90"
-                        style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
-                      >
-                        {roleLabel}
-                      </p>
-                      <p className="mt-1.5 font-display text-2xl md:text-3xl font-bold leading-tight text-white">
-                        {msg.name}
-                      </p>
-                    </div>
                   </div>
 
-                  {/* Body */}
-                  <div className="flex flex-1 flex-col p-6 md:p-7">
+                  {/* Text */}
+                  <div
+                    className={
+                      "relative flex flex-col justify-center p-8 md:p-12 " +
+                      (imageOnRight ? "md:order-1" : "")
+                    }
+                    style={{ background: `color-mix(in oklab, ${c1} 5%, var(--color-surface))` }}
+                  >
+                    <Quote
+                      className="absolute right-6 top-6 opacity-[0.06] md:right-8 md:top-8"
+                      size={90}
+                      strokeWidth={1}
+                      style={{ color: c1 }}
+                    />
+                    <p className="relative text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: c1 }}>
+                      {roleLabel}
+                    </p>
+                    <p className="relative mt-2 font-display text-2xl md:text-3xl font-bold leading-tight">
+                      {msg.name}
+                    </p>
+
                     {msg.quote?.trim() && (
-                      <p className="flex-1 line-clamp-3 font-display text-base italic leading-relaxed text-foreground/85">
+                      <p className="relative mt-5 line-clamp-3 font-display text-lg italic leading-relaxed text-foreground/85">
                         "{msg.quote}"
                       </p>
                     )}
 
                     <span
-                      className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold"
+                      className="relative mt-7 inline-flex w-fit items-center gap-1.5 text-sm font-semibold"
                       style={{ color: c1 }}
                     >
                       Read full message
