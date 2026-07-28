@@ -2,26 +2,28 @@ import { motion } from "framer-motion";
 import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { SITE } from "@/lib/site-content";
 
+// Descriptions are kept to a similar length so the four columns line up
+// instead of leaving a ragged bottom edge.
 const MILESTONES = [
   {
     year: "2014",
     title: "Founded",
-    desc: `Established at ${SITE.foundedAt}, bringing together the first cohort of public university students from Bishwambarpur.`,
+    desc: "Established at Digendra Barman Government College, bringing together the first cohort of public university students.",
   },
   {
     year: "Since",
     title: "Growing Together",
-    desc: "Year after year, new members have joined — from freshers stepping into public universities to alumni giving back.",
+    desc: "Year after year new members have joined — from freshers stepping into public universities to alumni giving back.",
   },
   {
     year: "Today",
     title: `${SITE.members} Members Strong`,
-    desc: "A community spanning universities, medical and engineering colleges across the country, still rooted in one upazila.",
+    desc: "A community spanning universities, medical and engineering colleges nationwide, still rooted in one upazila.",
   },
   {
     year: "Ahead",
     title: "Building What's Next",
-    desc: "Scholarships, mentoring, relief work and cultural programs — continuing to expand what PUSAB can do for Bishwambarpur.",
+    desc: "Scholarships, mentoring, relief work and cultural programs — expanding what PUSAB can do for Bishwambarpur.",
   },
 ];
 
