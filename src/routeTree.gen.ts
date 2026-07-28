@@ -23,15 +23,12 @@ import { Route as FelicitationRouteImport } from './routes/felicitation'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConveningCommitteeRouteImport } from './routes/convening-committee'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HonorBoardIndexRouteImport } from './routes/honor-board/index'
 import { Route as ProgramsSlugRouteImport } from './routes/programs_.$slug'
 import { Route as HonorBoardYearRouteImport } from './routes/honor-board/$year'
 import { Route as EcYearRouteImport } from './routes/ec.$year'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
@@ -103,18 +100,9 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -142,16 +130,10 @@ const EcYearRoute = EcYearRouteImport.update({
   path: '/ec/$year',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/convening-committee': typeof ConveningCommitteeRoute
   '/dashboard': typeof DashboardRoute
@@ -166,7 +148,6 @@ export interface FileRoutesByFullPath {
   '/sayor': typeof SayorRoute
   '/secretary-message': typeof SecretaryMessageRoute
   '/support': typeof SupportRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/ec/$year': typeof EcYearRoute
   '/honor-board/$year': typeof HonorBoardYearRoute
   '/programs/$slug': typeof ProgramsSlugRoute
@@ -175,7 +156,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/convening-committee': typeof ConveningCommitteeRoute
   '/dashboard': typeof DashboardRoute
@@ -189,7 +169,6 @@ export interface FileRoutesByTo {
   '/sayor': typeof SayorRoute
   '/secretary-message': typeof SecretaryMessageRoute
   '/support': typeof SupportRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/ec/$year': typeof EcYearRoute
   '/honor-board/$year': typeof HonorBoardYearRoute
   '/programs/$slug': typeof ProgramsSlugRoute
@@ -198,9 +177,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/convening-committee': typeof ConveningCommitteeRoute
   '/dashboard': typeof DashboardRoute
@@ -215,7 +192,6 @@ export interface FileRoutesById {
   '/sayor': typeof SayorRoute
   '/secretary-message': typeof SecretaryMessageRoute
   '/support': typeof SupportRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/ec/$year': typeof EcYearRoute
   '/honor-board/$year': typeof HonorBoardYearRoute
   '/programs_/$slug': typeof ProgramsSlugRoute
@@ -226,7 +202,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/auth'
     | '/contact'
     | '/convening-committee'
     | '/dashboard'
@@ -241,7 +216,6 @@ export interface FileRouteTypes {
     | '/sayor'
     | '/secretary-message'
     | '/support'
-    | '/admin'
     | '/ec/$year'
     | '/honor-board/$year'
     | '/programs/$slug'
@@ -250,7 +224,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/auth'
     | '/contact'
     | '/convening-committee'
     | '/dashboard'
@@ -264,7 +237,6 @@ export interface FileRouteTypes {
     | '/sayor'
     | '/secretary-message'
     | '/support'
-    | '/admin'
     | '/ec/$year'
     | '/honor-board/$year'
     | '/programs/$slug'
@@ -272,9 +244,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/_authenticated'
     | '/about'
-    | '/auth'
     | '/contact'
     | '/convening-committee'
     | '/dashboard'
@@ -289,7 +259,6 @@ export interface FileRouteTypes {
     | '/sayor'
     | '/secretary-message'
     | '/support'
-    | '/_authenticated/admin'
     | '/ec/$year'
     | '/honor-board/$year'
     | '/programs_/$slug'
@@ -298,9 +267,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
-  AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
   ConveningCommitteeRoute: typeof ConveningCommitteeRoute
   DashboardRoute: typeof DashboardRoute
@@ -419,25 +386,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -475,26 +428,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EcYearRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
   }
 }
-
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
-}
-
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
-}
-
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface HonorBoardRouteChildren {
   HonorBoardYearRoute: typeof HonorBoardYearRoute
@@ -512,9 +447,7 @@ const HonorBoardRouteWithChildren = HonorBoardRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
-  AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
   ConveningCommitteeRoute: ConveningCommitteeRoute,
   DashboardRoute: DashboardRoute,

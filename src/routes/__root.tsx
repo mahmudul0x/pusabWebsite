@@ -176,7 +176,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const bare = ["/dashboard", "/admin", "/auth"].some((p) => pathname.startsWith(p));
+  const bare = ["/dashboard"].some((p) => pathname.startsWith(p));
   const [flipbookOpen, setFlipbookOpen] = useState(false);
 
   // Prefetch all committee data on first load so every page gets it from cache.
