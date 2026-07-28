@@ -78,58 +78,56 @@ export function LeadershipPreview() {
                   className="group grid overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] transition-all duration-300 hover:-translate-y-1 md:grid-cols-5"
                   style={{ borderColor: `color-mix(in oklab, ${c1} 18%, var(--color-border, transparent))` }}
                 >
-                  {/* Photo — smaller column, full face visible (object-top, not cropped center) */}
+                  {/* Photo — whole image always visible, never cropped */}
                   <div
                     className={
-                      "relative aspect-[4/3] w-full overflow-hidden md:aspect-auto md:col-span-2 md:min-h-[380px] " +
+                      "relative w-full overflow-hidden md:col-span-2 " +
                       (imageOnRight ? "md:order-2" : "")
                     }
+                    style={{ background: `color-mix(in oklab, ${c1} 8%, var(--color-surface-2))` }}
                   >
                     {msg.photo_url ? (
                       <img
                         src={optimizeImage(msg.photo_url, 900)}
                         alt={msg.name}
-                        className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                        className="h-full max-h-[420px] w-full object-contain transition-transform duration-500 group-hover:scale-[1.03] md:max-h-none"
                       />
                     ) : (
-                      <div
-                        className="absolute inset-0 grid place-items-center"
-                        style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
-                      >
+                      <div className="flex aspect-[4/3] items-center justify-center md:aspect-auto md:min-h-[300px]" style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}>
                         <span className="text-7xl font-bold text-white select-none">{letter}</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Text — larger column, full message excerpt */}
+                  {/* Text — larger column, short excerpt of the full message */}
                   <div
                     className={
-                      "relative flex flex-col justify-center p-8 md:col-span-3 md:p-14 " +
+                      "relative flex flex-col justify-center p-8 md:col-span-3 md:p-12 " +
                       (imageOnRight ? "md:order-1" : "")
                     }
                     style={{ background: `color-mix(in oklab, ${c1} 5%, var(--color-surface))` }}
                   >
                     <Quote
                       className="absolute right-6 top-6 opacity-[0.06] md:right-10 md:top-10"
-                      size={110}
+                      size={90}
                       strokeWidth={1}
                       style={{ color: c1 }}
                     />
                     <p className="relative text-xs font-bold uppercase tracking-[0.22em]" style={{ color: c1 }}>
                       {roleLabel}
                     </p>
-                    <p className="relative mt-2 font-display text-3xl md:text-4xl font-bold leading-tight">
+                    <p className="relative mt-2 font-display text-2xl md:text-3xl font-bold leading-tight">
                       {msg.name}
                     </p>
 
                     {msg.quote?.trim() && (
-                      <p className="relative mt-6 line-clamp-5 font-display text-xl md:text-2xl italic leading-relaxed text-foreground/85">
+                      <p className="relative mt-5 line-clamp-3 font-display text-lg md:text-xl italic leading-relaxed text-foreground/85">
                         "{msg.quote}"
                       </p>
                     )}
 
                     <span
-                      className="relative mt-8 inline-flex w-fit items-center gap-1.5 text-sm font-semibold"
+                      className="relative mt-7 inline-flex w-fit items-center gap-1.5 text-sm font-semibold"
                       style={{ color: c1 }}
                     >
                       Read full message
