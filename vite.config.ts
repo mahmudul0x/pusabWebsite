@@ -6,11 +6,12 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-// Pin the Nitro target only when NITRO_PRESET is set (Netlify sets it in
-// netlify.toml -> emits .netlify/functions-internal/server). Locally it stays
-// unset, so the build keeps its default output (dist/server/server.js) that
-// `vite dev`/`vite preview` expect — hard-pinning a preset would break preview.
-const nitroPreset = process.env.NITRO_PRESET;
+// Pin the Nitro target when NITRO_PRESET is set explicitly (Netlify sets it
+// in netlify.toml -> emits .netlify/functions-internal/server), or fall back
+// to "vercel" when building on Vercel (which always sets VERCEL=1). Locally
+// both stay unset, so the build keeps its default output (dist/server/server.js)
+// that `vite dev`/`vite preview` expect — hard-pinning a preset would break preview.
+const nitroPreset = process.env.NITRO_PRESET ?? (process.env.VERCEL ? "vercel" : undefined);
 
 export default defineConfig({
   tanstackStart: {
