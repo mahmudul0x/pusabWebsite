@@ -129,13 +129,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f537e135-106d-4695-a44e-911e2ae1aeb1/id-preview-f24b7edb--8f0f20d1-de75-4037-967d-0dbc5b1d8d01.lovable.app-1781700696901.png",
+        content: `https://pusab.net${faviconPusab}`,
       },
       {
         name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f537e135-106d-4695-a44e-911e2ae1aeb1/id-preview-f24b7edb--8f0f20d1-de75-4037-967d-0dbc5b1d8d01.lovable.app-1781700696901.png",
+        content: `https://pusab.net${faviconPusab}`,
       },
     ],
     links: [
