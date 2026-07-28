@@ -75,13 +75,13 @@ export function LeadershipPreview() {
               >
                 <Link
                   to={to}
-                  className="group grid overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] transition-all duration-300 hover:-translate-y-1 md:grid-cols-2"
+                  className="group grid overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] transition-all duration-300 hover:-translate-y-1 md:grid-cols-5"
                   style={{ borderColor: `color-mix(in oklab, ${c1} 18%, var(--color-border, transparent))` }}
                 >
-                  {/* Photo */}
+                  {/* Photo — smaller column, full face visible (object-top, not cropped center) */}
                   <div
                     className={
-                      "relative aspect-[4/3] w-full overflow-hidden md:aspect-auto md:min-h-[320px] " +
+                      "relative aspect-[4/3] w-full overflow-hidden md:aspect-auto md:col-span-2 md:min-h-[380px] " +
                       (imageOnRight ? "md:order-2" : "")
                     }
                   >
@@ -89,7 +89,7 @@ export function LeadershipPreview() {
                       <img
                         src={optimizeImage(msg.photo_url, 900)}
                         alt={msg.name}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
                       <div
@@ -101,35 +101,35 @@ export function LeadershipPreview() {
                     )}
                   </div>
 
-                  {/* Text */}
+                  {/* Text — larger column, full message excerpt */}
                   <div
                     className={
-                      "relative flex flex-col justify-center p-8 md:p-12 " +
+                      "relative flex flex-col justify-center p-8 md:col-span-3 md:p-14 " +
                       (imageOnRight ? "md:order-1" : "")
                     }
                     style={{ background: `color-mix(in oklab, ${c1} 5%, var(--color-surface))` }}
                   >
                     <Quote
-                      className="absolute right-6 top-6 opacity-[0.06] md:right-8 md:top-8"
-                      size={90}
+                      className="absolute right-6 top-6 opacity-[0.06] md:right-10 md:top-10"
+                      size={110}
                       strokeWidth={1}
                       style={{ color: c1 }}
                     />
-                    <p className="relative text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: c1 }}>
+                    <p className="relative text-xs font-bold uppercase tracking-[0.22em]" style={{ color: c1 }}>
                       {roleLabel}
                     </p>
-                    <p className="relative mt-2 font-display text-2xl md:text-3xl font-bold leading-tight">
+                    <p className="relative mt-2 font-display text-3xl md:text-4xl font-bold leading-tight">
                       {msg.name}
                     </p>
 
                     {msg.quote?.trim() && (
-                      <p className="relative mt-5 line-clamp-3 font-display text-lg italic leading-relaxed text-foreground/85">
+                      <p className="relative mt-6 line-clamp-5 font-display text-xl md:text-2xl italic leading-relaxed text-foreground/85">
                         "{msg.quote}"
                       </p>
                     )}
 
                     <span
-                      className="relative mt-7 inline-flex w-fit items-center gap-1.5 text-sm font-semibold"
+                      className="relative mt-8 inline-flex w-fit items-center gap-1.5 text-sm font-semibold"
                       style={{ color: c1 }}
                     >
                       Read full message
