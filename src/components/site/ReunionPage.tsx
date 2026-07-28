@@ -284,24 +284,6 @@ export function ReunionPage({
             )}
           </div>
 
-          {/* Framing strip */}
-          <div
-            className="mb-12 flex items-center gap-6 overflow-hidden rounded-2xl p-6 sm:p-8"
-            style={{ background: GRADIENT }}
-          >
-            {page?.stats[0] && (
-              <p className="shrink-0 font-display text-4xl md:text-5xl font-extrabold text-white">
-                {page.stats[0].value}
-              </p>
-            )}
-            <p className="text-sm leading-relaxed text-white/90">
-              Once every year, PUSAB members from every batch and every university find their way
-              back to Bishwambarpur for one evening — old friends, familiar faces, and a room full
-              of people who grew up in the same place. It's the one night the whole family shows
-              up, and the photos from that night are what everyone remembers it by.
-            </p>
-          </div>
-
           {/* Stats row */}
           {page && page.stats.length > 0 && (
             <div className="mb-14 grid grid-cols-2 gap-3 rounded-2xl border border-border bg-[var(--color-surface)] p-4 sm:grid-cols-4 sm:p-6">
