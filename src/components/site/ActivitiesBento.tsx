@@ -12,6 +12,17 @@ type Activity = {
   slug?: string;
 };
 
+// Most program slugs live at /programs/<slug>, but a few have their own
+// top-level route — send those to the real page instead.
+const SLUG_ROUTE_OVERRIDES: Record<string, string> = {
+  felicitation: "/felicitation",
+};
+
+function hrefFor(slug?: string): string {
+  if (!slug) return "/programs";
+  return SLUG_ROUTE_OVERRIDES[slug] ?? `/programs/${slug}`;
+}
+
 /** Focus areas. Desktop: a list on the left drives a detail panel on the
  *  right. Mobile: the same list becomes an accordion, expanding the detail
  *  inline under the tapped row.
@@ -154,7 +165,7 @@ function Panel({
   heroUrl?: string;
   stacked?: boolean;
 }) {
-  const { Icon, title, desc } = activity;
+  const { Icon, title, desc, slug } = activity;
   return (
     <div
       className={
@@ -207,7 +218,7 @@ function Panel({
         </p>
 
         <Link
-          to="/programs"
+          to={hrefFor(slug)}
           className={
             "group inline-flex w-fit items-center gap-1.5 font-semibold text-[var(--color-accent-1)] " +
             (stacked ? "mt-4 text-[13px]" : "mt-7 text-sm")
