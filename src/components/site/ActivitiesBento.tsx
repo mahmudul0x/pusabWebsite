@@ -14,10 +14,14 @@ type Activity = {
 
 /** Focus areas. Desktop: a list on the left drives a detail panel on the
  *  right. Mobile: the same list becomes an accordion, expanding the detail
- *  inline under the tapped row. Selection is by click/tap — hovering never
- *  changes it, so moving the cursor away can't leave the wrong item active. */
+ *  inline under the tapped row.
+ *
+ *  Hovering previews an item and that preview sticks after the cursor leaves.
+ *  Clicking locks an item, so later hovers no longer change the panel — the
+ *  user's explicit pick wins over an accidental sweep across the list. */
 export function ActivitiesBento({ activities }: { activities: Activity[] }) {
   const [active, setActive] = useState(0);
+  const [locked, setLocked] = useState(false);
   const [images, setImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -55,7 +59,12 @@ export function ActivitiesBento({ activities }: { activities: Activity[] }) {
             <li key={title} className="border-b border-border">
               <button
                 type="button"
-                onClick={() => setActive(i)}
+                onMouseEnter={() => !locked && setActive(i)}
+                onFocus={() => !locked && setActive(i)}
+                onClick={() => {
+                  setActive(i);
+                  setLocked(true);
+                }}
                 aria-expanded={isActive}
                 className={
                   "relative flex w-full items-center gap-3.5 py-4 pl-4 pr-3 text-left transition-colors duration-200 " +
