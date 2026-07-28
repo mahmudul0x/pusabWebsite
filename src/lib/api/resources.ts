@@ -14,6 +14,7 @@ import type {
   ProgramPage,
   PublicityPost,
   SiteSettings,
+  Testimonial,
 } from "./types";
 
 type QueryValue = string | number | boolean | undefined;
@@ -74,6 +75,7 @@ export const programsApi = crud<Program>("programs");
 export const contactApi = crud<ContactMessage>("contact", true); // admin-only read
 export const usersApi = crud<AdminUser>("users", true);
 export const felicitationApi = crud<FelicitationEntry>("felicitation");
+export const testimonialsApi = crud<Testimonial>("testimonials");
 
 // Leader messages (President / General Secretary) — looked up by role string.
 export const leaderMessageApi = {

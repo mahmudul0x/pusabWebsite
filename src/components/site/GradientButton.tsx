@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 interface Props {
   to?: string;
   href?: string;
+  target?: string;
   variant?: "solid" | "ghost";
   children: ReactNode;
   className?: string;
@@ -14,6 +15,7 @@ interface Props {
 export function GradientButton({
   to,
   href,
+  target,
   variant = "solid",
   children,
   className = "",
@@ -36,7 +38,12 @@ export function GradientButton({
     );
   if (href)
     return (
-      <a href={href} className={cls}>
+      <a
+        href={href}
+        target={target}
+        rel={target === "_blank" ? "noopener noreferrer" : undefined}
+        className={cls}
+      >
         {children}
       </a>
     );

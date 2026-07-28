@@ -12,6 +12,7 @@ import {
   Stethoscope,
   Megaphone,
   Quote,
+  Facebook,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
@@ -19,7 +20,14 @@ import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { GradientButton } from "@/components/site/GradientButton";
 import { StatCounter } from "@/components/site/StatCounter";
 import { GlowCard } from "@/components/site/GlowCard";
-import { SITE, STATS } from "@/lib/site-content";
+import { Timeline } from "@/components/site/Timeline";
+import { LocationMap } from "@/components/site/LocationMap";
+import { LatestNews } from "@/components/site/LatestNews";
+import { UpcomingPrograms } from "@/components/site/UpcomingPrograms";
+import { LeadershipPreview } from "@/components/site/LeadershipPreview";
+import { TestimonialsCarousel } from "@/components/site/TestimonialsCarousel";
+import { SITE, buildStats } from "@/lib/site-content";
+import { settingsApi, type SiteSettings } from "@/lib/api";
 import homeHero1 from "@/assets/home-hero-1.png";
 import homeHero2 from "@/assets/home-hero-2.png";
 import sayorHome from "@/assets/sayor-home.png";
@@ -117,9 +125,16 @@ function MagazineTilt() {
 }
 
 function Index() {
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+
   useEffect(() => {
     document.documentElement.classList.add("dark");
   }, []);
+
+  useEffect(() => {
+    settingsApi.get().then(setSettings).catch(() => setSettings(null));
+  }, []);
+
   return (
     <>
       {/* HERO */}
@@ -227,7 +242,7 @@ function Index() {
       {/* STATS */}
       <section className="border-y border-border bg-[var(--color-surface-2)]">
         <div className="container-page grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
-          {STATS.map((s, i) => (
+          {buildStats(settings).map((s, i) => (
             <div key={i} className="px-6 py-12 text-center">
               <StatCounter value={s.value} suffix={s.suffix} raw={s.raw} text={s.text} />
               <div className="mt-2 text-label">{s.label}</div>
@@ -272,6 +287,12 @@ function Index() {
         </div>
       </section>
 
+      <Timeline />
+
+      <UpcomingPrograms />
+
+      <LatestNews />
+
       {/* SAYOR */}
       <section className="py-28 md:py-32 relative overflow-hidden bg-[var(--color-surface-2)]">
         <div className="absolute -left-32 top-1/3 h-[40vh] w-[40vh] rounded-full bg-[var(--color-accent-2)] opacity-10 blur-[120px]" />
@@ -296,6 +317,10 @@ function Index() {
         </div>
       </section>
 
+      <LeadershipPreview />
+
+      <TestimonialsCarousel />
+
       {/* QUOTE */}
       <section className="py-28 md:py-32 relative bg-[var(--color-surface)]">
         <div className="container-page relative text-center max-w-4xl">
@@ -317,6 +342,8 @@ function Index() {
         </div>
       </section>
 
+      <LocationMap />
+
       {/* CTA */}
       <section className="py-24 md:py-28 bg-[var(--color-surface-2)]">
         <div className="container-page">
@@ -334,6 +361,9 @@ function Index() {
                 <GradientButton to="/contact">Contact Us</GradientButton>
                 <GradientButton to="/leadership" variant="ghost">
                   Meet the Executive Committee
+                </GradientButton>
+                <GradientButton href={SITE.facebook} target="_blank" variant="ghost">
+                  <Facebook size={16} /> Join our Facebook Community
                 </GradientButton>
               </div>
             </div>

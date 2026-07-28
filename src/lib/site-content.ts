@@ -277,3 +277,27 @@ export const STATS = [
   { value: 14, label: "Core Objectives" },
   { value: 1, text: "First", label: "Pioneer in Sunamganj" },
 ];
+
+// Merges live site settings (from the dashboard) into the stats bar, falling
+// back to the static entry above whenever a field is blank or unparseable —
+// so the homepage never shows 0/NaN, and looks identical to today until an
+// admin fills in Settings.
+export function buildStats(settings: { members?: string; founded?: string } | null): typeof STATS {
+  if (!settings) return STATS;
+
+  const membersRaw = settings.members?.trim();
+  const membersNum = membersRaw ? parseInt(membersRaw.replace(/[^\d]/g, ""), 10) : NaN;
+  const membersStat =
+    membersRaw && !Number.isNaN(membersNum) && membersNum > 0
+      ? { value: membersNum, suffix: membersRaw.includes("+") ? "+" : "", label: "Members" }
+      : STATS[0];
+
+  const foundedRaw = settings.founded?.trim();
+  const foundedYear = foundedRaw ? parseInt(foundedRaw.replace(/[^\d]/g, "").slice(0, 4), 10) : NaN;
+  const foundedStat =
+    foundedRaw && !Number.isNaN(foundedYear) && foundedYear > 1900 && foundedYear <= new Date().getFullYear()
+      ? { value: foundedYear, label: "Established", noPlus: true, raw: true }
+      : STATS[1];
+
+  return [membersStat, foundedStat, STATS[2], STATS[3]];
+}

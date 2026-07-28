@@ -125,6 +125,18 @@ export interface FelicitationEntry {
   created_at: string;
 }
 
+export interface Testimonial {
+  id: number;
+  name: string;
+  role: string;
+  quote: string;
+  photo_url: string;
+  program: string;
+  is_featured: boolean;
+  order: number;
+  created_at: string;
+}
+
 export interface ProgramObjective {
   id: number;
   title: string;
