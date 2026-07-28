@@ -15,10 +15,14 @@ import {
   Camera,
   Gift,
   Sparkles,
+  Facebook,
+  Image as ImageIcon,
   X,
   type LucideIcon,
 } from "lucide-react";
 import { optimizeImage, type ProgramPage } from "@/lib/api";
+import { SITE } from "@/lib/site-content";
+import { GradientButton } from "./GradientButton";
 
 const ICONS: Record<string, LucideIcon> = {
   users: Users,
@@ -162,7 +166,7 @@ export function PicnicPage({
         </div>
       </section>
 
-      <section className="py-14 md:py-20">
+      <section className="pt-14 pb-0 md:pt-20">
         <div className="container-page">
           {/* Year switcher */}
           {years.length > 1 && page && (
@@ -412,25 +416,38 @@ export function PicnicPage({
           )}
 
           {/* CTA */}
-          <div
-            className="flex flex-col items-center gap-5 rounded-2xl p-8 text-center sm:flex-row sm:justify-between sm:text-left"
-            style={{ background: `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})` }}
-          >
-            <div className="text-white">
-              <h3 className="font-display text-lg font-bold leading-tight">
+          <div className="relative overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] p-10 text-center md:p-14">
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `radial-gradient(circle at 30% 30%, color-mix(in oklab, ${ACCENT} 18%, transparent), transparent 50%), radial-gradient(circle at 70% 70%, color-mix(in oklab, ${ACCENT_2} 16%, transparent), transparent 50%)`,
+              }}
+            />
+            <div className="relative">
+              <h3 className="font-display text-2xl font-bold tracking-tight md:text-4xl">
                 {page?.cta_title || "Let's make this picnic the best one yet!"}
               </h3>
-              {page?.cta_subtitle && <p className="mt-1 text-sm text-white/85">{page.cta_subtitle}</p>}
+              {page?.cta_subtitle && (
+                <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground md:text-base">
+                  {page.cta_subtitle}
+                </p>
+              )}
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                {page?.register_label && (
+                  <GradientButton href={page.register_url || "#"}>
+                    {page.register_label} <ArrowRight size={15} />
+                  </GradientButton>
+                )}
+                {gallery.length > 0 && (
+                  <GradientButton onClick={() => setLightboxIndex(0)} variant="ghost">
+                    <ImageIcon size={16} /> View Gallery
+                  </GradientButton>
+                )}
+                <GradientButton href={SITE.facebook} target="_blank" variant="ghost">
+                  <Facebook size={16} /> Join our Facebook Community
+                </GradientButton>
+              </div>
             </div>
-            {page?.register_label && (
-              <a
-                href={page.register_url || "#"}
-                className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold transition-opacity hover:opacity-90"
-                style={{ color: ACCENT }}
-              >
-                {page.register_label} <ArrowRight size={15} />
-              </a>
-            )}
           </div>
         </div>
       </section>

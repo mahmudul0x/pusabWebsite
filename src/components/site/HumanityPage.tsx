@@ -16,10 +16,14 @@ import {
   Globe2,
   HeartHandshake,
   ZoomIn,
+  Facebook,
+  Image as ImageIcon,
   X,
   type LucideIcon,
 } from "lucide-react";
 import { optimizeImage, type ProgramPage } from "@/lib/api";
+import { SITE } from "@/lib/site-content";
+import { GradientButton } from "./GradientButton";
 
 const ICONS: Record<string, LucideIcon> = {
   users: Users,
@@ -138,7 +142,7 @@ export function HumanityPage({
         </div>
       </section>
 
-      <section className="py-14 md:py-20">
+      <section className="pt-14 pb-0 md:pt-20">
         <div className="container-page">
           {/* Year switcher */}
           {years.length > 1 && page && (
@@ -442,36 +446,39 @@ export function HumanityPage({
             )}
           </AnimatePresence>
 
-          {/* CTA — gradient banner with decorative rings */}
-          <div className="relative overflow-hidden rounded-3xl p-8 md:p-10" style={{ background: GRADIENT }}>
-            <div className="pointer-events-none absolute -right-14 -top-14 h-48 w-48 rounded-full bg-white/10" />
-            <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-white/[0.07]" />
-            <div className="relative flex flex-col items-center gap-6 text-center sm:flex-row sm:justify-between sm:text-left">
-              <div className="flex items-center gap-4">
-                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/15 text-white backdrop-blur-sm">
-                  <Heart size={20} />
-                </div>
-                <div className="text-white">
-                  <h3 className="font-display text-xl font-bold leading-tight md:text-2xl">
-                    {page?.cta_title || "Be a Part of the Change"}
-                  </h3>
-                  {page?.cta_subtitle && <p className="mt-1 text-sm text-white/85">{page.cta_subtitle}</p>}
-                </div>
+          {/* CTA */}
+          <div className="relative overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] p-10 text-center md:p-14">
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `radial-gradient(circle at 30% 30%, color-mix(in oklab, ${ACCENT} 18%, transparent), transparent 50%), radial-gradient(circle at 70% 70%, color-mix(in oklab, ${ACCENT_2} 16%, transparent), transparent 50%)`,
+              }}
+            />
+            <div className="relative">
+              <div
+                className="mx-auto grid h-11 w-11 place-items-center rounded-full text-white"
+                style={{ background: GRADIENT }}
+              >
+                <Heart size={18} />
               </div>
-              <div className="flex shrink-0 items-center gap-3">
-                <a
-                  href="/support"
-                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold shadow-md transition-opacity hover:opacity-90"
-                  style={{ color: ACCENT }}
-                >
-                  Get Involved
-                </a>
-                <a
-                  href="/support"
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/40 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10"
-                >
-                  Contribute Now <ArrowRight size={15} />
-                </a>
+              <h3 className="mt-5 font-display text-2xl font-bold tracking-tight md:text-4xl">
+                {page?.cta_title || "Be a Part of the Change"}
+              </h3>
+              {page?.cta_subtitle && (
+                <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground md:text-base">
+                  {page.cta_subtitle}
+                </p>
+              )}
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <GradientButton href="/support">Get Involved</GradientButton>
+                {gallery.length > 0 && (
+                  <GradientButton onClick={() => setLightboxIndex(0)} variant="ghost">
+                    <ImageIcon size={16} /> View Gallery
+                  </GradientButton>
+                )}
+                <GradientButton href={SITE.facebook} target="_blank" variant="ghost">
+                  <Facebook size={16} /> Join our Facebook Community
+                </GradientButton>
               </div>
             </div>
           </div>
