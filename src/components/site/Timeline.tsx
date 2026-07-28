@@ -27,7 +27,7 @@ const MILESTONES = [
 
 export function Timeline() {
   return (
-    <section className="py-28 md:py-32">
+    <section className="py-28 md:py-32 bg-[var(--color-surface-2)]">
       <div className="container-page">
         <div className="mb-16 max-w-xl">
           <p className="text-label mb-3">Our journey</p>
@@ -54,7 +54,9 @@ export function Timeline() {
                 className="relative pl-10 md:pl-0"
               >
                 {/* Node */}
-                <div className="absolute left-0 top-0 h-8 w-8 -translate-x-1/2 translate-x-[15px] rounded-full border-2 border-[var(--color-accent-1)] bg-[var(--color-surface)] md:relative md:left-auto md:top-auto md:mb-6 md:translate-x-0" />
+                {/* Centred on the 1px rule at x=15px, so -1px puts the 32px
+                    node's midpoint exactly on the line. */}
+                <div className="absolute -left-px top-0 h-8 w-8 rounded-full border-2 border-[var(--color-accent-1)] bg-[var(--color-surface)] md:relative md:left-auto md:top-auto md:mb-6" />
 
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-accent-1)]">
                   {m.year}

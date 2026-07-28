@@ -261,6 +261,8 @@ function Index() {
         </div>
       </section>
 
+      <Timeline />
+
       {/* ACTIVITIES */}
       <section className="py-28 md:py-32">
         <div className="container-page">
@@ -283,8 +285,6 @@ function Index() {
           <ActivitiesBento activities={ACTIVITIES} />
         </div>
       </section>
-
-      <Timeline />
 
       <UpcomingPrograms />
 
