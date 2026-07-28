@@ -141,13 +141,13 @@ function MomentsPage() {
         imageAlt={hero.imageAlt ?? "PUSAB reunion moments collage"}
       />
 
-      <section className="pb-24">
+      <section className="relative -mt-10 pb-24 sm:-mt-12">
         <div className="container-page">
-          <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
+          <div className="relative z-20 mb-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-[var(--color-surface)]/95 p-2 shadow-[0_18px_40px_-20px_rgba(2,6,23,0.35)] backdrop-blur-md">
             <div
               role="tablist"
               aria-label="Filter by category"
-              className="inline-flex flex-wrap gap-1 rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-sm"
+              className="inline-flex flex-wrap gap-1"
             >
               {CAT_TABS.map((t) => {
                 const count =
@@ -194,7 +194,7 @@ function MomentsPage() {
               })}
             </div>
             {items && !failed && shown.length > 0 && (
-              <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <span className="mr-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
                 {shown.length} {shown.length === 1 ? "photo" : "photos"}
               </span>
             )}
