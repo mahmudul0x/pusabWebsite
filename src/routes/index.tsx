@@ -56,36 +56,46 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+// `slug` links each focus area to its program page — the detail panel pulls
+// that page's hero photo from the dashboard, so images are managed there.
 const ACTIVITIES = [
   {
     Icon: HeartHandshake,
     title: "Student Unity & Cooperation",
     desc: "To foster cooperation among students from public universities, government medical colleges, and engineering colleges in Bangladesh who are permanent residents of Bishwambarpur Upazila.",
+    slug: "reunion",
   },
   {
     Icon: Award,
     title: "Achievement Recognition",
     desc: "Honor students who bring pride to the region through merit.",
+    slug: "felicitation",
   },
   {
     Icon: Megaphone,
     title: "Educational Campaigns",
     desc: "Awareness drives, study circles and career talks across schools of the upazila.",
+    slug: "schooling",
   },
   {
     Icon: GraduationCap,
     title: "Admission Support",
     desc: "Mentoring aspirants through SSC, HSC, admission tests and university application.",
+    // The online-events page has no hero photo yet; schooling covers the same
+    // mentoring work visually. Swap back to "online" once it has one.
+    slug: "schooling",
   },
   {
     Icon: BookOpen,
     title: "PUSAB Scholarship",
     desc: "Provide financial aid to deserving students from underserved families. PUSAB also arrenges Scholarship Exam for the student of class VIII, IX and X.",
+    slug: "scholarship",
   },
   {
     Icon: Stethoscope,
     title: "Medical Camps & Humanity",
     desc: "Free health camps, disaster relief and humanitarian aid for the community.",
+    slug: "humanity",
   },
 ];
 
