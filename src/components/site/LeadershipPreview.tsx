@@ -58,56 +58,72 @@ export function LeadershipPreview() {
           </AnimatedHeading>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 max-w-3xl">
-          {populated.map(({ role, letter, accent, roleLabel, to }) => {
+        <div className="grid gap-6 sm:grid-cols-2">
+          {populated.map(({ role, letter, accent, roleLabel, to }, i) => {
             const msg = leaders[role]!;
             const c1 = accent === "1" ? "var(--color-accent-1)" : "var(--color-accent-2)";
             const c2 = accent === "1" ? "var(--color-accent-2)" : "var(--color-accent-1)";
             return (
-              <Link
+              <motion.div
                 key={role}
-                to={to}
-                className="group rounded-2xl border border-border bg-[var(--color-surface)] p-7 transition-all duration-300 hover:-translate-y-1"
-                style={{ borderColor: `color-mix(in oklab, ${c1} 18%, var(--color-border, transparent))` }}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
               >
-                <div className="flex items-center gap-4">
-                  <div
-                    className="h-16 w-16 shrink-0 overflow-hidden rounded-xl"
-                    style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
-                  >
+                <Link
+                  to={to}
+                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] transition-all duration-300 hover:-translate-y-1.5"
+                  style={{ borderColor: `color-mix(in oklab, ${c1} 18%, var(--color-border, transparent))` }}
+                >
+                  {/* Large photo banner */}
+                  <div className="relative aspect-[4/3] w-full overflow-hidden">
                     {msg.photo_url ? (
                       <img
-                        src={optimizeImage(msg.photo_url, 200)}
+                        src={optimizeImage(msg.photo_url, 800)}
                         alt={msg.name}
-                        className="h-full w-full object-cover"
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
-                      <span className="grid h-full w-full place-items-center text-xl font-bold text-white select-none">
-                        {letter}
-                      </span>
+                      <div
+                        className="absolute inset-0 grid place-items-center"
+                        style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
+                      >
+                        <span className="text-6xl font-bold text-white select-none">{letter}</span>
+                      </div>
                     )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/10 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-6">
+                      <p
+                        className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/90"
+                        style={{ textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
+                      >
+                        {roleLabel}
+                      </p>
+                      <p className="mt-1.5 font-display text-2xl md:text-3xl font-bold leading-tight text-white">
+                        {msg.name}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: c1 }}>
-                      {roleLabel}
-                    </p>
-                    <p className="mt-1 font-display text-lg font-bold leading-tight truncate">
-                      {msg.name}
-                    </p>
+
+                  {/* Body */}
+                  <div className="flex flex-1 flex-col p-6 md:p-7">
+                    {msg.quote?.trim() && (
+                      <p className="flex-1 line-clamp-3 font-display text-base italic leading-relaxed text-foreground/85">
+                        "{msg.quote}"
+                      </p>
+                    )}
+
+                    <span
+                      className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold"
+                      style={{ color: c1 }}
+                    >
+                      Read full message
+                      <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                    </span>
                   </div>
-                </div>
-
-                {msg.quote?.trim() && (
-                  <p className="mt-5 line-clamp-2 text-sm italic leading-relaxed text-muted-foreground">
-                    "{msg.quote}"
-                  </p>
-                )}
-
-                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-accent-1)]">
-                  Read full message
-                  <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-                </span>
-              </Link>
+                </Link>
+              </motion.div>
             );
           })}
         </div>
