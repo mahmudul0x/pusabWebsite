@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { SITE } from "@/lib/site-content";
-import heroAbout from "@/assets/hero-about.jpg";
+import heroSupport from "@/assets/support.jpeg";
 
 export const Route = createFileRoute("/support")({
   head: () => ({
@@ -83,9 +83,11 @@ function SupportPage() {
     <>
       {/* ── Hero ── */}
       <section className="relative h-[72vh] min-h-[520px] max-h-[820px] w-full overflow-hidden bg-background">
-        <img src={heroAbout} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/20 to-transparent" />
+        <img src={heroSupport} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        {/* Minimal scrim — a soft fade at the very bottom edge so the headline
+            stays readable; the photo is otherwise left alone. */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/12 via-30% to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/25 via-transparent to-transparent" />
 
         {/* Breadcrumb */}
         <div className="absolute top-32 md:top-36 left-0 right-0 z-10">
