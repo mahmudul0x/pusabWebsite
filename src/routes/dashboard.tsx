@@ -1,6 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
 import {
   AuthProvider,
   useAuth,
@@ -13,7 +25,16 @@ import {
   type GalleryItem,
   type PublicityPost,
   type Program,
+  type EcMember,
 } from "@/lib/api";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import {
   LayoutDashboard,
   Image as ImageIcon,
@@ -35,14 +56,13 @@ import {
   Award,
   Crown,
   ShieldCheck,
-  TrendingUp,
-  Clock,
   Plus,
   Star,
   Quote,
   FileText,
   MessageSquareQuote,
   GalleryHorizontal,
+  TrendingUp,
 } from "lucide-react";
 import logoPusab from "@/assets/logo-pusab.png";
 import { StatCard } from "@/components/dashboard/primitives";
@@ -59,6 +79,8 @@ import { FelicitationSection } from "@/components/dashboard/FelicitationSection"
 import { ProgramPagesSection } from "@/components/dashboard/ProgramPagesSection";
 import { TestimonialsSection } from "@/components/dashboard/TestimonialsSection";
 import { PageHeroesSection } from "@/components/dashboard/PageHeroesSection";
+
+const ACCENT = "var(--color-accent-1)";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -528,7 +550,25 @@ interface OverviewData {
   moments: GalleryItem[];
   publicity: PublicityPost[];
   programs: Program[];
+  members: EcMember[];
   committee: { count: number; current: number; sessions: number };
+}
+
+const CHART_COLORS = {
+  blue: "var(--color-chart-2)",
+  green: "var(--color-chart-3)",
+  amber: "var(--color-chart-4)",
+  pink: "var(--color-chart-5)",
+};
+
+function monthKey(iso: string) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function monthLabel(key: string) {
+  const [y, m] = key.split("-").map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString("en-GB", { month: "short", year: "2-digit" });
 }
 
 function Overview({ onJump }: { onJump: (s: Section) => void }) {
@@ -537,16 +577,17 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
   useEffect(() => {
     let alive = true;
     Promise.all([
-      galleryApi.list(),
-      publicityApi.list(),
-      programsApi.list(),
+      galleryApi.listAll(),
+      publicityApi.listAll(),
+      programsApi.listAll(),
       committeeApi.listAll(),
-    ]).then(([g, p, pr, c]) => {
+    ]).then(([moments, publicity, programs, c]) => {
       if (!alive) return;
       setData({
-        moments: g.results,
-        publicity: p.results,
-        programs: pr.results,
+        moments,
+        publicity,
+        programs,
+        members: c,
         committee: {
           count: c.length,
           current: c.filter((m) => m.is_current).length,
@@ -580,9 +621,71 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
     : [];
 
   const loading = data === null;
-  const now = new Date();
+  const now = useMemo(() => new Date(), []);
   const hour = now.getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+  // Content added per month, last 6 months — moments + publicity + programs.
+  const activityTrend = useMemo(() => {
+    if (!data) return [];
+    const months: string[] = [];
+    const cursor = new Date(now.getFullYear(), now.getMonth(), 1);
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(cursor.getFullYear(), cursor.getMonth() - i, 1);
+      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    }
+    const buckets = new Map(months.map((m) => [m, { moments: 0, publicity: 0, programs: 0 }]));
+    for (const m of data.moments) {
+      const k = monthKey(m.created_at);
+      if (buckets.has(k)) buckets.get(k)!.moments++;
+    }
+    for (const p of data.publicity) {
+      const k = monthKey(p.created_at);
+      if (buckets.has(k)) buckets.get(k)!.publicity++;
+    }
+    for (const p of data.programs) {
+      const k = monthKey(p.created_at);
+      if (buckets.has(k)) buckets.get(k)!.programs++;
+    }
+    return months.map((m) => ({ month: monthLabel(m), ...buckets.get(m)! }));
+  }, [data, now]);
+
+  const programStatus = useMemo(() => {
+    if (!data) return [];
+    const counts = { upcoming: 0, ongoing: 0, completed: 0 };
+    for (const p of data.programs) counts[p.status]++;
+    return [
+      { name: "Upcoming", value: counts.upcoming, fill: CHART_COLORS.blue },
+      { name: "Ongoing", value: counts.ongoing, fill: CHART_COLORS.green },
+      { name: "Completed", value: counts.completed, fill: CHART_COLORS.amber },
+    ].filter((d) => d.value > 0);
+  }, [data]);
+
+  const committeeByYear = useMemo(() => {
+    if (!data) return [];
+    const counts = new Map<number, number>();
+    for (const m of data.members) counts.set(m.year, (counts.get(m.year) ?? 0) + 1);
+    return [...counts.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .slice(-6)
+      .map(([year, count]) => ({ year: String(year), members: count }));
+  }, [data]);
+
+  const contentMixConfig: ChartConfig = {
+    moments: { label: "Photos", color: CHART_COLORS.blue },
+    publicity: { label: "Publicity", color: CHART_COLORS.green },
+    programs: { label: "Programs", color: CHART_COLORS.amber },
+  };
+
+  const programStatusConfig: ChartConfig = {
+    Upcoming: { label: "Upcoming", color: CHART_COLORS.blue },
+    Ongoing: { label: "Ongoing", color: CHART_COLORS.green },
+    Completed: { label: "Completed", color: CHART_COLORS.amber },
+  };
+
+  const committeeConfig: ChartConfig = {
+    members: { label: "Members", color: CHART_COLORS.blue },
+  };
 
   const quickActions = [
     { key: "moments", label: "Add a photo", Icon: ImageIcon, desc: "Upload to gallery" },
@@ -599,149 +702,208 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
   ];
 
   return (
-    <div className="grid auto-rows-min gap-4 md:grid-cols-6">
-      {/* Greeting hero — spans wide, merges welcome + a live snapshot line */}
-      <div
-        className="relative col-span-full overflow-hidden rounded-3xl p-6 md:col-span-4 md:p-8"
-        style={{ background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))" }}
-      >
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 80% 30%, white 0%, transparent 60%)" }} />
-        <div className="relative flex h-full flex-col justify-between gap-6">
-          <div>
-            <p className="text-sm font-semibold text-white/70 uppercase tracking-[0.18em]">{greeting}</p>
-            <h2 className="font-display text-3xl font-black tracking-tight text-white mt-1 md:text-4xl">Welcome back</h2>
-            <p className="mt-1.5 text-sm text-white/70">
-              {now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-white/85">
-            <span className="text-xs">
-              <span className="font-display text-lg font-black tabular-nums">{loading ? "—" : pub.length}</span> publicity posts
-            </span>
-            <span className="text-xs">
-              <span className="font-display text-lg font-black tabular-nums">{loading ? "—" : data!.committee.count}</span> committee members
-            </span>
-            <span className="text-xs">
-              <span className="font-display text-lg font-black tabular-nums">{loading ? "—" : prog.length}</span> programs
-            </span>
-          </div>
+    <div className="space-y-6">
+      {/* Slim greeting header */}
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>{greeting}</p>
+          <h2 className="font-display text-2xl font-extrabold tracking-tight mt-1 md:text-[28px]">Welcome back</h2>
         </div>
+        <p className="text-sm text-muted-foreground">
+          {now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+        </p>
       </div>
 
-      {/* Featured stat tile — Committee, tall accent card beside the hero */}
-      <div className="col-span-full md:col-span-2 md:row-span-2">
-        <StatCard label="Committee" icon={<Users size={16} />}
-          value={loading ? "—" : data!.committee.count}
-          sub={loading ? "" : `${data!.committee.sessions} sessions · ${data!.committee.current} current`}
-          onClick={() => onJump("executive-committee")} accent fill />
-      </div>
-
-      {/* Remaining stat tiles */}
-      <div className="col-span-full sm:col-span-1 md:col-span-2">
+      {/* Stat row — 4 equal cards */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Photos" icon={<ImageIcon size={16} />}
           value={loading ? "—" : data!.moments.length}
-          sub="In the Moments gallery" onClick={() => onJump("moments")} fill />
-      </div>
-      <div className="col-span-full sm:col-span-1 md:col-span-2">
+          sub="In the Moments gallery" onClick={() => onJump("moments")} />
         <StatCard label="Publicity Posts" icon={<Newspaper size={16} />}
           value={loading ? "—" : pub.length}
           sub={loading ? "" : `${published} published · ${pub.length - published} drafts`}
-          onClick={() => onJump("publicity")} fill />
-      </div>
-      <div className="col-span-full sm:col-span-2 md:col-span-2">
+          onClick={() => onJump("publicity")} />
+        <StatCard label="Committee" icon={<Users size={16} />}
+          value={loading ? "—" : data!.committee.count}
+          sub={loading ? "" : `${data!.committee.sessions} sessions · ${data!.committee.current} current`}
+          onClick={() => onJump("executive-committee")} accent />
         <StatCard label="Programs" icon={<CalendarRange size={16} />}
           value={loading ? "—" : prog.length}
           sub={loading ? "" : `${upcoming} upcoming · ${ongoing} ongoing`}
-          onClick={() => onJump("programs")} fill />
+          onClick={() => onJump("programs")} />
       </div>
 
-      {/* Recent activity — tall left tile */}
-      <div className="col-span-full overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] md:col-span-4 md:row-span-2">
-        <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
-          <div className="flex items-center gap-2.5">
-            <span className="grid h-7 w-7 place-items-center rounded-lg text-white" style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}>
-              <Clock size={13} />
-            </span>
+      {/* Charts row */}
+      <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
+        {/* Content activity over time */}
+        <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-5">
+          <div className="mb-1 flex items-center justify-between gap-4">
+            <div>
+              <h3 className="font-display text-sm font-bold">Content activity</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">New items added, last 6 months</p>
+            </div>
+            <TrendingUp size={16} className="text-muted-foreground/50" />
+          </div>
+          {loading ? (
+            <div className="mt-4 h-[220px] animate-pulse rounded-xl bg-[var(--color-background)]" />
+          ) : activityTrend.every((m) => m.moments + m.publicity + m.programs === 0) ? (
+            <p className="py-16 text-center text-sm text-muted-foreground">No activity in this period yet.</p>
+          ) : (
+            <ChartContainer config={contentMixConfig} className="mt-2 aspect-auto h-[220px] w-full">
+              <AreaChart data={activityTrend} margin={{ left: -20, right: 8, top: 8 }}>
+                <defs>
+                  <linearGradient id="fillMoments" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={CHART_COLORS.blue} stopOpacity={0.28} />
+                    <stop offset="95%" stopColor={CHART_COLORS.blue} stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="fillPublicity" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={CHART_COLORS.green} stopOpacity={0.28} />
+                    <stop offset="95%" stopColor={CHART_COLORS.green} stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="fillPrograms" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={CHART_COLORS.amber} stopOpacity={0.28} />
+                    <stop offset="95%" stopColor={CHART_COLORS.amber} stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} strokeDasharray="0" stroke="var(--color-border)" />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} fontSize={11} />
+                <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={11} allowDecimals={false} width={28} />
+                <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+                <Area dataKey="moments" type="monotone" fill="url(#fillMoments)" stroke={CHART_COLORS.blue} strokeWidth={2} stackId="a" />
+                <Area dataKey="publicity" type="monotone" fill="url(#fillPublicity)" stroke={CHART_COLORS.green} strokeWidth={2} stackId="a" />
+                <Area dataKey="programs" type="monotone" fill="url(#fillPrograms)" stroke={CHART_COLORS.amber} strokeWidth={2} stackId="a" />
+                <ChartLegend content={<ChartLegendContent />} />
+              </AreaChart>
+            </ChartContainer>
+          )}
+        </div>
+
+        {/* Program status donut */}
+        <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-5">
+          <h3 className="font-display text-sm font-bold">Programs by status</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">Current pipeline</p>
+          {loading ? (
+            <div className="mt-4 h-[190px] animate-pulse rounded-xl bg-[var(--color-background)]" />
+          ) : programStatus.length === 0 ? (
+            <p className="py-16 text-center text-sm text-muted-foreground">No programs yet.</p>
+          ) : (
+            <ChartContainer config={programStatusConfig} className="mx-auto aspect-auto h-[190px] w-full">
+              <PieChart>
+                <ChartTooltip content={<ChartTooltipContent hideLabel indicator="dot" />} />
+                <Pie data={programStatus} dataKey="value" nameKey="name" innerRadius={48} outerRadius={72} strokeWidth={2} stroke="var(--color-surface)">
+                  {programStatus.map((entry) => (
+                    <Cell key={entry.name} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <ChartLegend content={<ChartLegendContent nameKey="name" />} />
+              </PieChart>
+            </ChartContainer>
+          )}
+        </div>
+      </div>
+
+      {/* Committee growth */}
+      {!loading && committeeByYear.length > 1 && (
+        <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-5">
+          <h3 className="font-display text-sm font-bold">Committee members by session</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">Headcount across the most recent sessions</p>
+          <ChartContainer config={committeeConfig} className="mt-2 aspect-auto h-[180px] w-full">
+            <BarChart data={committeeByYear} margin={{ left: -20, right: 8, top: 8 }}>
+              <CartesianGrid vertical={false} strokeDasharray="0" stroke="var(--color-border)" />
+              <XAxis dataKey="year" tickLine={false} axisLine={false} tickMargin={8} fontSize={11} />
+              <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={11} allowDecimals={false} width={28} />
+              <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+              <Bar dataKey="members" fill={CHART_COLORS.blue} radius={[4, 4, 0, 0]} maxBarSize={40} />
+            </BarChart>
+          </ChartContainer>
+        </div>
+      )}
+
+      {/* Bottom: activity feed + sidebar */}
+      <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
+        {/* Recent activity */}
+        <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
+          <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
             <h3 className="font-display text-sm font-bold">Recent activity</h3>
+            <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground tabular-nums">{recent.length}</span>
           </div>
-          <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground tabular-nums">{recent.length}</span>
+          {loading ? (
+            <div className="space-y-1 p-3">
+              {[0,1,2,3,4].map((i) => (
+                <div key={i} className="h-14 animate-pulse rounded-xl bg-[var(--color-background)]" style={{ animationDelay: `${i*60}ms` }} />
+              ))}
+            </div>
+          ) : recent.length === 0 ? (
+            <p className="py-16 text-center text-sm text-muted-foreground">Nothing yet.</p>
+          ) : (
+            <ul>
+              {recent.map((r) => (
+                <li key={r.id}
+                  className="group flex cursor-pointer items-center gap-3 px-5 py-3 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)] border-b border-border last:border-0"
+                  onClick={() => onJump(r.section)}
+                >
+                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-[var(--color-background)] border border-border">
+                    {r.image ? <img src={r.image} alt="" className="h-full w-full object-cover" /> : (
+                      <div className="grid h-full w-full place-items-center text-muted-foreground/30">
+                        <ImageIcon size={14} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold leading-tight">{r.title}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      <span className="font-bold" style={{ color: ACCENT }}>{r.kind}</span>
+                      {" · "}
+                      {new Date(r.at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                    </p>
+                  </div>
+                  <ArrowUpRight size={13} className="shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-        {loading ? (
-          <div className="space-y-1 p-3">
-            {[0,1,2,3,4].map((i) => (
-              <div key={i} className="h-14 animate-pulse rounded-xl bg-[var(--color-background)]" style={{ animationDelay: `${i*60}ms` }} />
-            ))}
+
+        {/* Sidebar */}
+        <div className="flex flex-col gap-5">
+          {/* Quick actions */}
+          <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
+            <div className="border-b border-border px-5 py-4">
+              <h3 className="font-display text-sm font-bold">Quick actions</h3>
+            </div>
+            <div className="p-2 space-y-0.5">
+              {quickActions.map(({ key, label, Icon, desc }) => (
+                <button key={key} onClick={() => onJump(key)}
+                  className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all hover:bg-[color-mix(in_oklab,var(--color-accent-1)_6%,transparent)]"
+                >
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border bg-[var(--color-background)] text-muted-foreground transition-colors group-hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] group-hover:text-[var(--color-accent-1)]">
+                    <Icon size={14} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold leading-tight">{label}</p>
+                    <p className="text-[11px] text-muted-foreground">{desc}</p>
+                  </div>
+                  <Plus size={13} className="shrink-0 text-muted-foreground/40 group-hover:text-[var(--color-accent-1)] transition-colors" />
+                </button>
+              ))}
+            </div>
           </div>
-        ) : recent.length === 0 ? (
-          <p className="py-16 text-center text-sm text-muted-foreground">Nothing yet.</p>
-        ) : (
-          <ul>
-            {recent.map((r) => (
-              <li key={r.id}
-                className="group flex cursor-pointer items-center gap-3 px-5 py-3 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)] border-b border-border last:border-0"
-                onClick={() => onJump(r.section)}
-              >
-                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-[var(--color-background)] border border-border">
-                  {r.image ? <img src={r.image} alt="" className="h-full w-full object-cover" /> : (
-                    <div className="grid h-full w-full place-items-center text-muted-foreground/30">
-                      <ImageIcon size={14} />
-                    </div>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold leading-tight">{r.title}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    <span className="font-bold" style={{ color: "var(--color-accent-1)" }}>{r.kind}</span>
-                    {" · "}
-                    {new Date(r.at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                  </p>
-                </div>
-                <ArrowUpRight size={13} className="shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
 
-      {/* Quick actions */}
-      <div className="col-span-full overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] md:col-span-2">
-        <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
-          <span className="grid h-7 w-7 place-items-center rounded-lg text-white" style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}>
-            <TrendingUp size={13} />
-          </span>
-          <h3 className="font-display text-sm font-bold">Quick actions</h3>
-        </div>
-        <div className="p-2 space-y-0.5">
-          {quickActions.map(({ key, label, Icon, desc }) => (
-            <button key={key} onClick={() => onJump(key)}
-              className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all hover:bg-[color-mix(in_oklab,var(--color-accent-1)_6%,transparent)]"
-            >
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border bg-[var(--color-background)] text-muted-foreground transition-colors group-hover:border-[color-mix(in_oklab,var(--color-accent-1)_40%,transparent)] group-hover:text-[var(--color-accent-1)]">
-                <Icon size={14} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold leading-tight">{label}</p>
-                <p className="text-[11px] text-muted-foreground">{desc}</p>
-              </div>
-              <Plus size={13} className="shrink-0 text-muted-foreground/40 group-hover:text-[var(--color-accent-1)] transition-colors" />
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Site links */}
-      <div className="col-span-full overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] md:col-span-2">
-        <div className="border-b border-border px-5 py-3.5">
-          <h3 className="font-display text-sm font-bold">View site pages</h3>
-        </div>
-        <div className="divide-y divide-border">
-          {sitePages.map(({ label, to }) => (
-            <Link key={to} to={to} target="_blank"
-              className="flex items-center justify-between gap-2 px-5 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)] hover:text-foreground"
-            >
-              {label} <ExternalLink size={11} className="text-muted-foreground/50" />
-            </Link>
-          ))}
+          {/* Site links */}
+          <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
+            <div className="border-b border-border px-5 py-3.5">
+              <h3 className="font-display text-sm font-bold">View site pages</h3>
+            </div>
+            <div className="divide-y divide-border">
+              {sitePages.map(({ label, to }) => (
+                <Link key={to} to={to} target="_blank"
+                  className="flex items-center justify-between gap-2 px-5 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)] hover:text-foreground"
+                >
+                  {label} <ExternalLink size={11} className="text-muted-foreground/50" />
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
