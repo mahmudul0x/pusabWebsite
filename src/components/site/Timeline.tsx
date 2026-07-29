@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Sparkles } from "lucide-react";
 import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { SITE } from "@/lib/site-content";
 
@@ -21,6 +22,12 @@ const MILESTONES = [
     desc: "A community spanning universities, medical and engineering colleges nationwide, still rooted in one upazila.",
   },
   {
+    year: "2026",
+    title: "One Decade & Two Years",
+    desc: "Twelve years on from that first gathering, PUSAB marks the milestone by opening its official website to everyone.",
+    highlight: true,
+  },
+  {
     year: "Ahead",
     title: "Building What's Next",
     desc: "Scholarships, mentoring, relief work and cultural programs — expanding what PUSAB can do for Bishwambarpur.",
@@ -37,7 +44,7 @@ export function Timeline() {
             as="h2"
             className="font-display text-4xl md:text-5xl font-bold tracking-tight"
           >
-            A Decade of Impact
+Twelve Years of Impact
           </AnimatedHeading>
         </div>
 
@@ -45,7 +52,7 @@ export function Timeline() {
           {/* Connecting line */}
           <div className="absolute left-[15px] top-2 bottom-2 w-px bg-border md:left-0 md:right-0 md:top-[15px] md:h-px md:w-auto" />
 
-          <div className="grid gap-10 md:grid-cols-4 md:gap-6">
+          <div className="grid gap-10 md:grid-cols-5 md:gap-5">
             {MILESTONES.map((m, i) => (
               <motion.div
                 key={m.year}
@@ -57,13 +64,30 @@ export function Timeline() {
               >
                 {/* Node */}
                 {/* Centred on the 1px rule at x=15px, so -1px puts the 32px
-                    node's midpoint exactly on the line. */}
-                <div className="absolute -left-px top-0 h-8 w-8 rounded-full border-2 border-[var(--color-accent-1)] bg-[var(--color-surface)] md:relative md:left-auto md:top-auto md:mb-6" />
+                    node's midpoint exactly on the line. The anniversary step is
+                    filled in and haloed so it reads as the milestone. */}
+                <div
+                  className={
+                    "absolute -left-px top-0 grid h-8 w-8 place-items-center rounded-full border-2 border-[var(--color-accent-1)] md:relative md:left-auto md:top-auto md:mb-6 " +
+                    (m.highlight
+                      ? "bg-[var(--color-accent-1)] shadow-[0_0_0_6px_color-mix(in_oklab,var(--color-accent-1)_18%,transparent)]"
+                      : "bg-[var(--color-surface)]")
+                  }
+                >
+                  {m.highlight && <Sparkles size={14} className="text-white" />}
+                </div>
 
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-accent-1)]">
                   {m.year}
                 </p>
-                <h3 className="mt-2 font-display text-lg font-semibold">{m.title}</h3>
+                <h3
+                  className={
+                    "mt-2 font-display text-lg font-semibold " +
+                    (m.highlight ? "gradient-text" : "")
+                  }
+                >
+                  {m.title}
+                </h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{m.desc}</p>
               </motion.div>
             ))}

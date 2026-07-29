@@ -14,6 +14,7 @@ import { Home } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import faviconPusab from "../assets/logo-pusab.png?url";
+import shareBanner from "../assets/celebrate-modal.png?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FloatingNavbar } from "../components/site/FloatingNavbar";
 import { FlipbookContext } from "../lib/flipbook-context";
@@ -118,7 +119,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "PUSAB" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         name: "twitter:title",
         content: "PUSAB — Public University Students' Association of Bishwambarpur",
@@ -128,13 +129,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "A non-profit association of 300+ students from public universities, medical & engineering colleges — united for one upazila.",
       },
+      // Share previews carry the 12th-anniversary banner, so a link posted
+      // anywhere leads with the launch artwork rather than a bare logo.
       {
         property: "og:image",
-        content: `https://pusab.net${faviconPusab}`,
+        content: `https://pusab.net${shareBanner}`,
+      },
+      { property: "og:image:width", content: "1766" },
+      { property: "og:image:height", content: "891" },
+      {
+        property: "og:image:alt",
+        content: "PUSAB's 12th anniversary and official website inauguration",
       },
       {
         name: "twitter:image",
-        content: `https://pusab.net${faviconPusab}`,
+        content: `https://pusab.net${shareBanner}`,
       },
     ],
     links: [
