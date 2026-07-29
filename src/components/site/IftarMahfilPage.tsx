@@ -167,7 +167,7 @@ export function IftarMahfilPage({
           )}
 
           {/* About + quote card */}
-          <div className="mb-16 grid gap-6 lg:grid-cols-[1.3fr_1fr] lg:items-start">
+          <div className="mb-16 grid gap-8 lg:grid-cols-[1.3fr_1fr] lg:items-stretch">
             <div>
               <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                 About the Iftar
@@ -179,23 +179,30 @@ export function IftarMahfilPage({
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{overview}</p>
 
               {aboutFeatures.length > 0 && (
-                <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="mt-8 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2">
                   {aboutFeatures.map((f, i) => {
                     const FeatureIcon = FEATURE_ICONS[f.icon] ?? Sparkles;
                     return (
                       <motion.div
                         key={f.id}
-                        initial={{ opacity: 0, y: 14 }}
+                        initial={{ opacity: 0, y: 12 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "-40px" }}
-                        transition={{ duration: 0.4, delay: i * 0.07, ease: "easeOut" }}
-                        className="rounded-2xl border border-border bg-[var(--color-surface)] p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                        transition={{ duration: 0.4, delay: i * 0.06, ease: "easeOut" }}
+                        className="group flex items-center gap-3.5 bg-[var(--color-surface)] p-4 transition-colors duration-300 hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,var(--color-surface))]"
                       >
-                        <div className="grid h-10 w-10 place-items-center rounded-xl text-white shadow-sm" style={{ background: GRADIENT }}>
-                          <FeatureIcon size={17} />
+                        <div
+                          className="grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-transform duration-300 group-hover:scale-105"
+                          style={{ background: `color-mix(in oklab, ${ACCENT} 10%, transparent)`, color: ACCENT }}
+                        >
+                          <FeatureIcon size={18} />
                         </div>
-                        <p className="mt-3 text-sm font-bold leading-tight">{f.title}</p>
-                        {f.description && <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{f.description}</p>}
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold leading-tight">{f.title}</p>
+                          {f.description && (
+                            <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{f.description}</p>
+                          )}
+                        </div>
                       </motion.div>
                     );
                   })}
@@ -203,27 +210,45 @@ export function IftarMahfilPage({
               )}
             </div>
 
-            <div className="relative overflow-hidden rounded-2xl border border-border p-6 md:p-8" style={{ background: "var(--color-surface-2)" }}>
+            <div
+              className="relative flex flex-col overflow-hidden rounded-2xl border border-border p-6 md:p-8"
+              style={{ background: "var(--color-surface-2)" }}
+            >
               <div
-                className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full"
-                style={{ background: `color-mix(in oklab, ${ACCENT} 8%, transparent)` }}
+                className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full"
+                style={{ background: `color-mix(in oklab, ${ACCENT} 7%, transparent)` }}
               />
-              <h3 className="relative font-display text-lg font-bold" style={{ color: ACCENT }}>
-                All Are Welcome
-              </h3>
-              <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
-                Open to all PUSAB members, alumni, and their families.
-              </p>
-              <div className="relative mt-6 rounded-xl border-l-4 bg-[var(--color-surface)] p-5" style={{ borderColor: ACCENT }}>
-                <Quote size={18} style={{ color: ACCENT }} className="opacity-80" />
-                <p className="mt-2 text-sm italic leading-relaxed text-foreground">
+              <div
+                className="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full"
+                style={{ background: `color-mix(in oklab, ${ACCENT_2} 6%, transparent)` }}
+              />
+
+              <div className="relative">
+                <div
+                  className="mb-4 grid h-10 w-10 place-items-center rounded-xl text-white shadow-sm"
+                  style={{ background: GRADIENT }}
+                >
+                  <Heart size={17} />
+                </div>
+                <h3 className="font-display text-lg font-bold tracking-tight">All Are Welcome</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  Open to all PUSAB members, alumni, and their families.
+                </p>
+              </div>
+
+              <div className="relative mt-6 flex-1 rounded-xl bg-[var(--color-surface)] p-5 shadow-sm">
+                <Quote size={26} style={{ color: ACCENT }} className="opacity-25" />
+                <p className="-mt-2 text-sm italic leading-relaxed text-foreground">
                   "The best of you are those who feed others and return greetings of peace."
                 </p>
-                <p className="mt-2 text-xs text-muted-foreground">— Prophet Muhammad (ﷺ)</p>
+                <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  — Prophet Muhammad (ﷺ)
+                </p>
               </div>
+
               <a
                 href={page?.register_url || "#"}
-                className="relative mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
+                className="relative mt-6 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
                 style={{ background: GRADIENT }}
               >
                 Join Us <ArrowRight size={15} />
@@ -277,21 +302,13 @@ export function IftarMahfilPage({
           {/* Gallery — 4-up grid, 8 photos initially, show-more below */}
           {gallery.length > 0 && (
             <div className="mb-16">
-              <div className="mb-6 flex items-center justify-between">
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
-                    Glimpses from Past Iftar
-                  </p>
-                  <h2 className="mt-1 font-display text-2xl font-bold tracking-tight md:text-3xl">
-                    Moments That Stay in Our Hearts
-                  </h2>
-                </div>
-                <button
-                  onClick={() => setLightboxIndex(0)}
-                  className="hidden shrink-0 rounded-full border border-border px-4 py-2 text-xs font-bold text-foreground/80 transition-colors hover:text-foreground sm:inline-flex"
-                >
-                  View All Photos
-                </button>
+              <div className="mb-6">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
+                  Glimpses from Past Iftar
+                </p>
+                <h2 className="mt-1 font-display text-2xl font-bold tracking-tight md:text-3xl">
+                  Moments That Stay in Our Hearts
+                </h2>
               </div>
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

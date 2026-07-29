@@ -188,7 +188,7 @@ export function PageHeroesSection() {
           </span>
           <span className="text-[11px] text-muted-foreground/60">{PAGES.length} pages</span>
         </div>
-        <div className="flex gap-2 overflow-x-auto p-2.5">
+        <div className="flex flex-wrap gap-2 p-2.5">
           {PAGES.map((p) => {
             const f = forms[p.key];
             const active = page === p.key;
@@ -200,45 +200,34 @@ export function PageHeroesSection() {
                 type="button"
                 onClick={() => setPage(p.key)}
                 className={
-                  "group relative flex shrink-0 items-center gap-2.5 rounded-xl border p-2 pr-3.5 text-left transition-all " +
+                  "group relative flex items-center gap-2 rounded-full border px-3.5 py-2 text-left transition-all " +
                   (active
-                    ? "border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] bg-[color-mix(in_oklab,var(--color-accent-1)_7%,var(--color-surface))] shadow-sm"
-                    : "border-transparent hover:border-border hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)]")
+                    ? "border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] bg-[color-mix(in_oklab,var(--color-accent-1)_8%,var(--color-surface))] shadow-sm"
+                    : "border-border bg-[var(--color-surface)] hover:border-[color-mix(in_oklab,var(--color-accent-1)_25%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)]")
                 }
               >
-                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border bg-[var(--color-background)]">
-                  {f?.images[0]?.image_url ? (
-                    <img
-                      src={optimizeImage(f.images[0].image_url, 120)}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
+                <span
+                  className={
+                    "h-1.5 w-1.5 shrink-0 rounded-full transition-colors " +
+                    (isDirtyHere
+                      ? "bg-amber-500"
+                      : active
+                        ? "bg-[var(--color-accent-1)]"
+                        : "bg-muted-foreground/25")
+                  }
+                />
+                <span className={"whitespace-nowrap text-[13px] font-semibold " + (active ? "text-foreground" : "text-foreground/75")}>
+                  {p.label}
+                </span>
+                <span className="whitespace-nowrap text-[10.5px] text-muted-foreground/60">
+                  {isDirtyHere ? (
+                    <span className="font-medium text-amber-600">Unsaved</span>
+                  ) : at ? (
+                    relativeTime(at)
                   ) : (
-                    <div className="grid h-full w-full place-items-center">
-                      <ImageIcon size={12} className="text-muted-foreground/30" />
-                    </div>
+                    "New"
                   )}
-                  {isDirtyHere && (
-                    <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--color-surface)] bg-amber-500" />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <p className={"whitespace-nowrap text-[13px] font-semibold " + (active ? "text-foreground" : "text-foreground/75")}>
-                    {p.label}
-                  </p>
-                  <span className="flex items-center gap-1 whitespace-nowrap text-[10.5px] text-muted-foreground/70">
-                    {isDirtyHere ? (
-                      <span className="font-medium text-amber-600">Unsaved edits</span>
-                    ) : at ? (
-                      <>
-                        <Clock size={9} className="shrink-0" />
-                        {relativeTime(at)}
-                      </>
-                    ) : (
-                      "Not edited yet"
-                    )}
-                  </span>
-                </div>
+                </span>
               </button>
             );
           })}

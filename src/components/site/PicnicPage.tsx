@@ -18,6 +18,7 @@ import {
   Facebook,
   Image as ImageIcon,
   X,
+  Sun,
   type LucideIcon,
 } from "lucide-react";
 import { optimizeImage, type ProgramPage } from "@/lib/api";
@@ -37,40 +38,7 @@ const ICONS: Record<string, LucideIcon> = {
 
 const ACCENT = "var(--color-accent-1)";
 const ACCENT_2 = "var(--color-accent-2)";
-
-function HeroFacts({
-  eventDate,
-  venue,
-  eligibility,
-}: {
-  eventDate: string;
-  venue: string;
-  eligibility: string;
-}) {
-  const facts = [
-    { icon: Calendar, label: "Date", value: eventDate },
-    { icon: MapPin, label: "Venue", value: venue },
-    { icon: Users, label: "Who Can Join", value: eligibility },
-  ].filter((f) => f.value);
-
-  if (facts.length === 0) return null;
-
-  return (
-    <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-3">
-      {facts.map((f) => (
-        <div key={f.label} className="flex items-start gap-2.5">
-          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full" style={{ background: "color-mix(in oklab, var(--color-accent-1) 8%, transparent)" }}>
-            <f.icon size={15} style={{ color: ACCENT }} />
-          </div>
-          <div>
-            <p className="text-xs font-bold leading-tight text-foreground">{f.label}</p>
-            <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{f.value}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
+const GRADIENT = `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})`;
 
 export function PicnicPage({
   page,
@@ -115,54 +83,57 @@ export function PicnicPage({
     { icon: MapPin, label: "Venue", value: page?.venue },
   ].filter((f) => f.value);
 
+  const titleParts = title.split(" ");
+  const splitAt = Math.ceil(titleParts.length / 2);
+
+  const heroFacts = [
+    page?.event_date ? { Icon: Calendar, label: "Date", value: page.event_date } : null,
+    page?.venue ? { Icon: MapPin, label: "Venue", value: page.venue } : null,
+    page?.eligibility ? { Icon: Users, label: "Who Can Join", value: page.eligibility } : null,
+  ].filter((f): f is { Icon: LucideIcon; label: string; value: string } => f !== null);
+
   return (
     <>
-      {/* Hero — boxed light card, image on the right */}
-      <section className="pt-28 pb-10 md:pt-32 md:pb-14" style={{ background: "var(--color-surface-2)" }}>
-        <div className="container-page">
-          <nav className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
-            <Link to="/" className="transition-colors hover:text-foreground">
+      {/* Hero — full-cover photo header (site's standard full-photo hero pattern) */}
+      <section className="relative flex h-[380px] items-end overflow-hidden pt-28 pb-10 md:h-[460px] md:pt-32 md:pb-14">
+        <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/55 to-slate-950/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+
+        <div className="container-page relative z-10 [text-shadow:0_2px_30px_rgba(2,6,23,0.5)]">
+          <nav className="mb-4 flex items-center gap-2 text-xs text-white/70">
+            <Link to="/" className="transition-colors hover:text-white">
               Home
             </Link>
             <ChevronRight size={12} className="opacity-60" />
-            <Link to="/programs" className="transition-colors hover:text-foreground">
+            <Link to="/programs" className="transition-colors hover:text-white">
               Programs
             </Link>
             <ChevronRight size={12} className="opacity-60" />
-            <span className="text-foreground">{title}</span>
+            <span className="text-white">{title}</span>
           </nav>
 
-          <div className="grid gap-8 md:grid-cols-2 md:items-center">
-            <div>
-              <p
-                className="mb-3 inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em]"
-                style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))`, color: ACCENT }}
-              >
-                Together in Nature
-              </p>
-              <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-foreground md:text-5xl">
-                {title.split(" ").slice(0, -1).join(" ")}{" "}
-                <span style={{ color: ACCENT }}>{title.split(" ").slice(-1)}</span>
-              </h1>
-              {tagline && <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground md:text-base">{tagline}</p>}
-
-              <HeroFacts eventDate={page?.event_date ?? ""} venue={page?.venue ?? ""} eligibility={page?.eligibility ?? ""} />
-
-              {page?.register_label && (
-                <a
-                  href={page.register_url || "#"}
-                  className="mt-7 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                  style={{ background: ACCENT }}
-                >
-                  Stay Updated <ArrowRight size={15} />
-                </a>
-              )}
-            </div>
-
-            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl md:aspect-auto md:h-full md:min-h-[320px]">
-              <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
-            </div>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
+            <Sun size={13} style={{ color: ACCENT }} />
+            Together in Nature
           </div>
+
+          <h1 className="max-w-2xl font-display text-3xl font-extrabold leading-[1.04] tracking-[-0.03em] text-white md:text-5xl">
+            {titleParts.slice(0, splitAt).join(" ")}{" "}
+            <span style={{ color: ACCENT }}>{titleParts.slice(splitAt).join(" ")}</span>
+          </h1>
+          {tagline && <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/80 md:text-base">{tagline}</p>}
+
+          {heroFacts.length > 0 && (
+            <div className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3 text-xs text-white/85 md:text-sm">
+              {heroFacts.map((f) => (
+                <span key={f.label} className="inline-flex items-center gap-2">
+                  <f.Icon size={14} style={{ color: ACCENT }} />
+                  {f.value}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -200,47 +171,113 @@ export function PicnicPage({
             </div>
           )}
 
-          {/* About the Picnic — text + 4 icon facts on the left, "Open to All" card on the right */}
-          <div className="mb-16 grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:items-start">
+          {/* About the Picnic — event-info panel with floating badge on the left, copy + checklist on the right */}
+          <div className="mb-16 grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="relative"
+            >
+              <div
+                className="relative overflow-hidden rounded-3xl border border-border p-7 shadow-[0_40px_90px_-50px_rgba(15,23,42,0.35)] sm:p-8"
+                style={{ background: "var(--color-surface-2)" }}
+              >
+                <div
+                  className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full"
+                  style={{ background: `color-mix(in oklab, ${ACCENT} 8%, transparent)` }}
+                />
+                <div
+                  className="pointer-events-none absolute -bottom-12 -left-12 h-36 w-36 rounded-full"
+                  style={{ background: `color-mix(in oklab, ${ACCENT_2} 7%, transparent)` }}
+                />
+
+                <p className="relative text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
+                  Event Details
+                </p>
+
+                <div className="relative mt-6 space-y-6">
+                  {eventInfo.map((f) => (
+                    <div key={f.label} className="flex items-start gap-4">
+                      <div
+                        className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-white shadow-sm"
+                        style={{ background: GRADIENT }}
+                      >
+                        <f.icon size={18} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground">{f.label}</p>
+                        <p className="mt-1 font-display text-lg font-bold leading-snug text-foreground">{f.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="absolute -bottom-6 left-5 flex items-center gap-3 rounded-2xl border border-border bg-[var(--color-surface)] px-5 py-4 shadow-[0_20px_40px_-20px_rgba(15,23,42,0.4)] sm:left-8">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-white shadow-sm" style={{ background: GRADIENT }}>
+                  <Users size={18} />
+                </div>
+                <div>
+                  <p className="font-display text-lg font-extrabold leading-none">Open to All</p>
+                  <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                    Members, alumni &amp; families
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
             <div>
               <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
                 About the Picnic
               </p>
               <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">Relax. Reconnect. Recharge.</h2>
+              <div className="mt-3 h-1 w-14 rounded-full" style={{ background: GRADIENT }} />
               {overviewParagraphs.map((p, i) => (
-                <p key={i} className="mt-4 text-muted-foreground leading-relaxed">
+                <p
+                  key={i}
+                  className={
+                    i === 0
+                      ? "mt-5 text-base leading-relaxed text-foreground/80"
+                      : "mt-4 text-sm leading-relaxed text-muted-foreground"
+                  }
+                >
                   {p}
                 </p>
               ))}
 
               {facts.length > 0 && (
-                <div className="mt-7 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
-                  {facts.map((f) => {
+                <ul className="mt-7 space-y-3">
+                  {facts.map((f, i) => {
                     const FactIcon = ICONS[f.icon] ?? Sparkles;
                     return (
-                      <div key={f.id} className="flex items-start gap-2">
-                        <FactIcon size={16} style={{ color: ACCENT }} className="mt-0.5 shrink-0" />
-                        <p className="text-xs font-semibold leading-snug text-foreground/80">{f.title}</p>
-                      </div>
+                      <motion.li
+                        key={f.id}
+                        initial={{ opacity: 0, x: -12 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, margin: "-40px" }}
+                        transition={{ duration: 0.4, delay: i * 0.06, ease: "easeOut" }}
+                        className="flex items-center gap-3"
+                      >
+                        <span
+                          className="grid h-8 w-8 shrink-0 place-items-center rounded-full"
+                          style={{ background: `color-mix(in oklab, ${ACCENT} 10%, transparent)`, color: ACCENT }}
+                        >
+                          <FactIcon size={15} />
+                        </span>
+                        <span className="text-sm font-semibold text-foreground/85">{f.title}</span>
+                      </motion.li>
                     );
                   })}
-                </div>
+                </ul>
               )}
-            </div>
 
-            <div className="rounded-2xl p-6" style={{ background: "var(--color-surface-2)" }}>
-              <div className="grid h-14 w-14 place-items-center rounded-full" style={{ background: ACCENT }}>
-                <Users size={24} className="text-white" />
-              </div>
-              <h3 className="mt-4 font-display text-lg font-bold tracking-tight">Open to All</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {page?.eligibility || "All PUSAB members, alumni, and their families are warmly invited."}
-              </p>
               {page?.register_label && (
                 <a
                   href={page.register_url || "#"}
-                  className="mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                  style={{ background: ACCENT }}
+                  className="mt-8 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
+                  style={{ background: GRADIENT }}
                 >
                   {page.register_label} <ArrowRight size={15} />
                 </a>
@@ -397,23 +434,6 @@ export function PicnicPage({
               </motion.div>
             )}
           </AnimatePresence>
-
-          {/* Event info strip — light card, three columns */}
-          {eventInfo.length > 0 && (
-            <div className="mb-8 grid grid-cols-1 gap-6 rounded-2xl p-6 sm:grid-cols-3 sm:p-8" style={{ background: "var(--color-surface-2)" }}>
-              {eventInfo.map((f) => (
-                <div key={f.label} className="flex items-center justify-center gap-3 text-center sm:justify-start sm:text-left">
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border" style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))` }}>
-                    <f.icon size={18} style={{ color: ACCENT }} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold leading-tight">{f.label}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{f.value}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
 
           {/* CTA */}
           <div className="relative overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] p-10 text-center md:p-14">
