@@ -75,18 +75,17 @@ export function EventCard({ w }: { w: ProgramWebinar }) {
           </p>
         )}
 
-        <div className="mt-4 flex items-center gap-2.5">
-          <button className="flex-1 rounded-lg border border-border px-3 py-2 text-xs font-bold text-foreground/80 transition-colors hover:text-foreground">
-            View Details
-          </button>
-          <a
-            href={w.register_url || "#"}
-            className="flex-1 rounded-lg px-3 py-2 text-center text-xs font-bold text-white transition-opacity hover:opacity-90"
-            style={{ background: GRADIENT }}
-          >
-            Register Now
-          </a>
-        </div>
+        {w.register_url && (
+          <div className="mt-4">
+            <a
+              href={w.register_url}
+              className="block rounded-lg px-3 py-2 text-center text-xs font-bold text-white transition-opacity hover:opacity-90"
+              style={{ background: GRADIENT }}
+            >
+              Register Now
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );

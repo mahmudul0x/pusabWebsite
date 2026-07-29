@@ -261,9 +261,9 @@ export function PicnicPage({
                 </ul>
               )}
 
-              {page?.register_label && (
+              {page?.register_label && page?.register_url && (
                 <a
-                  href={page.register_url || "#"}
+                  href={page.register_url}
                   className="mt-8 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
                   style={{ background: GRADIENT }}
                 >
@@ -444,8 +444,8 @@ export function PicnicPage({
                 </p>
               )}
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                {page?.register_label && (
-                  <GradientButton href={page.register_url || "#"}>
+                {page?.register_label && page?.register_url && (
+                  <GradientButton href={page.register_url}>
                     {page.register_label} <ArrowRight size={15} />
                   </GradientButton>
                 )}

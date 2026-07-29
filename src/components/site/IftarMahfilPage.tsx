@@ -246,13 +246,15 @@ export function IftarMahfilPage({
                 </p>
               </div>
 
-              <a
-                href={page?.register_url || "#"}
-                className="relative mt-6 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
-                style={{ background: GRADIENT }}
-              >
-                Join Us <ArrowRight size={15} />
-              </a>
+              {page?.register_url && (
+                <a
+                  href={page.register_url}
+                  className="relative mt-6 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg"
+                  style={{ background: GRADIENT }}
+                >
+                  Join Us <ArrowRight size={15} />
+                </a>
+              )}
             </div>
           </div>
 
@@ -452,8 +454,8 @@ export function IftarMahfilPage({
                 </p>
               )}
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                {page?.register_label && (
-                  <GradientButton href={page.register_url || "#"}>
+                {page?.register_label && page?.register_url && (
+                  <GradientButton href={page.register_url}>
                     {page.register_label} <ArrowRight size={15} />
                   </GradientButton>
                 )}

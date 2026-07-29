@@ -436,8 +436,8 @@ export function SchoolingPage({
                   </p>
                 )}
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                  {page?.register_label && (
-                    <GradientButton href={page.register_url || "#"}>
+                  {page?.register_label && page?.register_url && (
+                    <GradientButton href={page.register_url}>
                       Support a Student <ArrowRight size={15} />
                     </GradientButton>
                   )}

@@ -49,12 +49,14 @@ function Field({
   value,
   onChange,
   textarea,
+  required,
 }: {
   label: string;
   type?: string;
   value: string;
   onChange: (v: string) => void;
   textarea?: boolean;
+  required?: boolean;
 }) {
   const hasValue = value.length > 0;
   const sharedClass =
@@ -65,6 +67,7 @@ function Field({
         <textarea
           rows={5}
           value={value}
+          required={required}
           onChange={(e) => onChange(e.target.value)}
           className={sharedClass + " resize-none"}
         />
@@ -72,6 +75,7 @@ function Field({
         <input
           type={type}
           value={value}
+          required={required}
           onChange={(e) => onChange(e.target.value)}
           className={sharedClass}
         />
@@ -246,6 +250,12 @@ function ContactBody() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
+    // Guard the send itself, so a blank message can't slip through even if the
+    // browser's own field validation is bypassed.
+    if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) {
+      toast.error("Please fill in your name, email, subject and message.");
+      return;
+    }
     setBusy(true);
     try {
       await contactApi.create({ name, email, subject, message, phone: "" });
@@ -279,11 +289,11 @@ function ContactBody() {
               className="md:col-span-8 rounded-3xl border border-border bg-[var(--color-surface)] p-6 md:p-10 space-y-4 shadow-sm"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Name" value={name} onChange={setName} />
-                <Field label="Email" type="email" value={email} onChange={setEmail} />
+                <Field label="Name" value={name} onChange={setName} required />
+                <Field label="Email" type="email" value={email} onChange={setEmail} required />
               </div>
-              <Field label="Subject" value={subject} onChange={setSubject} />
-              <Field label="Message" value={message} onChange={setMessage} textarea />
+              <Field label="Subject" value={subject} onChange={setSubject} required />
+              <Field label="Message" value={message} onChange={setMessage} textarea required />
               <div className="pt-4 flex items-center justify-between gap-4 flex-wrap">
                 <p className="text-xs text-muted-foreground">We aim to respond within 48 hours.</p>
                 <GradientButton type="submit">{busy ? "Sending…" : "Send Message"}</GradientButton>
