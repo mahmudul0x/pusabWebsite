@@ -10,7 +10,6 @@ import {
   Check,
   RotateCcw,
   ExternalLink,
-  Clock,
 } from "lucide-react";
 import { pageHeroApi, optimizeImage, type PageHero, type PageHeroImage, type PageHeroKey } from "@/lib/api";
 import { Field, inputCls } from "./primitives";
@@ -55,25 +54,10 @@ function sameForm(a: Form, b: Form): boolean {
   return a.images.every((img, i) => img.image_url === b.images[i].image_url && img.alt_text === b.images[i].alt_text);
 }
 
-function relativeTime(iso: string): string {
-  const diffMs = Date.now() - new Date(iso).getTime();
-  const mins = Math.round(diffMs / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.round(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  const months = Math.round(days / 30);
-  if (months < 12) return `${months}mo ago`;
-  return `${Math.round(months / 12)}y ago`;
-}
-
 export function PageHeroesSection() {
   const [page, setPage] = useState<PageHeroKey>("home");
   const [saved, setSaved] = useState<Partial<Record<PageHeroKey, Form>>>({});
   const [forms, setForms] = useState<Partial<Record<PageHeroKey, Form>>>({});
-  const [updatedAt, setUpdatedAt] = useState<Partial<Record<PageHeroKey, string>>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -88,14 +72,11 @@ export function PageHeroesSection() {
     Promise.all(PAGES.map((p) => pageHeroApi.get(p.key)))
       .then((results) => {
         const next: Partial<Record<PageHeroKey, Form>> = {};
-        const nextUpdated: Partial<Record<PageHeroKey, string>> = {};
         results.forEach((h, i) => {
           next[PAGES[i].key] = toForm(h);
-          nextUpdated[PAGES[i].key] = h.updated_at;
         });
         setForms(next);
         setSaved(next);
-        setUpdatedAt(nextUpdated);
       })
       .catch((e) => toast.error(errMessage(e)))
       .finally(() => setLoading(false));
@@ -139,11 +120,10 @@ export function PageHeroesSection() {
       const images = form.images
         .filter((img) => img.image_url)
         .map((img, i) => ({ ...img, order: i }));
-      const updated = await pageHeroApi.update(page, { title: form.title, lede: form.lede, images });
+      await pageHeroApi.update(page, { title: form.title, lede: form.lede, images });
       const next = { ...form, images };
       set("images", images);
       setSaved((s) => ({ ...s, [page]: next }));
-      setUpdatedAt((u) => ({ ...u, [page]: updated.updated_at }));
       toast.success(`${meta.label} hero saved`);
     } catch (err) {
       toast.error(errMessage(err));
@@ -193,41 +173,33 @@ export function PageHeroesSection() {
             const f = forms[p.key];
             const active = page === p.key;
             const isDirtyHere = f && !sameForm(f, saved[p.key] ?? emptyForm);
-            const at = updatedAt[p.key];
             return (
               <button
                 key={p.key}
                 type="button"
                 onClick={() => setPage(p.key)}
                 className={
-                  "group relative flex items-center gap-2 rounded-full border px-3.5 py-2 text-left transition-all " +
+                  "relative flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold transition-all " +
                   (active
-                    ? "border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] bg-[color-mix(in_oklab,var(--color-accent-1)_8%,var(--color-surface))] shadow-sm"
-                    : "border-border bg-[var(--color-surface)] hover:border-[color-mix(in_oklab,var(--color-accent-1)_25%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)]")
+                    ? "text-white shadow-md"
+                    : "text-foreground/70 hover:bg-[color-mix(in_oklab,var(--color-accent-1)_6%,transparent)] hover:text-foreground")
+                }
+                style={
+                  active
+                    ? { background: "linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))" }
+                    : undefined
                 }
               >
-                <span
-                  className={
-                    "h-1.5 w-1.5 shrink-0 rounded-full transition-colors " +
-                    (isDirtyHere
-                      ? "bg-amber-500"
-                      : active
-                        ? "bg-[var(--color-accent-1)]"
-                        : "bg-muted-foreground/25")
-                  }
-                />
-                <span className={"whitespace-nowrap text-[13px] font-semibold " + (active ? "text-foreground" : "text-foreground/75")}>
-                  {p.label}
-                </span>
-                <span className="whitespace-nowrap text-[10.5px] text-muted-foreground/60">
-                  {isDirtyHere ? (
-                    <span className="font-medium text-amber-600">Unsaved</span>
-                  ) : at ? (
-                    relativeTime(at)
-                  ) : (
-                    "New"
-                  )}
-                </span>
+                {p.label}
+                {isDirtyHere && (
+                  <span
+                    className={
+                      "h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500 " +
+                      (active ? "ring-2 ring-white/70" : "")
+                    }
+                    title="Unsaved edits"
+                  />
+                )}
               </button>
             );
           })}
