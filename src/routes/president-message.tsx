@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { PageHero } from "@/components/site/PageHero";
 import { Quote } from "lucide-react";
 import { leaderMessageApi, optimizeImage, type LeaderMessage } from "@/lib/api";
-import heroLeadership from "@/assets/hero-leadership.jpg";
+import heroLeadership from "@/assets/hero-pages.jpeg";
 
 export const Route = createFileRoute("/president-message")({
   head: () => ({

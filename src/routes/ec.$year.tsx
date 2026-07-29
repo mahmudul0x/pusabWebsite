@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHero } from "@/components/site/PageHero";
 import { CommitteeView } from "@/components/site/CommitteeView";
-import heroLeadership from "@/assets/hero-leadership.jpg";
+import heroLeadership from "@/assets/hero-pages.jpeg";
 
 import { ecOrdinal, sessionSpan } from "@/lib/session";
 

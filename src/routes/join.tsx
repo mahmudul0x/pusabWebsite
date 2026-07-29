@@ -6,7 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { GradientButton } from "@/components/site/GradientButton";
 import { contactApi } from "@/lib/api";
 import { ChevronRight, GraduationCap, MapPin, Users } from "lucide-react";
-import heroLeadership from "@/assets/hero-leadership.jpg";
+import heroLeadership from "@/assets/hero-pages.jpeg";
 
 export const Route = createFileRoute("/join")({
   head: () => ({

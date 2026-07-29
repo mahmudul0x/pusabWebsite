@@ -5,7 +5,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { committeeApi, optimizeImage } from "@/lib/api";
 import { usePageHero } from "@/lib/usePageHero";
 import { Users, GraduationCap, Star } from "lucide-react";
-import heroLeadership from "@/assets/hero-leadership.jpg";
+import heroLeadership from "@/assets/hero-pages.jpeg";
 
 export const Route = createFileRoute("/convening-committee")({
   head: () => ({
