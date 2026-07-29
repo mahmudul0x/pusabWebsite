@@ -11,7 +11,7 @@ import {
   RotateCcw,
   ExternalLink,
 } from "lucide-react";
-import { pageHeroApi, optimizeImage, type PageHero, type PageHeroImage, type PageHeroKey } from "@/lib/api";
+import { pageHeroApi, type PageHero, type PageHeroImage, type PageHeroKey } from "@/lib/api";
 import { Field, inputCls } from "./primitives";
 import { ImageUpload } from "./ImageUpload";
 import { errMessage } from "./useResource";
@@ -140,8 +140,6 @@ export function PageHeroesSection() {
     );
   }
 
-  const previewImage = form.images[0]?.image_url;
-
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -206,28 +204,45 @@ export function PageHeroesSection() {
         </div>
       </div>
 
-      {/* Editor + preview */}
-      <div className="grid gap-6 xl:grid-cols-[1fr_360px] xl:items-start">
-        <div className="min-w-0">
-          {/* Form */}
-          <form key={page} onSubmit={save} className="space-y-5 rounded-2xl border border-border bg-[var(--color-surface)] p-6">
-            <Field label="Title" hint="Leave empty to use the site's default heading for this page.">
-              <input
-                value={form.title}
-                onChange={(e) => set("title", e.target.value)}
-                className={inputCls}
-                placeholder="Default heading"
-              />
-            </Field>
-            <Field label="Subtitle" hint="Leave empty to use the site's default subtitle for this page.">
-              <textarea
-                value={form.lede}
-                onChange={(e) => set("lede", e.target.value)}
-                className={inputCls + " min-h-[80px] resize-y"}
-                placeholder="Default subtitle"
-              />
-            </Field>
+      {/* Editor */}
+      <div>
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
+            Editing {meta.label}
+          </p>
+          <a
+            href={meta.path}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-[var(--color-accent-1)]"
+          >
+            View live page <ExternalLink size={10} />
+          </a>
+        </div>
 
+        <form key={page} onSubmit={save} className="rounded-2xl border border-border bg-[var(--color-surface)]">
+          <div className="grid gap-x-8 gap-y-6 p-6 lg:grid-cols-2">
+            {/* Left column — copy */}
+            <div className="space-y-5">
+              <Field label="Title" hint="Leave empty to use the site's default heading for this page.">
+                <input
+                  value={form.title}
+                  onChange={(e) => set("title", e.target.value)}
+                  className={inputCls}
+                  placeholder="Default heading"
+                />
+              </Field>
+              <Field label="Subtitle" hint="Leave empty to use the site's default subtitle for this page.">
+                <textarea
+                  value={form.lede}
+                  onChange={(e) => set("lede", e.target.value)}
+                  className={inputCls + " min-h-[120px] resize-y lg:min-h-[220px]"}
+                  placeholder="Default subtitle"
+                />
+              </Field>
+            </div>
+
+            {/* Right column — images */}
             <div>
               <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
                 {meta.multiImage ? "Slideshow images" : "Banner image"}
@@ -304,98 +319,44 @@ export function PageHeroesSection() {
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Save bar — always in-flow at the end of the form, never overlaps content */}
-            <div className="-mx-6 -mb-6 flex flex-wrap items-center justify-between gap-3 border-t border-border bg-[color-mix(in_oklab,var(--color-background)_60%,var(--color-surface))] px-6 py-4">
-              <span className="text-xs">
-                {dirty ? (
-                  <span className="inline-flex items-center gap-1.5 font-medium text-amber-600">
-                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                    Unsaved changes
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 text-emerald-600">
-                    <Check size={13} /> All changes saved
-                  </span>
-                )}
-              </span>
-              <div className="flex items-center gap-2">
-                {dirty && (
-                  <button
-                    type="button"
-                    onClick={discard}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-[var(--color-surface)] px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-[var(--color-background)] hover:text-foreground"
-                  >
-                    <RotateCcw size={13} /> Discard
-                  </button>
-                )}
-                <button
-                  type="submit"
-                  disabled={saving || !dirty}
-                  className="inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40 active:scale-[0.98]"
-                  style={{ background: "linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))" }}
-                >
-                  {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                  {saving ? "Saving…" : "Save hero"}
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        {/* Right rail — sticky live preview + guidance */}
-        <div className="space-y-5 xl:sticky xl:top-5">
-          <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
-            <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-              <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
-                Live preview
-              </span>
-              <a
-                href={meta.path}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-[var(--color-accent-1)]"
-              >
-                View <ExternalLink size={10} />
-              </a>
-            </div>
-            <div className="relative flex min-h-[220px] items-end overflow-hidden p-5">
-              {previewImage ? (
-                <>
-                  <img src={optimizeImage(previewImage, 640)} alt="" className="absolute inset-0 h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-b from-slate-950/55 via-slate-950/55 to-slate-950/85" />
-                </>
+          {/* Save bar — always in-flow at the end of the form, never overlaps content */}
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-b-2xl border-t border-border bg-[color-mix(in_oklab,var(--color-background)_60%,var(--color-surface))] px-6 py-4">
+            <span className="text-xs">
+              {dirty ? (
+                <span className="inline-flex items-center gap-1.5 font-medium text-amber-600">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                  Unsaved changes
+                </span>
               ) : (
-                <div className="absolute inset-0 overflow-hidden" aria-hidden>
-                  <div className="absolute -top-16 -left-10 h-40 w-40 rounded-full bg-[var(--color-accent-1)] opacity-[0.18] blur-[60px]" />
-                  <div className="absolute top-1/3 -right-10 h-40 w-40 rounded-full bg-[var(--color-accent-2)] opacity-[0.14] blur-[60px]" />
-                </div>
+                <span className="inline-flex items-center gap-1.5 text-emerald-600">
+                  <Check size={13} /> All changes saved
+                </span>
               )}
-              <div className={"relative z-10 " + (previewImage ? "text-white" : "text-foreground")}>
-                <div className="mb-2.5 h-1 w-10 rounded-full bg-[linear-gradient(90deg,var(--color-accent-1),var(--color-accent-2))]" />
-                <p className="font-display text-lg font-extrabold tracking-tight leading-tight">
-                  {form.title || <span className="opacity-50">Using site default title</span>}
-                </p>
-                {(form.lede || !form.title) && (
-                  <p className={"mt-2 text-xs leading-relaxed " + (previewImage ? "text-white/75" : "text-muted-foreground")}>
-                    {form.lede || "Using site default subtitle"}
-                  </p>
-                )}
-              </div>
+            </span>
+            <div className="flex items-center gap-2">
+              {dirty && (
+                <button
+                  type="button"
+                  onClick={discard}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-[var(--color-surface)] px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-[var(--color-background)] hover:text-foreground"
+                >
+                  <RotateCcw size={13} /> Discard
+                </button>
+              )}
+              <button
+                type="submit"
+                disabled={saving || !dirty}
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40 active:scale-[0.98]"
+                style={{ background: "linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))" }}
+              >
+                {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                {saving ? "Saving…" : "Save hero"}
+              </button>
             </div>
           </div>
-
-          <div className="rounded-2xl border border-dashed border-border p-4">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
-              Tips
-            </p>
-            <ul className="mt-2.5 space-y-2 text-xs leading-relaxed text-muted-foreground">
-              <li>Leave title or subtitle empty to keep the site's default copy for this page.</li>
-              <li>Use a landscape photo, at least 1600px wide, so it stays sharp on large screens.</li>
-              {meta.multiImage && <li>Drag slides by the handle to change the order they rotate in.</li>}
-            </ul>
-          </div>
-        </div>
+        </form>
       </div>
     </div>
   );

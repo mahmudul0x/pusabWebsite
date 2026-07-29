@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -82,17 +82,6 @@ import { PageHeroesSection } from "@/components/dashboard/PageHeroesSection";
 
 const ACCENT = "var(--color-accent-1)";
 
-export const Route = createFileRoute("/dashboard")({
-  head: () => ({
-    meta: [{ title: "Dashboard — PUSAB" }, { name: "robots", content: "noindex" }],
-  }),
-  component: () => (
-    <AuthProvider>
-      <DashboardGate />
-    </AuthProvider>
-  ),
-});
-
 function Centered({ children }: { children: ReactNode }) {
   return (
     <div className="grid min-h-screen place-items-center bg-[var(--color-background)] px-6 text-center">
@@ -101,7 +90,15 @@ function Centered({ children }: { children: ReactNode }) {
   );
 }
 
-function DashboardGate() {
+export function DashboardGate({ section, onPick }: { section: Section; onPick: (s: Section) => void }) {
+  return (
+    <AuthProvider>
+      <DashboardGateInner section={section} onPick={onPick} />
+    </AuthProvider>
+  );
+}
+
+function DashboardGateInner({ section, onPick }: { section: Section; onPick: (s: Section) => void }) {
   const { user, loading, isAdmin } = useAuth();
   if (loading)
     return (
@@ -123,7 +120,7 @@ function DashboardGate() {
         </p>
       </Centered>
     );
-  return <DashboardShell />;
+  return <DashboardShell section={section} onPick={onPick} />;
 }
 
 function LoginScreen() {
@@ -220,7 +217,7 @@ function LoginScreen() {
   );
 }
 
-const NAV = [
+export const NAV = [
   { key: "overview", label: "Overview", Icon: LayoutDashboard, group: "main" },
   { key: "page-heroes", label: "Page Heroes", Icon: GalleryHorizontal, group: "content" },
   { key: "moments", label: "Moments", Icon: ImageIcon, group: "content" },
@@ -239,7 +236,13 @@ const NAV = [
   { key: "settings", label: "Settings", Icon: SettingsIcon, group: "system" },
 ] as const;
 
-type Section = (typeof NAV)[number]["key"];
+export type Section = (typeof NAV)[number]["key"];
+
+export const SECTION_KEYS = NAV.map((n) => n.key) as Section[];
+
+export function isSection(value: string): value is Section {
+  return (SECTION_KEYS as string[]).includes(value);
+}
 
 const GROUP_LABELS: Record<string, string> = {
   main: "",
@@ -315,59 +318,6 @@ function NavList({
   );
 }
 
-function TopbarUser({ email, onSignOut }: { email: string; onSignOut: () => void }) {
-  const [open, setOpen] = useState(false);
-  const initials = email.slice(0, 2).toUpperCase();
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-xl border border-border px-2.5 py-1.5 transition-colors hover:border-[var(--color-accent-1)]/40 hover:bg-[var(--color-surface)]"
-      >
-        <div className="relative grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-[11px] font-bold text-white">
-          {initials}
-          <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-[var(--color-background)] bg-emerald-500" />
-        </div>
-        <div className="hidden sm:block text-left">
-          <p className="text-xs font-semibold leading-tight max-w-[120px] truncate">{email}</p>
-          <p className="text-[10px] text-muted-foreground">Administrator</p>
-        </div>
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <>
-            <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-            <motion.div
-              initial={{ opacity: 0, y: 6, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 4, scale: 0.97 }}
-              transition={{ duration: 0.15 }}
-              className="absolute right-0 top-full z-40 mt-2 w-56 rounded-2xl border border-border bg-[var(--color-surface)] p-2 shadow-xl"
-            >
-              <div className="flex items-center gap-3 rounded-xl bg-[var(--color-background)] px-3 py-2.5 mb-2">
-                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))] text-xs font-bold text-white">
-                  {initials}
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-semibold">{email}</p>
-                  <p className="text-[10px] text-muted-foreground">Administrator</p>
-                </div>
-              </div>
-              <button
-                onClick={() => { setOpen(false); onSignOut(); }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-500"
-              >
-                <LogOut size={13} /> Sign out
-              </button>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
 function UserFooter({ email, onSignOut }: { email: string; onSignOut: () => void }) {
   const initials = email.slice(0, 2).toUpperCase();
   return (
@@ -393,9 +343,8 @@ function UserFooter({ email, onSignOut }: { email: string; onSignOut: () => void
   );
 }
 
-function DashboardShell() {
+function DashboardShell({ section, onPick }: { section: Section; onPick: (s: Section) => void }) {
   const { user, signOut } = useAuth();
-  const [section, setSection] = useState<Section>("overview");
   const [drawer, setDrawer] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [unread, setUnread] = useState(0);
@@ -411,7 +360,10 @@ function DashboardShell() {
     return () => { alive = false; };
   }, [section]);
 
-  const pick = (s: Section) => { setSection(s); setDrawer(false); };
+  const pick = (s: Section) => {
+    setDrawer(false);
+    onPick(s);
+  };
 
   return (
     <div className="flex min-h-screen bg-[var(--color-background)]">

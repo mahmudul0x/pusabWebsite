@@ -66,17 +66,28 @@ export function OnlineEventsPage({
   const whyJoin = page?.info_items ?? [];
   const webinars = page?.webinars ?? [];
 
+  const categories = useMemo(
+    () => Array.from(new Set(webinars.map((w) => w.tag).filter(Boolean))),
+    [webinars],
+  );
+
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [upcomingOnly, setUpcomingOnly] = useState(false);
+
   const filteredWebinars = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return webinars;
-    return webinars.filter(
-      (w) =>
+    return webinars.filter((w) => {
+      if (category !== "all" && w.tag !== category) return false;
+      if (upcomingOnly && w.status !== "upcoming") return false;
+      if (!q) return true;
+      return (
         w.title.toLowerCase().includes(q) ||
         w.speaker_name.toLowerCase().includes(q) ||
-        w.tag.toLowerCase().includes(q),
-    );
-  }, [webinars, search]);
+        w.tag.toLowerCase().includes(q)
+      );
+    });
+  }, [webinars, search, category, upcomingOnly]);
 
   const gallery = page?.gallery ?? [];
   const GALLERY_STEP = 5;
@@ -182,24 +193,42 @@ export function OnlineEventsPage({
               />
             </div>
             <div className="flex flex-wrap items-center gap-2.5">
-              <select className="rounded-xl border border-border bg-[var(--color-surface)] px-4 py-2.5 text-sm text-foreground/80 outline-none">
-                <option>All Categories</option>
-                <option>Talk Show</option>
-                <option>Workshop</option>
-                <option>Seminar</option>
-                <option>Discussion</option>
-              </select>
-              <select className="rounded-xl border border-border bg-[var(--color-surface)] px-4 py-2.5 text-sm text-foreground/80 outline-none">
-                <option>All Status</option>
-                <option>Live</option>
-                <option>Upcoming</option>
-              </select>
-              <button
-                className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
-                style={{ background: GRADIENT }}
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="rounded-xl border border-border bg-[var(--color-surface)] px-4 py-2.5 text-sm text-foreground/80 outline-none"
               >
-                Upcoming First <ArrowUpDown size={14} />
-              </button>
+                <option value="all">All Categories</option>
+                {categories.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <div className="inline-flex gap-1 rounded-xl border border-border bg-[var(--color-surface)] p-1">
+                <button
+                  onClick={() => setUpcomingOnly(false)}
+                  className="rounded-lg px-3.5 py-1.5 text-sm font-bold transition-all"
+                  style={
+                    !upcomingOnly
+                      ? { background: GRADIENT, color: "white" }
+                      : { color: "var(--color-foreground)" }
+                  }
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setUpcomingOnly(true)}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-bold transition-all"
+                  style={
+                    upcomingOnly
+                      ? { background: GRADIENT, color: "white" }
+                      : { color: "var(--color-foreground)" }
+                  }
+                >
+                  Upcoming <ArrowUpDown size={14} />
+                </button>
+              </div>
             </div>
           </div>
 

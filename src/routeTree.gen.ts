@@ -20,15 +20,16 @@ import { Route as LeadershipRouteImport } from './routes/leadership'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as HonorBoardRouteImport } from './routes/honor-board'
 import { Route as FelicitationRouteImport } from './routes/felicitation'
-import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConveningCommitteeRouteImport } from './routes/convening-committee'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HonorBoardIndexRouteImport } from './routes/honor-board/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as ProgramsSlugRouteImport } from './routes/programs_.$slug'
 import { Route as HonorBoardYearRouteImport } from './routes/honor-board/$year'
 import { Route as EcYearRouteImport } from './routes/ec.$year'
+import { Route as DashboardSectionRouteImport } from './routes/dashboard/$section'
 
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
@@ -85,11 +86,6 @@ const FelicitationRoute = FelicitationRouteImport.update({
   path: '/felicitation',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ConveningCommitteeRoute = ConveningCommitteeRouteImport.update({
   id: '/convening-committee',
   path: '/convening-committee',
@@ -115,6 +111,11 @@ const HonorBoardIndexRoute = HonorBoardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => HonorBoardRoute,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProgramsSlugRoute = ProgramsSlugRouteImport.update({
   id: '/programs_/$slug',
   path: '/programs/$slug',
@@ -130,13 +131,17 @@ const EcYearRoute = EcYearRouteImport.update({
   path: '/ec/$year',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardSectionRoute = DashboardSectionRouteImport.update({
+  id: '/dashboard/$section',
+  path: '/dashboard/$section',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/convening-committee': typeof ConveningCommitteeRoute
-  '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
   '/honor-board': typeof HonorBoardRouteWithChildren
   '/join': typeof JoinRoute
@@ -148,9 +153,11 @@ export interface FileRoutesByFullPath {
   '/sayor': typeof SayorRoute
   '/secretary-message': typeof SecretaryMessageRoute
   '/support': typeof SupportRoute
+  '/dashboard/$section': typeof DashboardSectionRoute
   '/ec/$year': typeof EcYearRoute
   '/honor-board/$year': typeof HonorBoardYearRoute
   '/programs/$slug': typeof ProgramsSlugRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/honor-board/': typeof HonorBoardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -158,7 +165,6 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/convening-committee': typeof ConveningCommitteeRoute
-  '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
   '/join': typeof JoinRoute
   '/leadership': typeof LeadershipRoute
@@ -169,9 +175,11 @@ export interface FileRoutesByTo {
   '/sayor': typeof SayorRoute
   '/secretary-message': typeof SecretaryMessageRoute
   '/support': typeof SupportRoute
+  '/dashboard/$section': typeof DashboardSectionRoute
   '/ec/$year': typeof EcYearRoute
   '/honor-board/$year': typeof HonorBoardYearRoute
   '/programs/$slug': typeof ProgramsSlugRoute
+  '/dashboard': typeof DashboardIndexRoute
   '/honor-board': typeof HonorBoardIndexRoute
 }
 export interface FileRoutesById {
@@ -180,7 +188,6 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/convening-committee': typeof ConveningCommitteeRoute
-  '/dashboard': typeof DashboardRoute
   '/felicitation': typeof FelicitationRoute
   '/honor-board': typeof HonorBoardRouteWithChildren
   '/join': typeof JoinRoute
@@ -192,9 +199,11 @@ export interface FileRoutesById {
   '/sayor': typeof SayorRoute
   '/secretary-message': typeof SecretaryMessageRoute
   '/support': typeof SupportRoute
+  '/dashboard/$section': typeof DashboardSectionRoute
   '/ec/$year': typeof EcYearRoute
   '/honor-board/$year': typeof HonorBoardYearRoute
   '/programs_/$slug': typeof ProgramsSlugRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/honor-board/': typeof HonorBoardIndexRoute
 }
 export interface FileRouteTypes {
@@ -204,7 +213,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/convening-committee'
-    | '/dashboard'
     | '/felicitation'
     | '/honor-board'
     | '/join'
@@ -216,9 +224,11 @@ export interface FileRouteTypes {
     | '/sayor'
     | '/secretary-message'
     | '/support'
+    | '/dashboard/$section'
     | '/ec/$year'
     | '/honor-board/$year'
     | '/programs/$slug'
+    | '/dashboard/'
     | '/honor-board/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -226,7 +236,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/convening-committee'
-    | '/dashboard'
     | '/felicitation'
     | '/join'
     | '/leadership'
@@ -237,9 +246,11 @@ export interface FileRouteTypes {
     | '/sayor'
     | '/secretary-message'
     | '/support'
+    | '/dashboard/$section'
     | '/ec/$year'
     | '/honor-board/$year'
     | '/programs/$slug'
+    | '/dashboard'
     | '/honor-board'
   id:
     | '__root__'
@@ -247,7 +258,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/convening-committee'
-    | '/dashboard'
     | '/felicitation'
     | '/honor-board'
     | '/join'
@@ -259,9 +269,11 @@ export interface FileRouteTypes {
     | '/sayor'
     | '/secretary-message'
     | '/support'
+    | '/dashboard/$section'
     | '/ec/$year'
     | '/honor-board/$year'
     | '/programs_/$slug'
+    | '/dashboard/'
     | '/honor-board/'
   fileRoutesById: FileRoutesById
 }
@@ -270,7 +282,6 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
   ConveningCommitteeRoute: typeof ConveningCommitteeRoute
-  DashboardRoute: typeof DashboardRoute
   FelicitationRoute: typeof FelicitationRoute
   HonorBoardRoute: typeof HonorBoardRouteWithChildren
   JoinRoute: typeof JoinRoute
@@ -282,8 +293,10 @@ export interface RootRouteChildren {
   SayorRoute: typeof SayorRoute
   SecretaryMessageRoute: typeof SecretaryMessageRoute
   SupportRoute: typeof SupportRoute
+  DashboardSectionRoute: typeof DashboardSectionRoute
   EcYearRoute: typeof EcYearRoute
   ProgramsSlugRoute: typeof ProgramsSlugRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -365,13 +378,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FelicitationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/convening-committee': {
       id: '/convening-committee'
       path: '/convening-committee'
@@ -407,6 +413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HonorBoardIndexRouteImport
       parentRoute: typeof HonorBoardRoute
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/programs_/$slug': {
       id: '/programs_/$slug'
       path: '/programs/$slug'
@@ -426,6 +439,13 @@ declare module '@tanstack/react-router' {
       path: '/ec/$year'
       fullPath: '/ec/$year'
       preLoaderRoute: typeof EcYearRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/$section': {
+      id: '/dashboard/$section'
+      path: '/dashboard/$section'
+      fullPath: '/dashboard/$section'
+      preLoaderRoute: typeof DashboardSectionRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -450,7 +470,6 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   ConveningCommitteeRoute: ConveningCommitteeRoute,
-  DashboardRoute: DashboardRoute,
   FelicitationRoute: FelicitationRoute,
   HonorBoardRoute: HonorBoardRouteWithChildren,
   JoinRoute: JoinRoute,
@@ -462,8 +481,10 @@ const rootRouteChildren: RootRouteChildren = {
   SayorRoute: SayorRoute,
   SecretaryMessageRoute: SecretaryMessageRoute,
   SupportRoute: SupportRoute,
+  DashboardSectionRoute: DashboardSectionRoute,
   EcYearRoute: EcYearRoute,
   ProgramsSlugRoute: ProgramsSlugRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
