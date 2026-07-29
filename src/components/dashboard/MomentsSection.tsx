@@ -15,6 +15,7 @@ import {
   inputCls,
 } from "./primitives";
 import { ImageUpload } from "./ImageUpload";
+import { MomentsBulkAdd } from "./MomentsBulkAdd";
 
 // Seed categories shown even before any photo uses them. Admins can add more
 // by typing a new value in the category field — it's saved as free text.
@@ -39,6 +40,7 @@ const empty: Form = {
 export function MomentsSection() {
   const { items, loading, reload } = useResource(galleryApi);
   const [open, setOpen] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<Form>(empty);
   const [saving, setSaving] = useState(false);
@@ -124,8 +126,8 @@ export function MomentsSection() {
         title="Moments"
         subtitle="Photo gallery shown on the public Moments page."
         count={items.length}
-        onNew={startNew}
-        newLabel="Add photo"
+        onNew={() => setBulkOpen(true)}
+        newLabel="Add photos"
       />
 
       <Toolbar query={query} onQuery={setQuery} placeholder="Search photos…">
@@ -137,6 +139,12 @@ export function MomentsSection() {
             ...categories.map((c) => ({ value: c, label: c })),
           ]}
         />
+        <button
+          onClick={startNew}
+          className="rounded-xl border border-border px-3.5 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_50%,transparent)] hover:text-[var(--color-accent-1)]"
+        >
+          Add one
+        </button>
       </Toolbar>
 
       {loading ? (
@@ -192,13 +200,13 @@ export function MomentsSection() {
         </Field>
         <Field label="Category" hint="Pick an existing one or type a new category to create it.">
           <input
-            list="moments-categories"
+            list="moments-categories-single"
             value={form.category}
             onChange={(e) => set("category", e.target.value)}
             className={inputCls}
             placeholder="e.g. events"
           />
-          <datalist id="moments-categories">
+          <datalist id="moments-categories-single">
             {categories.map((c) => (
               <option key={c} value={c} />
             ))}
@@ -208,6 +216,13 @@ export function MomentsSection() {
           <input value={form.caption} onChange={(e) => set("caption", e.target.value)} className={inputCls} />
         </Field>
       </Modal>
+
+      <MomentsBulkAdd
+        open={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        onSaved={reload}
+        categories={categories}
+      />
       {confirmEl}
     </div>
   );
