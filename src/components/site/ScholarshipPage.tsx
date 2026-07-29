@@ -42,6 +42,22 @@ const ACCENT = "var(--color-accent-1)";
 const ACCENT_2 = "var(--color-accent-2)";
 const GRADIENT = `linear-gradient(120deg, ${ACCENT}, ${ACCENT_2})`;
 
+/**
+ * Mosaic span pattern for the gallery grid — repeats every 8 photos so a
+ * couple of tiles stand out as bigger feature images instead of a flat,
+ * uniform grid.
+ */
+const GALLERY_TILE_SPAN = [
+  "col-span-2 row-span-2", // big feature tile
+  "",
+  "",
+  "row-span-2", // tall tile
+  "",
+  "col-span-2", // wide tile
+  "",
+  "",
+];
+
 const PROCESS_STEPS = [
   { icon: ListChecks, title: "Check Eligibility", desc: "Review the eligibility criteria carefully." },
   { icon: ClipboardCheck, title: "Submit Application", desc: "Fill out the application form with required documents." },
@@ -297,16 +313,19 @@ export function ScholarshipPage({
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="grid auto-rows-[120px] grid-flow-dense grid-cols-3 gap-3 sm:auto-rows-[140px] sm:grid-cols-4 lg:auto-rows-[150px] lg:grid-cols-6">
                 {visibleGallery.map((g, i) => (
                   <motion.button
                     key={g.id}
                     initial={{ opacity: 0, y: 16 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.45, delay: (i % 4) * 0.07, ease: "easeOut" }}
+                    transition={{ duration: 0.45, delay: (i % 8) * 0.06, ease: "easeOut" }}
                     onClick={() => setLightboxIndex(i)}
-                    className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-border shadow-sm transition-shadow duration-300 hover:shadow-xl"
+                    className={
+                      "group relative overflow-hidden rounded-2xl border border-border shadow-sm transition-shadow duration-300 hover:shadow-xl " +
+                      GALLERY_TILE_SPAN[i % GALLERY_TILE_SPAN.length]
+                    }
                   >
                     <img
                       src={optimizeImage(g.image_url, 480)}

@@ -23,7 +23,7 @@ import { GlowCard } from "@/components/site/GlowCard";
 import { OBJECTIVES, SITE } from "@/lib/site-content";
 import { usePageHero } from "@/lib/usePageHero";
 import heroAbout from "@/assets/hero-about.jpg";
-import aboutMission from "@/assets/about-mission.jpg";
+import aboutMission from "@/assets/aboutPageSquareImg.jpg";
 
 // One icon per aim, matched to the OBJECTIVES order in site-content.
 const AIM_ICONS = [
@@ -97,7 +97,7 @@ function AboutPage() {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="relative"
           >
-            <div className="relative overflow-hidden rounded-3xl border border-border aspect-[4/3] shadow-[0_40px_90px_-50px_rgba(15,23,42,0.55)]">
+            <div className="relative overflow-hidden rounded-3xl border border-border aspect-square shadow-[0_40px_90px_-50px_rgba(15,23,42,0.55)]">
               <img
                 src={aboutMission}
                 alt="PUSAB students studying together"
