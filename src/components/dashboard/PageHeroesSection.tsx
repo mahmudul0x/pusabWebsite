@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -10,6 +10,7 @@ import {
   Check,
   RotateCcw,
   ExternalLink,
+  Clock,
 } from "lucide-react";
 import { pageHeroApi, optimizeImage, type PageHero, type PageHeroImage, type PageHeroKey } from "@/lib/api";
 import { Field, inputCls } from "./primitives";
@@ -54,10 +55,25 @@ function sameForm(a: Form, b: Form): boolean {
   return a.images.every((img, i) => img.image_url === b.images[i].image_url && img.alt_text === b.images[i].alt_text);
 }
 
+function relativeTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.round(diffMs / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.round(days / 30);
+  if (months < 12) return `${months}mo ago`;
+  return `${Math.round(months / 12)}y ago`;
+}
+
 export function PageHeroesSection() {
   const [page, setPage] = useState<PageHeroKey>("home");
   const [saved, setSaved] = useState<Partial<Record<PageHeroKey, Form>>>({});
   const [forms, setForms] = useState<Partial<Record<PageHeroKey, Form>>>({});
+  const [updatedAt, setUpdatedAt] = useState<Partial<Record<PageHeroKey, string>>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -72,24 +88,20 @@ export function PageHeroesSection() {
     Promise.all(PAGES.map((p) => pageHeroApi.get(p.key)))
       .then((results) => {
         const next: Partial<Record<PageHeroKey, Form>> = {};
+        const nextUpdated: Partial<Record<PageHeroKey, string>> = {};
         results.forEach((h, i) => {
           next[PAGES[i].key] = toForm(h);
+          nextUpdated[PAGES[i].key] = h.updated_at;
         });
         setForms(next);
         setSaved(next);
+        setUpdatedAt(nextUpdated);
       })
       .catch((e) => toast.error(errMessage(e)))
       .finally(() => setLoading(false));
   }, []);
 
   const dirty = !loading && !sameForm(form, saved[page] ?? emptyForm);
-  const customizedPages = useMemo(
-    () => new Set(PAGES.filter((p) => {
-      const f = forms[p.key];
-      return f && (f.title || f.lede || f.images.length > 0);
-    }).map((p) => p.key)),
-    [forms],
-  );
 
   function setImage(index: number, url: string) {
     const images = form.images.slice();
@@ -127,10 +139,11 @@ export function PageHeroesSection() {
       const images = form.images
         .filter((img) => img.image_url)
         .map((img, i) => ({ ...img, order: i }));
-      await pageHeroApi.update(page, { title: form.title, lede: form.lede, images });
+      const updated = await pageHeroApi.update(page, { title: form.title, lede: form.lede, images });
       const next = { ...form, images };
       set("images", images);
       setSaved((s) => ({ ...s, [page]: next }));
+      setUpdatedAt((u) => ({ ...u, [page]: updated.updated_at }));
       toast.success(`${meta.label} hero saved`);
     } catch (err) {
       toast.error(errMessage(err));
@@ -159,55 +172,73 @@ export function PageHeroesSection() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
         {/* Page picker */}
-        <div className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
-          {PAGES.map((p) => {
-            const f = forms[p.key];
-            const isCustom = customizedPages.has(p.key);
-            const active = page === p.key;
-            return (
-              <button
-                key={p.key}
-                type="button"
-                onClick={() => setPage(p.key)}
-                className={
-                  "group flex shrink-0 items-center gap-3 rounded-xl border p-2.5 text-left transition-all lg:shrink " +
-                  (active
-                    ? "border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] bg-[color-mix(in_oklab,var(--color-accent-1)_6%,var(--color-surface))] shadow-sm"
-                    : "border-border bg-[var(--color-surface)] hover:border-[color-mix(in_oklab,var(--color-accent-1)_25%,transparent)]")
-                }
-              >
-                <div className="relative h-11 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-[var(--color-background)]">
-                  {f?.images[0]?.image_url ? (
-                    <img
-                      src={optimizeImage(f.images[0].image_url, 160)}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="grid h-full w-full place-items-center">
-                      <ImageIcon size={13} className="text-muted-foreground/30" />
-                    </div>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className={"truncate text-[13px] font-semibold " + (active ? "text-foreground" : "text-foreground/80")}>
-                    {p.label}
-                  </p>
+        <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] lg:h-fit">
+          <div className="border-b border-border px-4 py-3">
+            <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
+              Pages ({PAGES.length})
+            </span>
+          </div>
+          <div className="flex gap-2 overflow-x-auto p-2 lg:flex-col lg:overflow-visible">
+            {PAGES.map((p) => {
+              const f = forms[p.key];
+              const active = page === p.key;
+              const isDirtyHere = f && !sameForm(f, saved[p.key] ?? emptyForm);
+              const at = updatedAt[p.key];
+              return (
+                <button
+                  key={p.key}
+                  type="button"
+                  onClick={() => setPage(p.key)}
+                  className={
+                    "group relative flex shrink-0 items-center gap-3 rounded-xl p-2 text-left transition-all lg:shrink " +
+                    (active
+                      ? "bg-[color-mix(in_oklab,var(--color-accent-1)_8%,var(--color-surface))]"
+                      : "hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)]")
+                  }
+                >
+                  {/* Active indicator bar */}
                   <span
                     className={
-                      "mt-0.5 inline-flex items-center gap-1 text-[10px] font-medium " +
-                      (isCustom ? "text-[var(--color-accent-1)]" : "text-muted-foreground/60")
+                      "absolute left-0 top-1/2 hidden h-6 w-[3px] -translate-y-1/2 rounded-r-full transition-opacity lg:block " +
+                      (active ? "opacity-100 bg-[var(--color-accent-1)]" : "opacity-0")
                     }
-                  >
-                    <span className={"h-1.5 w-1.5 rounded-full " + (isCustom ? "bg-[var(--color-accent-1)]" : "bg-muted-foreground/30")} />
-                    {isCustom ? "Customized" : "Default"}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
+                  />
+                  <div className="relative h-11 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-[var(--color-background)]">
+                    {f?.images[0]?.image_url ? (
+                      <img
+                        src={optimizeImage(f.images[0].image_url, 160)}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center">
+                        <ImageIcon size={13} className="text-muted-foreground/30" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className={"truncate text-[13px] font-semibold " + (active ? "text-foreground" : "text-foreground/80")}>
+                      {p.label}
+                    </p>
+                    <span className="mt-0.5 flex items-center gap-1 text-[10.5px] text-muted-foreground/70">
+                      {isDirtyHere ? (
+                        <span className="font-medium text-amber-600">Unsaved edits</span>
+                      ) : at ? (
+                        <>
+                          <Clock size={10} className="shrink-0" />
+                          Updated {relativeTime(at)}
+                        </>
+                      ) : (
+                        "Not edited yet"
+                      )}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Editor + preview */}

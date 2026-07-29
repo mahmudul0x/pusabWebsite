@@ -66,7 +66,6 @@ export function HumanityPage({
 
   const allStats = page?.stats ?? [];
   const missionStats = allStats.slice(0, 4);
-  const impactStats = allStats.length > 4 ? allStats.slice(4) : allStats;
   const initiatives = page?.info_items ?? [];
 
   const gallery = page?.gallery ?? [];
@@ -269,44 +268,6 @@ export function HumanityPage({
                     </motion.div>
                   );
                 })}
-              </div>
-              {page?.register_label && (
-                <div className="mt-8 flex justify-center">
-                  <a
-                    href={page.register_url || "#"}
-                    className="inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-bold transition-colors hover:text-foreground"
-                    style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))`, color: ACCENT }}
-                  >
-                    View All Initiatives <ArrowRight size={14} />
-                  </a>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Our Impact So Far — gradient banner with decorative rings */}
-          {impactStats.length > 0 && (
-            <div className="relative mb-16 overflow-hidden rounded-3xl" style={{ background: GRADIENT }}>
-              <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10" />
-              <div className="pointer-events-none absolute -bottom-24 -left-12 h-64 w-64 rounded-full bg-white/[0.07]" />
-              <div className="pointer-events-none absolute right-24 bottom-6 h-16 w-16 rounded-full border-2 border-white/15" />
-              <p className="relative pt-8 text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">
-                Our Impact So Far
-              </p>
-              <div className="relative grid grid-cols-2 gap-6 p-8 sm:grid-cols-5 sm:p-10">
-                {impactStats.map((s, i) => (
-                  <motion.div
-                    key={s.id}
-                    initial={{ opacity: 0, y: 14 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.45, delay: i * 0.08, ease: "easeOut" }}
-                    className="text-center"
-                  >
-                    <p className="font-display text-3xl font-extrabold text-white md:text-4xl">{s.value}</p>
-                    <p className="mt-1.5 text-[11px] uppercase tracking-[0.1em] text-white/75">{s.label}</p>
-                  </motion.div>
-                ))}
               </div>
             </div>
           )}
