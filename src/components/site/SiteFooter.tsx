@@ -39,6 +39,17 @@ export function SiteFooter() {
               <p className="mt-4 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                 Est. {SITE.founded}
               </p>
+              <p className="mt-4 text-xs text-muted-foreground">
+                Developed by{" "}
+                <a
+                  href="https://www.facebook.com/abin0x"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-foreground/80 transition-colors hover:text-[var(--color-accent-1)]"
+                >
+                  Mahmudul Hasan Abin
+                </a>
+              </p>
             </div>
 
             <div>
