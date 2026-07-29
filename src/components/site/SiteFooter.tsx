@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { CalendarDays, Facebook, Mail, MapPin, PhoneCall, Sparkles, Youtube } from "lucide-react";
+import { CalendarDays, Facebook, Mail, MapPin, PhoneCall, Youtube } from "lucide-react";
 import { NAV_LINKS, PROGRAMS, SITE } from "@/lib/site-content";
 import logoPusab from "@/assets/logo-pusab.png";
 
@@ -141,14 +141,10 @@ export function SiteFooter() {
 
       <div className="border-t border-border">
         <div className="px-4">
-          <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-3 py-5 text-center text-xs text-muted-foreground md:flex-row md:text-left">
+          <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-3 py-5 text-center text-xs text-muted-foreground md:flex-row md:text-left">
             <p>
               © {new Date().getFullYear()} {SITE.fullName}. All rights reserved.
             </p>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] bg-[color-mix(in_oklab,var(--color-accent-1)_8%,transparent)] px-3 py-1 font-semibold tracking-wide text-[var(--color-accent-1)]">
-              <Sparkles size={12} />
-              12 Years · 2014–2026
-            </span>
             <p>Non-political · Non-profit · Educational.</p>
           </div>
         </div>
