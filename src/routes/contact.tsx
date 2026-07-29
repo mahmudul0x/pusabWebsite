@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { GradientButton } from "@/components/site/GradientButton";
 import { contactApi } from "@/lib/api";
@@ -14,13 +14,40 @@ import {
   Clock,
   Copy,
   Check,
-  ChevronLeft,
   ChevronRight,
+  Navigation,
 } from "lucide-react";
 import { SITE } from "@/lib/site-content";
-import heroImg1 from "@/assets/contact-hero-1.jpg";
-import heroImg2 from "@/assets/contact-hero-2.jpg";
-import heroImg3 from "@/assets/contact-hero-3.jpg";
+import contactHero from "@/assets/contact-hero.jpeg";
+
+const COORDS = { lat: 25.1639, lng: 91.2533 };
+const LATLNG = `${COORDS.lat},${COORDS.lng}`;
+
+const MAP_LINKS = {
+  /** Zoomed to the upazila so the pin reads as a place, not a street address. */
+  embed: `https://www.google.com/maps?q=${LATLNG}&z=12&output=embed`,
+  view: `https://www.google.com/maps/search/?api=1&query=${LATLNG}`,
+  directions: `https://www.google.com/maps/dir/?api=1&destination=${LATLNG}`,
+};
+
+/** Dhaka time, formatted where the visitor is — the office is UTC+06:00. */
+function useLocalTime() {
+  const [now, setNow] = useState<string | null>(null);
+  useEffect(() => {
+    const tick = () =>
+      setNow(
+        new Intl.DateTimeFormat("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          timeZone: "Asia/Dhaka",
+        }).format(new Date()),
+      );
+    tick();
+    const id = setInterval(tick, 30_000);
+    return () => clearInterval(id);
+  }, []);
+  return now;
+}
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -103,58 +130,22 @@ function ContactPage() {
   );
 }
 
-const HERO_SLIDES = [
-  {
-    img: heroImg1,
-    kicker: "Get in touch",
-    title: "Start a conversation",
-    caption: "Questions, partnerships and scholarship inquiries are always welcome.",
-  },
-  {
-    img: heroImg2,
-    kicker: "From Bishwambarpur",
-    title: "Rooted in service",
-    caption: "A student-led organization shaped by community and commitment.",
-  },
-  {
-    img: heroImg3,
-    kicker: "We respond promptly",
-    title: "A reply within 48 hours",
-    caption: "Every message is reviewed by a member of the team.",
-  },
-];
-
 function HeroSlider() {
-  const [i, setI] = useState(0);
-  const n = HERO_SLIDES.length;
-
-  useEffect(() => {
-    const id = setInterval(() => setI((v) => (v + 1) % n), 6000);
-    return () => clearInterval(id);
-  }, [n]);
-
-  const go = (next: number) => setI(((next % n) + n) % n);
-  const slide = HERO_SLIDES[i];
-
   return (
     <section className="relative h-[78vh] min-h-[560px] max-h-[820px] w-full overflow-hidden bg-background">
-      <AnimatePresence mode="sync">
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, scale: 1.06 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{
-            opacity: { duration: 0.9, ease: "easeOut" },
-            scale: { duration: 7, ease: "linear" },
-          }}
-          className="absolute inset-0"
-        >
-          <img src={slide.img} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/20 to-transparent" />
-        </motion.div>
-      </AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, scale: 1.06 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          opacity: { duration: 0.9, ease: "easeOut" },
+          scale: { duration: 7, ease: "linear" },
+        }}
+        className="absolute inset-0"
+      >
+        <img src={contactHero} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/35 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/55 via-transparent to-transparent" />
+      </motion.div>
 
       {/* Breadcrumbs */}
       <div className="absolute top-32 md:top-36 left-0 right-0 z-10">
@@ -172,59 +163,20 @@ function HeroSlider() {
       {/* Content */}
       <div className="absolute inset-0 flex items-end pb-20 md:pb-24 z-10">
         <div className="container-page">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 28 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="max-w-3xl"
-            >
-              <p className="text-label mb-4 text-[var(--color-accent-1)]">{slide.kicker}</p>
-              <h1 className="font-display text-4xl md:text-7xl font-extrabold tracking-tight leading-[1.05]">
-                {slide.title}
-              </h1>
-              <p className="mt-5 text-base md:text-lg text-muted-foreground max-w-xl">
-                {slide.caption}
-              </p>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="absolute bottom-6 md:bottom-8 right-0 z-20">
-        <div className="container-page flex items-center justify-end gap-4">
-          <div className="flex items-center gap-1.5">
-            {HERO_SLIDES.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => go(idx)}
-                aria-label={`Slide ${idx + 1}`}
-                className={`h-1 transition-all rounded-full ${idx === i ? "w-10 bg-[var(--color-accent-1)]" : "w-5 bg-border hover:bg-muted-foreground"}`}
-              />
-            ))}
-          </div>
-          <span className="text-xs font-mono text-muted-foreground tabular-nums">
-            {String(i + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}
-          </span>
-          <div className="flex items-center gap-1.5 ml-2">
-            <button
-              onClick={() => go(i - 1)}
-              aria-label="Previous"
-              className="h-9 w-9 rounded-full border border-border bg-background/60 backdrop-blur hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)] transition-colors flex items-center justify-center"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button
-              onClick={() => go(i + 1)}
-              aria-label="Next"
-              className="h-9 w-9 rounded-full border border-border bg-background/60 backdrop-blur hover:border-[var(--color-accent-1)] hover:text-[var(--color-accent-1)] transition-colors flex items-center justify-center"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="max-w-3xl"
+          >
+            <p className="text-label mb-4 text-[var(--color-accent-1)]">Get in touch</p>
+            <h1 className="font-display text-4xl md:text-7xl font-extrabold tracking-tight leading-[1.05]">
+              Start a conversation
+            </h1>
+            <p className="mt-5 text-base md:text-lg text-muted-foreground max-w-xl">
+              Questions, partnerships and scholarship inquiries are always welcome.
+            </p>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -238,8 +190,7 @@ function ContactBody() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
-
-  const COORDS = { lat: 25.1639, lng: 91.2533 };
+  const localTime = useLocalTime();
 
   function copyValue(key: string, value: string) {
     navigator.clipboard?.writeText(value);
@@ -415,7 +366,7 @@ function ContactBody() {
               </h2>
             </div>
             <a
-              href={`https://www.google.com/maps/dir/?api=1&destination=${COORDS.lat},${COORDS.lng}`}
+              href={MAP_LINKS.directions}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-accent-1)] hover:underline"
@@ -429,58 +380,114 @@ function ContactBody() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="rounded-3xl border border-border overflow-hidden bg-[var(--color-surface)] shadow-sm"
+            className="overflow-hidden rounded-3xl border border-border bg-[var(--color-surface)] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-12px_rgba(0,0,0,0.12)]"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px]">
-              <div className="relative">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.55fr_1fr]">
+              <div className="group relative isolate">
                 <iframe
                   title="PUSAB — Bishwambarpur, Sunamganj"
-                  src={`https://www.google.com/maps?q=${COORDS.lat},${COORDS.lng}&z=13&output=embed`}
-                  className="w-full h-[420px] md:h-[520px] grayscale-[0.4]"
+                  src={MAP_LINKS.embed}
+                  className="h-[380px] w-full saturate-[0.72] contrast-[1.04] transition-[filter] duration-500 group-hover:saturate-100 md:h-[540px]"
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                 />
+
+                {/* Softens the embed's edge into the card without eating pointer
+                    events on the map itself. */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/[0.06]"
+                />
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/[0.07] to-transparent"
+                />
+
+                {/* Floating place chip — gives the raw embed an anchor. */}
+                <div className="pointer-events-none absolute left-4 top-4 md:left-5 md:top-5">
+                  <div className="flex items-center gap-2.5 rounded-2xl border border-black/[0.06] bg-white/85 py-2 pl-2.5 pr-3.5 shadow-lg backdrop-blur-md">
+                    <span
+                      className="grid h-8 w-8 place-items-center rounded-xl text-white shadow-sm"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
+                      }}
+                    >
+                      <MapPin size={15} />
+                    </span>
+                    <div className="leading-tight">
+                      <p className="text-[13px] font-bold tracking-tight text-slate-900">PUSAB</p>
+                      <p className="text-[11px] text-slate-600">Bishwambarpur, Sunamganj</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="border-t lg:border-t-0 lg:border-l border-border p-6 md:p-8 space-y-6 bg-background/30">
+              <div className="flex flex-col border-t border-border p-7 md:p-9 lg:border-l lg:border-t-0">
                 <div>
-                  <p className="text-label mb-2">Our location</p>
-                  <p className="text-lg font-display leading-tight">PUSAB · Bishwambarpur</p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-label mb-2.5">Our location</p>
+                  <p className="font-display text-xl leading-tight tracking-tight">
+                    PUSAB · Bishwambarpur
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                     Govt. Digendra Barman College vicinity, Bishwambarpur Upazila, Sunamganj —
                     Sylhet Division, Bangladesh.
                   </p>
                 </div>
 
-                <div className="space-y-3 text-sm">
+                <dl className="mt-7 space-y-4 border-t border-border pt-6 text-sm">
                   <div className="flex items-start gap-3">
-                    <MapPin size={16} className="mt-0.5 text-[var(--color-accent-1)] shrink-0" />
-                    <span>Sylhet Division, Bangladesh</span>
+                    <MapPin size={15} className="mt-0.5 shrink-0 text-[var(--color-accent-1)]" />
+                    <div>
+                      <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
+                        Region
+                      </dt>
+                      <dd className="mt-0.5">Sylhet Division, Bangladesh</dd>
+                    </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Clock size={16} className="mt-0.5 text-[var(--color-accent-1)] shrink-0" />
-                    <span>Local time · UTC +06:00</span>
+                    <Clock size={15} className="mt-0.5 shrink-0 text-[var(--color-accent-1)]" />
+                    <div>
+                      <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
+                        Local time
+                      </dt>
+                      <dd className="mt-0.5 tabular-nums">
+                        {localTime ? `${localTime} · UTC +06:00` : "UTC +06:00"}
+                      </dd>
+                    </div>
                   </div>
-                </div>
+                </dl>
 
-                <div className="pt-4 border-t border-border space-y-3">
+                <div className="mt-auto space-y-2.5 pt-7">
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${COORDS.lat},${COORDS.lng}`}
+                    href={MAP_LINKS.directions}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-between text-sm group hover:text-[var(--color-accent-1)] transition-colors"
+                    className="group flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md active:scale-[0.99]"
+                    style={{
+                      background:
+                        "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))",
+                    }}
                   >
-                    <span>Open in Google Maps</span>
-                    <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    <span className="inline-flex items-center gap-2">
+                      <Navigation size={14} /> Get directions
+                    </span>
+                    <ArrowUpRight
+                      size={15}
+                      className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                    />
                   </a>
                   <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${COORDS.lat},${COORDS.lng}`}
+                    href={MAP_LINKS.view}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-between text-sm group hover:text-[var(--color-accent-1)] transition-colors"
+                    className="group flex items-center justify-between gap-3 rounded-xl border border-border px-4 py-3 text-sm font-medium transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] hover:text-[var(--color-accent-1)]"
                   >
-                    <span>Get directions</span>
-                    <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    <span>Open in Google Maps</span>
+                    <ArrowUpRight
+                      size={15}
+                      className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                    />
                   </a>
                 </div>
               </div>
