@@ -15,6 +15,7 @@ import {
   Users,
   Heart,
   Sparkles,
+  Tag,
 } from "lucide-react";
 import heroMoments from "@/assets/hero-moments.jpg";
 
@@ -40,12 +41,12 @@ export const Route = createFileRoute("/moments")({
 });
 
 type Item = GalleryItem;
+type Cat = "all" | string;
 
-const CATS = ["all", "events", "achievements", "community", "reunion", "other"] as const;
-type Cat = (typeof CATS)[number];
-
-const CAT_TABS: { key: Cat; label: string; Icon: typeof LayoutGrid }[] = [
-  { key: "all", label: "All", Icon: LayoutGrid },
+// Curated icon + label for the categories we ship with. Any other category
+// found in the photo data still gets a tab — just with a generic icon and
+// its raw value title-cased — so newly-created categories work immediately.
+const KNOWN_CATS: { key: string; label: string; Icon: typeof LayoutGrid }[] = [
   { key: "events", label: "Events", Icon: PartyPopper },
   { key: "achievements", label: "Achievements", Icon: Trophy },
   { key: "community", label: "Community", Icon: Users },
@@ -53,14 +54,13 @@ const CAT_TABS: { key: Cat; label: string; Icon: typeof LayoutGrid }[] = [
   { key: "other", label: "Other", Icon: Sparkles },
 ];
 
-const CAT_LABEL: Record<Cat, string> = {
-  all: "All",
-  events: "Events",
-  achievements: "Achievements",
-  community: "Community",
-  reunion: "Reunions",
-  other: "Other",
-};
+function titleCase(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function catLabel(key: string) {
+  return KNOWN_CATS.find((c) => c.key === key)?.label ?? titleCase(key);
+}
 
 /**
  * Deterministic size pattern for the mosaic grid — repeats every 9 photos so a
@@ -104,6 +104,18 @@ function MomentsPage() {
     () => (items ?? []).filter((i) => filter === "all" || i.category === filter),
     [items, filter],
   );
+
+  // Tabs = curated categories that actually have a photo, plus any
+  // uncurated ones found in the data, in a stable known-first order.
+  const catTabs = useMemo(() => {
+    const present = new Set((items ?? []).map((i) => i.category));
+    const known = KNOWN_CATS.filter((c) => present.has(c.key));
+    const extra = [...present]
+      .filter((c) => !KNOWN_CATS.some((k) => k.key === c))
+      .sort()
+      .map((c) => ({ key: c, label: titleCase(c), Icon: Tag }));
+    return [{ key: "all", label: "All", Icon: LayoutGrid }, ...known, ...extra];
+  }, [items]);
 
   const open = openIndex !== null ? shown[openIndex] : null;
 
@@ -149,7 +161,7 @@ function MomentsPage() {
               aria-label="Filter by category"
               className="inline-flex flex-wrap gap-1"
             >
-              {CAT_TABS.map((t) => {
+              {catTabs.map((t) => {
                 const count =
                   t.key === "all"
                     ? (items ?? []).length
@@ -319,7 +331,7 @@ function MomentsPage() {
                 )}
                 <div className="mt-3 flex items-center justify-center gap-3 text-xs text-white/50">
                   <span className="rounded-full border border-white/15 px-2.5 py-1 font-semibold uppercase tracking-wide">
-                    {CAT_LABEL[open.category]}
+                    {catLabel(open.category)}
                   </span>
                   {open.year && (
                     <span className="inline-flex items-center gap-1">

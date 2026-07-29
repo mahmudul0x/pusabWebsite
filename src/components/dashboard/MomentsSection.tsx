@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { galleryApi, type GalleryItem } from "@/lib/api";
 import { useResource, errMessage } from "./useResource";
@@ -16,12 +16,14 @@ import {
 } from "./primitives";
 import { ImageUpload } from "./ImageUpload";
 
-const CATEGORIES = ["events", "achievements", "community", "reunion", "other"] as const;
+// Seed categories shown even before any photo uses them. Admins can add more
+// by typing a new value in the category field — it's saved as free text.
+const DEFAULT_CATEGORIES = ["events", "achievements", "community", "reunion", "other"];
 
 interface Form {
   title: string;
   caption: string;
-  category: GalleryItem["category"];
+  category: string;
   year: string;
   image_url: string;
 }
@@ -46,6 +48,15 @@ export function MomentsSection() {
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
+  // All categories currently in use, plus the defaults, so new ones show up
+  // in the filter and the "existing categories" picker as soon as a photo
+  // using them is saved — no separate admin step to "create" a category.
+  const categories = useMemo(() => {
+    const set = new Set(DEFAULT_CATEGORIES);
+    for (const it of items) if (it.category) set.add(it.category);
+    return [...set].sort();
+  }, [items]);
+
   function startNew() {
     setEditId(null);
     setForm(empty);
@@ -65,12 +76,14 @@ export function MomentsSection() {
 
   async function save() {
     if (!form.image_url) return toast.error("Please upload an image");
+    const category = form.category.trim().toLowerCase();
+    if (!category) return toast.error("Please choose or type a category");
     setSaving(true);
     try {
       const payload = {
         title: form.title,
         caption: form.caption,
-        category: form.category,
+        category,
         year: form.year ? Number(form.year) : null,
         image_url: form.image_url,
       };
@@ -121,7 +134,7 @@ export function MomentsSection() {
           onChange={setCat}
           options={[
             { value: "all", label: "All categories" },
-            ...CATEGORIES.map((c) => ({ value: c, label: c })),
+            ...categories.map((c) => ({ value: c, label: c })),
           ]}
         />
       </Toolbar>
@@ -177,18 +190,19 @@ export function MomentsSection() {
             className={inputCls}
           />
         </Field>
-        <Field label="Category">
-          <select
+        <Field label="Category" hint="Pick an existing one or type a new category to create it.">
+          <input
+            list="moments-categories"
             value={form.category}
-            onChange={(e) => set("category", e.target.value as Form["category"])}
+            onChange={(e) => set("category", e.target.value)}
             className={inputCls}
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
+            placeholder="e.g. events"
+          />
+          <datalist id="moments-categories">
+            {categories.map((c) => (
+              <option key={c} value={c} />
             ))}
-          </select>
+          </datalist>
         </Field>
         <Field label="Caption" full>
           <input value={form.caption} onChange={(e) => set("caption", e.target.value)} className={inputCls} />

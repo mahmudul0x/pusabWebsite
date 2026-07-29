@@ -18,7 +18,8 @@ export interface GalleryItem {
   id: number;
   title: string;
   caption: string;
-  category: "events" | "achievements" | "community" | "reunion" | "other";
+  /** Free-text — admins can create new categories from the dashboard. */
+  category: string;
   year: number | null;
   image_url: string;
   created_at: string;
