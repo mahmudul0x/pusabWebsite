@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { programPagesApi, type ProgramPage } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { programPagesApi, felicitationApi, type ProgramPage, type FelicitationEntry } from "@/lib/api";
 import { FelicitationPage } from "@/components/site/FelicitationPage";
 import heroLeadership from "@/assets/hero-leadership.jpg";
 
@@ -38,7 +38,12 @@ function FelicitationRoute() {
   const { page: initialPage } = Route.useLoaderData();
   const [page, setPage] = useState<ProgramPage | null>(initialPage);
   const [loadingYear, setLoadingYear] = useState(false);
+  const [entries, setEntries] = useState<FelicitationEntry[]>([]);
   const years = page?.years ?? [];
+
+  useEffect(() => {
+    felicitationApi.listAll().then(setEntries).catch(() => setEntries([]));
+  }, []);
 
   async function switchYear(y: number) {
     if (!page || y === page.year) return;
@@ -56,6 +61,7 @@ function FelicitationRoute() {
   return (
     <FelicitationPage
       page={page}
+      entries={entries}
       fallbackTitle={FALLBACK_TITLE}
       fallbackDesc={FALLBACK_DESC}
       heroImageFallback={heroLeadership}

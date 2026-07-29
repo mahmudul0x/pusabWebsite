@@ -4,21 +4,9 @@ import { useEffect, useState, useCallback, useRef, useLayoutEffect } from "react
 import { BookOpen, ArrowUpRight, ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
 import { GradientButton } from "@/components/site/GradientButton";
 import { useFlipbook } from "@/lib/flipbook-context";
+import { SAYOR_ISSUES } from "@/lib/sayorIssues";
 
-const COVER_IMAGES = import.meta.glob<{ default: string }>(
-  "../assets/sayor/*.{jpg,jpeg}",
-  { eager: true },
-);
-
-function coverFor(id: number, extension: string): string {
-  return COVER_IMAGES[`../assets/sayor/${id}.${extension}`]?.default ?? "";
-}
-
-const ISSUE_ITEMS = Array.from({ length: 11 }, (_, index) => {
-  const id = index + 1;
-  const extension = id === 6 ? "jpeg" : "jpg";
-  return { id, title: `SAYOR Issue ${String(id).padStart(2, "0")}`, image: coverFor(id, extension) };
-});
+const ISSUE_ITEMS = SAYOR_ISSUES;
 
 type SayorChapter = { title: string; author: string; bio: string; paragraphs: string[] };
 type SayorDoc = { id: number; editor: string; chapters: SayorChapter[] };
@@ -32,6 +20,11 @@ function loadIssueContent(id: number): Promise<SayorDoc | null> {
 }
 
 export const Route = createFileRoute("/sayor")({
+  validateSearch: (search: Record<string, unknown>): { issue?: number } => ({
+    issue: typeof search.issue === "string" || typeof search.issue === "number"
+      ? Number(search.issue) || undefined
+      : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "SAYOR — The Annual Magazine of PUSAB" },
@@ -804,6 +797,7 @@ function MobileBook({
 // ════════════════════════════════════════════════════════════════════════════
 
 function SayorPage() {
+  const { issue: requestedIssue } = Route.useSearch();
   const [selectedIssue, setSelectedIssue] = useState<number | null>(null);
   const [doc, setDoc] = useState<SayorDoc | null>(null);
   const [loadingContent, setLoadingContent] = useState(false);
@@ -814,6 +808,15 @@ function SayorPage() {
 
   const openIssue = (id: number) => { setSelectedIssue(id); setIsOpen(true); };
   const closeIssue = () => { setSelectedIssue(null); setIsOpen(false); };
+
+  // Deep link support — e.g. /sayor?issue=3 from the home page preview
+  // opens that issue straight away instead of landing on the archive grid.
+  useEffect(() => {
+    if (requestedIssue != null && ISSUE_ITEMS.some((item) => item.id === requestedIssue)) {
+      openIssue(requestedIssue);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestedIssue]);
 
   useEffect(() => {
     if (selectedIssue == null) {

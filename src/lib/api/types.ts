@@ -146,7 +146,8 @@ export interface FelicitationEntry {
   id: number;
   name: string;
   title: string;
-  category: "achiever" | "fresher";
+  /** Free-text, admin-defined — e.g. "Achiever", "Fresher", or any custom category. */
+  category: string;
   year: number;
   image_url: string;
   note: string;

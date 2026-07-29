@@ -14,21 +14,24 @@ import {
   Quote,
   Facebook,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { GradientButton } from "@/components/site/GradientButton";
 import { StatCounter } from "@/components/site/StatCounter";
+import { AboutPreview } from "@/components/site/AboutPreview";
 import { ActivitiesBento } from "@/components/site/ActivitiesBento";
 import { Timeline } from "@/components/site/Timeline";
 import { LocationMap } from "@/components/site/LocationMap";
 import { LatestNews } from "@/components/site/LatestNews";
+import { MomentsPreview } from "@/components/site/MomentsPreview";
 import { UpcomingPrograms } from "@/components/site/UpcomingPrograms";
 import { LeadershipPreview } from "@/components/site/LeadershipPreview";
 import { TestimonialsCarousel } from "@/components/site/TestimonialsCarousel";
 import { SITE, buildStats } from "@/lib/site-content";
 import { settingsApi, type SiteSettings } from "@/lib/api";
 import { usePageHero } from "@/lib/usePageHero";
+import { SAYOR_ISSUES } from "@/lib/sayorIssues";
 import homeHero1 from "@/assets/home-hero-1.png";
 import homeHero2 from "@/assets/home-hero-2.png";
 import sayorHome from "@/assets/sayor-home.png";
@@ -100,7 +103,7 @@ const ACTIVITIES = [
   },
 ];
 
-function MagazineTilt() {
+function MagazineTilt({ image, alt }: { image: string; alt: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [r, setR] = useState({ x: 0, y: 0 });
   return (
@@ -124,21 +127,99 @@ function MagazineTilt() {
         style={{ transformStyle: "preserve-3d" }}
         className="absolute inset-0 rounded-3xl overflow-hidden border border-white/10 shadow-[0_30px_80px_-20px_rgba(124,58,237,0.45)]"
       >
-        <img
-          src={sayorHome}
-          alt="SAYOR — the annual magazine of PUSAB"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={image}
+            src={image}
+            alt={alt}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </AnimatePresence>
         <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-3xl" />
       </motion.div>
     </div>
   );
 }
 
+function MagazinePreview({
+  onHoverChange,
+}: {
+  onHoverChange: (issue: (typeof SAYOR_ISSUES)[number] | null) => void;
+}) {
+  return (
+    <div className="flex flex-wrap justify-center gap-4">
+      {SAYOR_ISSUES.map((issue) => (
+        <Link
+          key={issue.id}
+          to="/sayor"
+          search={{ issue: issue.id }}
+          onMouseEnter={() => onHoverChange(issue)}
+          onMouseLeave={() => onHoverChange(null)}
+          aria-label={`Open ${issue.title}`}
+          className="group relative h-28 w-[5.5rem] shrink-0 overflow-hidden rounded-lg border border-white/15 shadow-[0_10px_28px_-12px_rgba(2,6,23,0.6)] transition-transform duration-200 hover:-translate-y-1.5 hover:border-white/40"
+        >
+          <img src={issue.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/10" />
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+function SayorSection() {
+  const [hovered, setHovered] = useState<(typeof SAYOR_ISSUES)[number] | null>(null);
+  const preview = hovered ?? { image: sayorHome, title: "SAYOR — the annual magazine of PUSAB" };
+
+  return (
+    <section className="py-28 md:py-32 relative overflow-hidden bg-[var(--color-surface-2)]">
+      <div className="absolute -left-32 top-1/3 h-[40vh] w-[40vh] rounded-full bg-[var(--color-accent-2)] opacity-10 blur-[120px]" />
+      <div className="container-page relative">
+        <div className="grid lg:grid-cols-[1.4fr_1fr] gap-16 items-center">
+          <div>
+            <p className="text-label mb-3">Annual Magazine</p>
+            <h2 className="font-display text-4xl md:text-6xl font-bold tracking-tight">
+              <span className="gradient-text">SAYOR</span>- thoughts of years.
+            </h2>
+            <p className="mt-6 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
+              SAYOR is PUSAB's flagship annual magazine, bringing together voices from education,
+              culture, science, heritage, literature and student life across Bishwambarpur.
+            </p>
+            <Link
+              to="/sayor"
+              className="mt-8 inline-flex items-center gap-2 text-[var(--color-accent-1)] font-semibold hover:gap-3 transition-all"
+            >
+              Read more <ArrowRight size={16} />
+            </Link>
+          </div>
+          <MagazineTilt image={preview.image} alt={preview.title} />
+        </div>
+
+        <div className="mt-14">
+          <p className="text-center text-xs uppercase tracking-[0.2em] text-muted-foreground mb-5">
+            Hover a cover to preview · click to read
+          </p>
+          <MagazinePreview onHoverChange={setHovered} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Index() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const hero = usePageHero("home");
-  const slides = hero.images.length > 0 ? hero.images.map((img) => img.image_url) : HERO_SLIDES;
+  const heroImageUrls = hero.images.map((img) => img.image_url).join("|");
+  // Keep the same array reference across re-renders when the underlying
+  // images haven't changed, so HeroSlideshow's index-reset effect doesn't
+  // fire on every render and stomp on prev/next clicks.
+  const slides = useMemo(
+    () => (heroImageUrls ? heroImageUrls.split("|") : HERO_SLIDES),
+    [heroImageUrls],
+  );
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -279,6 +360,8 @@ function Index() {
         </div>
       </section>
 
+      <AboutPreview />
+
       <LeadershipPreview />
 
       <Timeline />
@@ -308,29 +391,10 @@ function Index() {
 
       <UpcomingPrograms />
 
+      <MomentsPreview />
+
       {/* SAYOR */}
-      <section className="py-28 md:py-32 relative overflow-hidden bg-[var(--color-surface-2)]">
-        <div className="absolute -left-32 top-1/3 h-[40vh] w-[40vh] rounded-full bg-[var(--color-accent-2)] opacity-10 blur-[120px]" />
-        <div className="container-page relative grid lg:grid-cols-[1.4fr_1fr] gap-16 items-center">
-          <div>
-            <p className="text-label mb-3">Annual Magazine</p>
-            <h2 className="font-display text-4xl md:text-6xl font-bold tracking-tight">
-              <span className="gradient-text">SAYOR</span>- thoughts of years.
-            </h2>
-            <p className="mt-6 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              SAYOR is PUSAB's flagship annual magazine, bringing together voices from education,
-              culture, science, heritage, literature and student life across Bishwambarpur.
-            </p>
-            <Link
-              to="/sayor"
-              className="mt-8 inline-flex items-center gap-2 text-[var(--color-accent-1)] font-semibold hover:gap-3 transition-all"
-            >
-              Read more <ArrowRight size={16} />
-            </Link>
-          </div>
-          <MagazineTilt />
-        </div>
-      </section>
+      <SayorSection />
 
       <LatestNews />
 
@@ -402,47 +466,51 @@ function HeroSlideshow({ slides }: { slides: string[] }) {
   const prev = () => setI((v) => (v - 1 + slides.length) % slides.length);
   const next = () => setI((v) => (v + 1) % slides.length);
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden">
-      <AnimatePresence>
-        <motion.img
-          key={i}
-          src={slides[i]}
-          alt=""
-          initial={{ opacity: 0, scale: 1.08 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{
-            opacity: { duration: 1.1, ease: "easeOut" },
-            scale: { duration: 7, ease: "linear" },
-          }}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-      </AnimatePresence>
-      {/* Cinematic scrim — darkens just enough for crisp white text, lets the photo read elsewhere. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/25 via-slate-950/35 to-slate-950/70" />
-      {/* Center focus + faint brand tint. */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(2,6,23,0.22),transparent_65%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(124,58,237,0.14),transparent_55%)]" />
+    <>
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <AnimatePresence>
+          <motion.img
+            key={i}
+            src={slides[i]}
+            alt=""
+            initial={{ opacity: 0, scale: 1.08 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              opacity: { duration: 1.1, ease: "easeOut" },
+              scale: { duration: 7, ease: "linear" },
+            }}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        </AnimatePresence>
+        {/* Cinematic scrim — darkens just enough for crisp white text, lets the photo read elsewhere. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/25 via-slate-950/35 to-slate-950/70" />
+        {/* Center focus + faint brand tint. */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(2,6,23,0.22),transparent_65%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(124,58,237,0.14),transparent_55%)]" />
+      </div>
 
+      {/* Rendered outside the z-0 image layer so its own stacking context
+          can't cap these above the z-10 hero content wrapper. */}
       {slides.length > 1 && (
         <>
           {/* Prev / next arrows */}
           <button
             onClick={prev}
             aria-label="Previous slide"
-            className="absolute left-3 top-1/2 z-10 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/35 md:left-6 md:h-12 md:w-12"
+            className="absolute left-3 top-1/2 z-30 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/35 md:left-6 md:h-12 md:w-12"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={next}
             aria-label="Next slide"
-            className="absolute right-3 top-1/2 z-10 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/35 md:right-6 md:h-12 md:w-12"
+            className="absolute right-3 top-1/2 z-30 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/35 md:right-6 md:h-12 md:w-12"
           >
             <ChevronRight size={20} />
           </button>
 
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5">
             {slides.map((_, idx) => (
               <button
                 key={idx}
@@ -454,6 +522,6 @@ function HeroSlideshow({ slides }: { slides: string[] }) {
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }

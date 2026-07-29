@@ -1,10 +1,50 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, ChevronDown, CalendarClock, ImagePlus, Loader2, X } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Save,
+  ChevronDown,
+  ChevronRight,
+  CalendarClock,
+  ImagePlus,
+  Loader2,
+  X,
+  Award,
+  HeartHandshake,
+  MoonStar,
+  Radio,
+  Trees,
+  Users,
+  GraduationCap,
+  BookOpen,
+  FileText,
+  Info,
+  Sparkles,
+  Grid2x2,
+  BarChart3,
+  ImageIcon,
+  Quote,
+  Video,
+  type LucideIcon,
+} from "lucide-react";
 import { programPagesApi, uploadImage, optimizeImage, isUploadConfigured, type ProgramPage } from "@/lib/api";
 import { errMessage } from "./useResource";
 import { SectionHeader, Field, inputCls } from "./primitives";
 import { ImageUpload } from "./ImageUpload";
+
+// Icon per program, keyed by slug — purely cosmetic, falls back to a generic
+// document icon for any slug not listed here (new programs still work fine).
+const PROGRAM_ICONS: Record<string, LucideIcon> = {
+  felicitation: Award,
+  humanity: HeartHandshake,
+  "iftar-mahfil": MoonStar,
+  online: Radio,
+  picnic: Trees,
+  reunion: Users,
+  scholarship: GraduationCap,
+  schooling: BookOpen,
+};
 
 type Objective = ProgramPage["objectives"][number];
 type InfoItem = ProgramPage["info_items"][number];
@@ -164,22 +204,41 @@ function BulkPhotoUpload({ onUploaded }: { onUploaded: (urls: string[]) => void 
 
 function EditorSection({
   title,
+  subtitle,
+  Icon,
   count,
+  defaultOpen,
   children,
 }: {
   title: string;
-  count: number;
+  subtitle?: string;
+  Icon: LucideIcon;
+  /** Shown as a badge next to the title — omit for sections with no repeating items. */
+  count?: number;
+  defaultOpen?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <details className="group rounded-xl border border-border" open={count > 0}>
-      <summary className="flex cursor-pointer list-none items-center justify-between px-3.5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground [&::-webkit-details-marker]:hidden">
-        <span>{title}</span>
-        <span className="rounded-full bg-[var(--color-background)] px-2 py-0.5 text-[10px] tabular-nums text-muted-foreground/80">
-          {count}
+    <details
+      className="group overflow-hidden rounded-xl border border-border bg-[var(--color-surface)] transition-colors open:border-[color-mix(in_oklab,var(--color-accent-1)_28%,var(--color-border))]"
+      open={defaultOpen ?? (count !== undefined && count > 0)}
+    >
+      <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[color-mix(in_oklab,var(--color-accent-1)_10%,transparent)] text-(--color-accent-1) transition-colors group-open:bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] group-open:text-white">
+          <Icon size={15} />
         </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold leading-tight text-foreground">{title}</span>
+          {subtitle && <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">{subtitle}</span>}
+        </span>
+        {count !== undefined && (
+          <span className="shrink-0 rounded-full bg-[var(--color-background)] px-2 py-0.5 text-[10px] font-bold tabular-nums text-muted-foreground/80">
+            {count}
+          </span>
+        )}
+        <ChevronRight size={15} className="shrink-0 text-muted-foreground/50 transition-transform group-open:rotate-90" />
       </summary>
-      <div className="space-y-2 border-t border-border p-3">{children}</div>
+      <div className="space-y-2 border-t border-border bg-[var(--color-background)]/40 p-3.5">{children}</div>
     </details>
   );
 }
@@ -354,27 +413,46 @@ export function ProgramPagesSection() {
         newLabel="Refresh"
       />
 
-      {/* Slug tabs */}
-      <div className="mb-4 flex flex-wrap gap-1.5">
-        {pages.map((p) => (
-          <button
-            key={p.slug}
-            onClick={() => setActiveSlug(p.slug)}
-            className={
-              "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors " +
-              (activeSlug === p.slug
-                ? "text-white"
-                : "border border-border bg-[var(--color-surface)] text-foreground/75 hover:text-foreground")
-            }
-            style={
-              activeSlug === p.slug
-                ? { background: "linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))" }
-                : undefined
-            }
-          >
-            {p.title}
-          </button>
-        ))}
+      {/* Program picker */}
+      <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+        {pages.map((p) => {
+          const Icon = PROGRAM_ICONS[p.slug] ?? FileText;
+          const active = activeSlug === p.slug;
+          return (
+            <button
+              key={p.slug}
+              onClick={() => setActiveSlug(p.slug)}
+              className={
+                "group flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all " +
+                (active
+                  ? "border-transparent shadow-md"
+                  : "border-border bg-[var(--color-surface)] hover:border-[color-mix(in_oklab,var(--color-accent-1)_35%,var(--color-border))]")
+              }
+              style={
+                active
+                  ? { background: "linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))" }
+                  : undefined
+              }
+            >
+              <span
+                className={
+                  "grid h-8 w-8 shrink-0 place-items-center rounded-lg transition-colors " +
+                  (active ? "bg-white/20 text-white" : "bg-[color-mix(in_oklab,var(--color-accent-1)_10%,transparent)] text-(--color-accent-1)")
+                }
+              >
+                <Icon size={15} />
+              </span>
+              <span
+                className={
+                  "truncate text-[13px] font-semibold leading-tight " +
+                  (active ? "text-white" : "text-foreground/85 group-hover:text-foreground")
+                }
+              >
+                {p.title}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Year switch — everything below belongs to whichever year is picked here */}
@@ -445,105 +523,95 @@ export function ProgramPagesSection() {
 
           {/* Everything for this edition, grouped into clear collapsible sections */}
           <div className="space-y-2.5">
-            <details className="group rounded-xl border border-border" open>
-              <summary className="flex cursor-pointer list-none items-center px-3.5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground [&::-webkit-details-marker]:hidden">
-                Basics
-              </summary>
-              <div className="space-y-3.5 border-t border-border p-3.5">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/70">
-                    Hero image
-                  </span>
-                  <div className="mt-1.5">
-                    <ImageUpload value={form.hero_image_url} onChange={(u) => set("hero_image_url", u)} folder="programs" />
-                  </div>
+            <EditorSection title="Basics" subtitle="Hero image, title, tagline & overview" Icon={Info} defaultOpen>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/70">
+                  Hero image
+                </span>
+                <div className="mt-1.5">
+                  <ImageUpload value={form.hero_image_url} onChange={(u) => set("hero_image_url", u)} folder="programs" />
                 </div>
+              </div>
 
-                <div className="grid gap-2.5 sm:grid-cols-2">
-                  <Field label="Title">
-                    <input value={form.title} onChange={(e) => set("title", e.target.value)} className={inputCls} />
-                  </Field>
-                  <Field label="Tagline" hint="Line under the title in the hero">
-                    <input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} className={inputCls} />
-                  </Field>
-                </div>
-
-                <Field label="Schedule note" hint='e.g. "Held once a year, in December"'>
-                  <input
-                    value={form.schedule_note}
-                    onChange={(e) => set("schedule_note", e.target.value)}
-                    className={inputCls}
-                  />
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                <Field label="Title">
+                  <input value={form.title} onChange={(e) => set("title", e.target.value)} className={inputCls} />
                 </Field>
+                <Field label="Tagline" hint="Line under the title in the hero">
+                  <input value={form.tagline} onChange={(e) => set("tagline", e.target.value)} className={inputCls} />
+                </Field>
+              </div>
 
-                <Field label="Overview">
+              <Field label="Schedule note" hint='e.g. "Held once a year, in December"'>
+                <input
+                  value={form.schedule_note}
+                  onChange={(e) => set("schedule_note", e.target.value)}
+                  className={inputCls}
+                />
+              </Field>
+
+              <Field label="Overview">
+                <textarea
+                  rows={3}
+                  value={form.overview}
+                  onChange={(e) => set("overview", e.target.value)}
+                  className={inputCls}
+                />
+              </Field>
+
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                <Field label="Who can join (eligibility)">
                   <textarea
-                    rows={3}
-                    value={form.overview}
-                    onChange={(e) => set("overview", e.target.value)}
+                    rows={2}
+                    value={form.eligibility}
+                    onChange={(e) => set("eligibility", e.target.value)}
                     className={inputCls}
                   />
                 </Field>
-
-                <div className="grid gap-2.5 sm:grid-cols-2">
-                  <Field label="Who can join (eligibility)">
-                    <textarea
-                      rows={2}
-                      value={form.eligibility}
-                      onChange={(e) => set("eligibility", e.target.value)}
-                      className={inputCls}
-                    />
-                  </Field>
-                  <Field label="How it works (process)">
-                    <textarea
-                      rows={2}
-                      value={form.process}
-                      onChange={(e) => set("process", e.target.value)}
-                      className={inputCls}
-                    />
-                  </Field>
-                </div>
+                <Field label="How it works (process)">
+                  <textarea
+                    rows={2}
+                    value={form.process}
+                    onChange={(e) => set("process", e.target.value)}
+                    className={inputCls}
+                  />
+                </Field>
               </div>
-            </details>
+            </EditorSection>
 
-            <details className="group rounded-xl border border-border">
-              <summary className="flex cursor-pointer list-none items-center px-3.5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground [&::-webkit-details-marker]:hidden">
-                Event, registration &amp; CTA
-              </summary>
-              <div className="space-y-3.5 border-t border-border p-3.5">
-                <div className="grid gap-2.5 sm:grid-cols-3">
-                  <Field label="Event date" hint='e.g. "December, Every Year"'>
-                    <input value={form.event_date} onChange={(e) => set("event_date", e.target.value)} className={inputCls} />
-                  </Field>
-                  <Field label="Venue">
-                    <input value={form.venue} onChange={(e) => set("venue", e.target.value)} className={inputCls} />
-                  </Field>
-                  <Field label="Time" hint='e.g. "6:00 PM – 11:00 PM"'>
-                    <input value={form.event_time} onChange={(e) => set("event_time", e.target.value)} className={inputCls} />
-                  </Field>
-                </div>
-
-                <div className="grid gap-2.5 sm:grid-cols-2">
-                  <Field label="Register button label" hint='e.g. "Register for Reunion"'>
-                    <input value={form.register_label} onChange={(e) => set("register_label", e.target.value)} className={inputCls} />
-                  </Field>
-                  <Field label="Register link (URL)">
-                    <input value={form.register_url} onChange={(e) => set("register_url", e.target.value)} className={inputCls} />
-                  </Field>
-                </div>
-
-                <div className="grid gap-2.5 sm:grid-cols-2">
-                  <Field label="CTA banner title" hint='e.g. "Be Part of the Tradition"'>
-                    <input value={form.cta_title} onChange={(e) => set("cta_title", e.target.value)} className={inputCls} />
-                  </Field>
-                  <Field label="CTA banner subtitle">
-                    <input value={form.cta_subtitle} onChange={(e) => set("cta_subtitle", e.target.value)} className={inputCls} />
-                  </Field>
-                </div>
+            <EditorSection title="Event, registration & CTA" subtitle="Date, venue, register button & closing banner" Icon={CalendarClock}>
+              <div className="grid gap-2.5 sm:grid-cols-3">
+                <Field label="Event date" hint='e.g. "December, Every Year"'>
+                  <input value={form.event_date} onChange={(e) => set("event_date", e.target.value)} className={inputCls} />
+                </Field>
+                <Field label="Venue">
+                  <input value={form.venue} onChange={(e) => set("venue", e.target.value)} className={inputCls} />
+                </Field>
+                <Field label="Time" hint='e.g. "6:00 PM – 11:00 PM"'>
+                  <input value={form.event_time} onChange={(e) => set("event_time", e.target.value)} className={inputCls} />
+                </Field>
               </div>
-            </details>
 
-            <EditorSection title="Highlights" count={form.objectives.length}>
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                <Field label="Register button label" hint='e.g. "Register for Reunion"'>
+                  <input value={form.register_label} onChange={(e) => set("register_label", e.target.value)} className={inputCls} />
+                </Field>
+                <Field label="Register link (URL)">
+                  <input value={form.register_url} onChange={(e) => set("register_url", e.target.value)} className={inputCls} />
+                </Field>
+              </div>
+
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                <Field label="CTA banner title" hint='e.g. "Be Part of the Tradition"'>
+                  <input value={form.cta_title} onChange={(e) => set("cta_title", e.target.value)} className={inputCls} />
+                </Field>
+                <Field label="CTA banner subtitle">
+                  <input value={form.cta_subtitle} onChange={(e) => set("cta_subtitle", e.target.value)} className={inputCls} />
+                </Field>
+              </div>
+            </EditorSection>
+
+            <EditorSection title="Highlights" subtitle="Small feature cards under the overview" Icon={Sparkles} count={form.objectives.length}>
               {form.objectives.map((o) => (
                 <RepeatingRow key={o.id} onRemove={() => set("objectives", form.objectives.filter((x) => x.id !== o.id) as Objective[])}>
                   <input
@@ -569,13 +637,6 @@ export function ProgramPagesSection() {
                     onChange={(e) => set("objectives", form.objectives.map((x) => (x.id === o.id ? { ...x, description: e.target.value } : x)) as Objective[])}
                     className={inputCls + " mt-0 sm:col-span-2"}
                   />
-                  <div className="sm:col-span-2">
-                    <ImageUpload
-                      value={o.image_url}
-                      onChange={(u) => set("objectives", form.objectives.map((x) => (x.id === o.id ? { ...x, image_url: u } : x)) as Objective[])}
-                      folder="programs"
-                    />
-                  </div>
                 </RepeatingRow>
               ))}
               <AddRowButton
@@ -589,7 +650,7 @@ export function ProgramPagesSection() {
               />
             </EditorSection>
 
-            <EditorSection title="Info grid" count={form.info_items.length}>
+            <EditorSection title="Info grid" subtitle="Label/value cells, e.g. Program Type, Frequency" Icon={Grid2x2} count={form.info_items.length}>
               {form.info_items.map((item) => (
                 <RepeatingRow key={item.id} onRemove={() => set("info_items", form.info_items.filter((x) => x.id !== item.id) as InfoItem[])}>
                   <select
@@ -628,7 +689,7 @@ export function ProgramPagesSection() {
               />
             </EditorSection>
 
-            <EditorSection title="Stat tiles" count={form.stats.length}>
+            <EditorSection title="Stat tiles" subtitle="Big numbers, e.g. 500+ Members Attending" Icon={BarChart3} count={form.stats.length}>
               {form.stats.map((s) => (
                 <RepeatingRow key={s.id} onRemove={() => set("stats", form.stats.filter((x) => x.id !== s.id) as Stat[])}>
                   <input
@@ -651,7 +712,7 @@ export function ProgramPagesSection() {
               />
             </EditorSection>
 
-            <EditorSection title="Gallery" count={form.gallery.length}>
+            <EditorSection title="Gallery" subtitle="Photos shown in the page's photo grid" Icon={ImageIcon} count={form.gallery.length}>
               {form.gallery.length > 0 && (
                 <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
                   {form.gallery.map((g) => (
@@ -684,7 +745,7 @@ export function ProgramPagesSection() {
               <BulkPhotoUpload onUploaded={appendGalleryPhotos} />
             </EditorSection>
 
-            <EditorSection title="Testimonials" count={form.testimonials.length}>
+            <EditorSection title="Testimonials" subtitle="Quotes from past participants" Icon={Quote} count={form.testimonials.length}>
               {form.testimonials.map((t) => (
                 <RepeatingRow key={t.id} onRemove={() => set("testimonials", form.testimonials.filter((x) => x.id !== t.id) as Testimonial[])}>
                   <input
@@ -726,7 +787,7 @@ export function ProgramPagesSection() {
               />
             </EditorSection>
 
-            <EditorSection title="Online event cards" count={form.webinars.length}>
+            <EditorSection title="Online event cards" subtitle="Webinar/talk cards — Online Events program only" Icon={Video} count={form.webinars.length}>
               {form.webinars.map((w) => (
                 <RepeatingRow key={w.id} onRemove={() => set("webinars", form.webinars.filter((x) => x.id !== w.id) as Webinar[])}>
                   <input

@@ -6,9 +6,6 @@ import {
   Area,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -19,12 +16,10 @@ import {
   galleryApi,
   publicityApi,
   committeeApi,
-  programsApi,
   contactApi,
   ApiError,
   type GalleryItem,
   type PublicityPost,
-  type Program,
   type EcMember,
 } from "@/lib/api";
 import {
@@ -40,7 +35,6 @@ import {
   Image as ImageIcon,
   Newspaper,
   Users,
-  CalendarRange,
   LogOut,
   Loader2,
   Lock,
@@ -69,7 +63,6 @@ import { StatCard } from "@/components/dashboard/primitives";
 import { MomentsSection } from "@/components/dashboard/MomentsSection";
 import { PublicitySection } from "@/components/dashboard/PublicitySection";
 import { CommitteeSection } from "@/components/dashboard/CommitteeSection";
-import { ProgramsSection } from "@/components/dashboard/ProgramsSection";
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
 import { JoinApplicationsSection } from "@/components/dashboard/JoinApplicationsSection";
 import { LeadershipMessagesSection } from "@/components/dashboard/LeadershipMessagesSection";
@@ -226,7 +219,6 @@ export const NAV = [
   { key: "honor-board", label: "Honor Board", Icon: Crown, group: "content" },
   { key: "convening-committee", label: "Convening Committee", Icon: Star, group: "content" },
   { key: "leadership-messages", label: "Leadership Messages", Icon: Quote, group: "content" },
-  { key: "programs", label: "Programs", Icon: CalendarRange, group: "content" },
   { key: "program-pages", label: "Program Pages", Icon: FileText, group: "content" },
   { key: "felicitation", label: "Felicitation", Icon: Award, group: "content" },
   { key: "testimonials", label: "Testimonials", Icon: MessageSquareQuote, group: "content" },
@@ -467,6 +459,8 @@ function DashboardShell({ section, onPick }: { section: Section; onPick: (s: Sec
           <div className="flex items-center gap-2">
             <Link
               to="/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-foreground/70 transition-colors hover:border-[var(--color-accent-1)] hover:text-foreground"
             >
               View site <ExternalLink size={11} />
@@ -484,7 +478,6 @@ function DashboardShell({ section, onPick }: { section: Section; onPick: (s: Sec
           {section === "honor-board" && <CommitteeSection view="honor-board" />}
           {section === "convening-committee" && <CommitteeSection view="convening-committee" />}
           {section === "leadership-messages" && <LeadershipMessagesSection />}
-          {section === "programs" && <ProgramsSection />}
           {section === "program-pages" && <ProgramPagesSection />}
           {section === "felicitation" && <FelicitationSection />}
           {section === "testimonials" && <TestimonialsSection />}
@@ -501,7 +494,6 @@ function DashboardShell({ section, onPick }: { section: Section; onPick: (s: Sec
 interface OverviewData {
   moments: GalleryItem[];
   publicity: PublicityPost[];
-  programs: Program[];
   members: EcMember[];
   committee: { count: number; current: number; sessions: number };
 }
@@ -531,14 +523,12 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
     Promise.all([
       galleryApi.listAll(),
       publicityApi.listAll(),
-      programsApi.listAll(),
       committeeApi.listAll(),
-    ]).then(([moments, publicity, programs, c]) => {
+    ]).then(([moments, publicity, c]) => {
       if (!alive) return;
       setData({
         moments,
         publicity,
-        programs,
         members: c,
         committee: {
           count: c.length,
@@ -551,18 +541,12 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
   }, []);
 
   const pub = data?.publicity ?? [];
-  const prog = data?.programs ?? [];
   const published = pub.filter((p) => p.published).length;
-  const upcoming = prog.filter((p) => p.status === "upcoming").length;
-  const ongoing = prog.filter((p) => p.status === "ongoing").length;
 
   const recent = data
     ? [
         ...data.publicity.map((p) => ({
           id: `p${p.id}`, kind: "Publicity", title: p.title, at: p.created_at, image: p.image_url, section: "publicity" as Section,
-        })),
-        ...data.programs.map((p) => ({
-          id: `pr${p.id}`, kind: "Program", title: p.title, at: p.created_at, image: p.image_url, section: "programs" as Section,
         })),
         ...data.moments.map((m) => ({
           id: `m${m.id}`, kind: "Moment", title: m.title || "Untitled photo", at: m.created_at, image: m.image_url, section: "moments" as Section,
@@ -577,7 +561,7 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
   const hour = now.getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
-  // Content added per month, last 6 months — moments + publicity + programs.
+  // Content added per month, last 6 months — moments + publicity.
   const activityTrend = useMemo(() => {
     if (!data) return [];
     const months: string[] = [];
@@ -586,7 +570,7 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
       const d = new Date(cursor.getFullYear(), cursor.getMonth() - i, 1);
       months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
     }
-    const buckets = new Map(months.map((m) => [m, { moments: 0, publicity: 0, programs: 0 }]));
+    const buckets = new Map(months.map((m) => [m, { moments: 0, publicity: 0 }]));
     for (const m of data.moments) {
       const k = monthKey(m.created_at);
       if (buckets.has(k)) buckets.get(k)!.moments++;
@@ -595,23 +579,8 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
       const k = monthKey(p.created_at);
       if (buckets.has(k)) buckets.get(k)!.publicity++;
     }
-    for (const p of data.programs) {
-      const k = monthKey(p.created_at);
-      if (buckets.has(k)) buckets.get(k)!.programs++;
-    }
     return months.map((m) => ({ month: monthLabel(m), ...buckets.get(m)! }));
   }, [data, now]);
-
-  const programStatus = useMemo(() => {
-    if (!data) return [];
-    const counts = { upcoming: 0, ongoing: 0, completed: 0 };
-    for (const p of data.programs) counts[p.status]++;
-    return [
-      { name: "Upcoming", value: counts.upcoming, fill: CHART_COLORS.blue },
-      { name: "Ongoing", value: counts.ongoing, fill: CHART_COLORS.green },
-      { name: "Completed", value: counts.completed, fill: CHART_COLORS.amber },
-    ].filter((d) => d.value > 0);
-  }, [data]);
 
   const committeeByYear = useMemo(() => {
     if (!data) return [];
@@ -626,13 +595,6 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
   const contentMixConfig: ChartConfig = {
     moments: { label: "Photos", color: CHART_COLORS.blue },
     publicity: { label: "Publicity", color: CHART_COLORS.green },
-    programs: { label: "Programs", color: CHART_COLORS.amber },
-  };
-
-  const programStatusConfig: ChartConfig = {
-    Upcoming: { label: "Upcoming", color: CHART_COLORS.blue },
-    Ongoing: { label: "Ongoing", color: CHART_COLORS.green },
-    Completed: { label: "Completed", color: CHART_COLORS.amber },
   };
 
   const committeeConfig: ChartConfig = {
@@ -643,7 +605,6 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
     { key: "moments", label: "Add a photo", Icon: ImageIcon, desc: "Upload to gallery" },
     { key: "publicity", label: "Write a post", Icon: Newspaper, desc: "Create publicity post" },
     { key: "executive-committee", label: "Add a member", Icon: Users, desc: "Update committee" },
-    { key: "programs", label: "Add a program", Icon: CalendarRange, desc: "Schedule event" },
   ] as const;
 
   const sitePages = [
@@ -666,8 +627,8 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
         </p>
       </div>
 
-      {/* Stat row — 4 equal cards */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Stat row — 3 equal cards */}
+      <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Photos" icon={<ImageIcon size={16} />}
           value={loading ? "—" : data!.moments.length}
           sub="In the Moments gallery" onClick={() => onJump("moments")} />
@@ -679,79 +640,44 @@ function Overview({ onJump }: { onJump: (s: Section) => void }) {
           value={loading ? "—" : data!.committee.count}
           sub={loading ? "" : `${data!.committee.sessions} sessions · ${data!.committee.current} current`}
           onClick={() => onJump("executive-committee")} accent />
-        <StatCard label="Programs" icon={<CalendarRange size={16} />}
-          value={loading ? "—" : prog.length}
-          sub={loading ? "" : `${upcoming} upcoming · ${ongoing} ongoing`}
-          onClick={() => onJump("programs")} />
       </div>
 
-      {/* Charts row */}
-      <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
-        {/* Content activity over time */}
-        <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-5">
-          <div className="mb-1 flex items-center justify-between gap-4">
-            <div>
-              <h3 className="font-display text-sm font-bold">Content activity</h3>
-              <p className="mt-0.5 text-xs text-muted-foreground">New items added, last 6 months</p>
-            </div>
-            <TrendingUp size={16} className="text-muted-foreground/50" />
+      {/* Content activity over time */}
+      <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-5">
+        <div className="mb-1 flex items-center justify-between gap-4">
+          <div>
+            <h3 className="font-display text-sm font-bold">Content activity</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">New items added, last 6 months</p>
           </div>
-          {loading ? (
-            <div className="mt-4 h-[220px] animate-pulse rounded-xl bg-[var(--color-background)]" />
-          ) : activityTrend.every((m) => m.moments + m.publicity + m.programs === 0) ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">No activity in this period yet.</p>
-          ) : (
-            <ChartContainer config={contentMixConfig} className="mt-2 aspect-auto h-[220px] w-full">
-              <AreaChart data={activityTrend} margin={{ left: -20, right: 8, top: 8 }}>
-                <defs>
-                  <linearGradient id="fillMoments" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={CHART_COLORS.blue} stopOpacity={0.28} />
-                    <stop offset="95%" stopColor={CHART_COLORS.blue} stopOpacity={0.02} />
-                  </linearGradient>
-                  <linearGradient id="fillPublicity" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={CHART_COLORS.green} stopOpacity={0.28} />
-                    <stop offset="95%" stopColor={CHART_COLORS.green} stopOpacity={0.02} />
-                  </linearGradient>
-                  <linearGradient id="fillPrograms" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={CHART_COLORS.amber} stopOpacity={0.28} />
-                    <stop offset="95%" stopColor={CHART_COLORS.amber} stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid vertical={false} strokeDasharray="0" stroke="var(--color-border)" />
-                <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} fontSize={11} />
-                <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={11} allowDecimals={false} width={28} />
-                <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-                <Area dataKey="moments" type="monotone" fill="url(#fillMoments)" stroke={CHART_COLORS.blue} strokeWidth={2} stackId="a" />
-                <Area dataKey="publicity" type="monotone" fill="url(#fillPublicity)" stroke={CHART_COLORS.green} strokeWidth={2} stackId="a" />
-                <Area dataKey="programs" type="monotone" fill="url(#fillPrograms)" stroke={CHART_COLORS.amber} strokeWidth={2} stackId="a" />
-                <ChartLegend content={<ChartLegendContent />} />
-              </AreaChart>
-            </ChartContainer>
-          )}
+          <TrendingUp size={16} className="text-muted-foreground/50" />
         </div>
-
-        {/* Program status donut */}
-        <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-5">
-          <h3 className="font-display text-sm font-bold">Programs by status</h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">Current pipeline</p>
-          {loading ? (
-            <div className="mt-4 h-[190px] animate-pulse rounded-xl bg-[var(--color-background)]" />
-          ) : programStatus.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">No programs yet.</p>
-          ) : (
-            <ChartContainer config={programStatusConfig} className="mx-auto aspect-auto h-[190px] w-full">
-              <PieChart>
-                <ChartTooltip content={<ChartTooltipContent hideLabel indicator="dot" />} />
-                <Pie data={programStatus} dataKey="value" nameKey="name" innerRadius={48} outerRadius={72} strokeWidth={2} stroke="var(--color-surface)">
-                  {programStatus.map((entry) => (
-                    <Cell key={entry.name} fill={entry.fill} />
-                  ))}
-                </Pie>
-                <ChartLegend content={<ChartLegendContent nameKey="name" />} />
-              </PieChart>
-            </ChartContainer>
-          )}
-        </div>
+        {loading ? (
+          <div className="mt-4 h-[220px] animate-pulse rounded-xl bg-[var(--color-background)]" />
+        ) : activityTrend.every((m) => m.moments + m.publicity === 0) ? (
+          <p className="py-16 text-center text-sm text-muted-foreground">No activity in this period yet.</p>
+        ) : (
+          <ChartContainer config={contentMixConfig} className="mt-2 aspect-auto h-[220px] w-full">
+            <AreaChart data={activityTrend} margin={{ left: -20, right: 8, top: 8 }}>
+              <defs>
+                <linearGradient id="fillMoments" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={CHART_COLORS.blue} stopOpacity={0.28} />
+                  <stop offset="95%" stopColor={CHART_COLORS.blue} stopOpacity={0.02} />
+                </linearGradient>
+                <linearGradient id="fillPublicity" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={CHART_COLORS.green} stopOpacity={0.28} />
+                  <stop offset="95%" stopColor={CHART_COLORS.green} stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} strokeDasharray="0" stroke="var(--color-border)" />
+              <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} fontSize={11} />
+              <YAxis tickLine={false} axisLine={false} tickMargin={8} fontSize={11} allowDecimals={false} width={28} />
+              <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+              <Area dataKey="moments" type="monotone" fill="url(#fillMoments)" stroke={CHART_COLORS.blue} strokeWidth={2} stackId="a" />
+              <Area dataKey="publicity" type="monotone" fill="url(#fillPublicity)" stroke={CHART_COLORS.green} strokeWidth={2} stackId="a" />
+              <ChartLegend content={<ChartLegendContent />} />
+            </AreaChart>
+          </ChartContainer>
+        )}
       </div>
 
       {/* Committee growth */}

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ChevronRight,
   ChevronLeft,
@@ -25,7 +25,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { optimizeImage, type ProgramPage } from "@/lib/api";
+import { optimizeImage, type ProgramPage, type FelicitationEntry } from "@/lib/api";
 import { SITE } from "@/lib/site-content";
 import { GradientButton } from "./GradientButton";
 
@@ -55,6 +55,7 @@ const SCHEDULE = [
 
 export function FelicitationPage({
   page,
+  entries = [],
   fallbackTitle,
   fallbackDesc,
   heroImageFallback,
@@ -64,6 +65,7 @@ export function FelicitationPage({
   onSwitchYear,
 }: {
   page: ProgramPage | null;
+  entries?: FelicitationEntry[];
   fallbackTitle: string;
   fallbackDesc: string;
   heroImageFallback: string;
@@ -85,6 +87,15 @@ export function FelicitationPage({
 
   const features = page?.objectives ?? [];
   const expectCards = page?.info_items ?? [];
+
+  const honoreeYear = entries.length > 0 ? Math.max(...entries.map((e) => e.year)) : null;
+  const honorees = honoreeYear ? entries.filter((e) => e.year === honoreeYear) : entries;
+  const honoreeCategories = useMemo(
+    () => Array.from(new Set(honorees.map((e) => e.category).filter(Boolean))).sort(),
+    [honorees],
+  );
+  const [honoreeFilter, setHonoreeFilter] = useState<string>("all");
+  const visibleHonorees = honorees.filter((e) => honoreeFilter === "all" || e.category === honoreeFilter);
 
   const titleParts = title.split(" ");
   const splitAt = Math.ceil(titleParts.length / 2);
@@ -267,6 +278,83 @@ export function FelicitationPage({
               )}
             </div>
           </div>
+
+          {/* Meet the Achievers & Freshers — honoree grid with category filter */}
+          {honorees.length > 0 && (
+            <div className="mb-14">
+              <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
+                    Honorees{honoreeYear ? ` · ${honoreeYear}` : ""}
+                  </p>
+                  <h2 className="mt-1 font-display text-2xl font-bold tracking-tight md:text-3xl">
+                    Meet the Achievers &amp; Freshers
+                  </h2>
+                </div>
+                {honoreeCategories.length > 1 && (
+                  <div className="inline-flex flex-wrap gap-1 rounded-2xl border border-border bg-[var(--color-surface)] p-1.5 shadow-sm">
+                    <button
+                      onClick={() => setHonoreeFilter("all")}
+                      className={
+                        "rounded-xl px-3.5 py-1.5 text-xs font-bold transition-colors " +
+                        (honoreeFilter === "all" ? "text-white" : "text-foreground/65 hover:text-foreground")
+                      }
+                      style={honoreeFilter === "all" ? { background: GRADIENT } : undefined}
+                    >
+                      All
+                    </button>
+                    {honoreeCategories.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => setHonoreeFilter(c)}
+                        className={
+                          "rounded-xl px-3.5 py-1.5 text-xs font-bold transition-colors " +
+                          (honoreeFilter === c ? "text-white" : "text-foreground/65 hover:text-foreground")
+                        }
+                        style={honoreeFilter === c ? { background: GRADIENT } : undefined}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {visibleHonorees.map((h, i) => (
+                  <motion.div
+                    key={h.id}
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ duration: 0.4, delay: (i % 8) * 0.06, ease: "easeOut" }}
+                    className="group rounded-2xl border border-border bg-[var(--color-surface)] p-5 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                  >
+                    <div
+                      className="mx-auto h-16 w-16 overflow-hidden rounded-full"
+                      style={{ background: GRADIENT }}
+                    >
+                      {h.image_url ? (
+                        <img src={optimizeImage(h.image_url, 128)} alt={h.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <span className="grid h-full w-full place-items-center text-lg font-bold text-white">
+                          {h.name.slice(0, 2).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-3 text-sm font-bold leading-tight">{h.name}</p>
+                    {h.title && <p className="mt-1 text-xs leading-snug text-muted-foreground">{h.title}</p>}
+                    <span
+                      className="mt-2.5 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                      style={{ background: `color-mix(in oklab, ${ACCENT} 12%, transparent)`, color: ACCENT }}
+                    >
+                      {h.category}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Gallery — 4-up card grid, 8 photos initially, show-more below */}
           {gallery.length > 0 && (

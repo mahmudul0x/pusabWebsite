@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { felicitationApi, type FelicitationEntry } from "@/lib/api";
 import { useResource, errMessage } from "./useResource";
@@ -16,15 +16,26 @@ import {
 } from "./primitives";
 import { ImageUpload } from "./ImageUpload";
 
-const CAT_LABEL: Record<FelicitationEntry["category"], string> = {
-  achiever: "Achiever",
-  fresher: "Fresher",
-};
+const DEFAULT_CATEGORY = "Achiever";
+
+// Stable badge color per category — hashes the name so the same category
+// always gets the same accent, without needing a fixed enum of colors.
+const BADGE_COLORS = [
+  { bg: "bg-[color-mix(in_oklab,var(--color-accent-1)_14%,transparent)]", text: "text-[var(--color-accent-1)]" },
+  { bg: "bg-[color-mix(in_oklab,var(--color-accent-2)_16%,transparent)]", text: "text-[var(--color-accent-2)]" },
+  { bg: "bg-[color-mix(in_oklab,var(--color-accent-3)_16%,transparent)]", text: "text-[var(--color-accent-3)]" },
+];
+
+function badgeStyle(category: string) {
+  let hash = 0;
+  for (let i = 0; i < category.length; i++) hash = (hash * 31 + category.charCodeAt(i)) >>> 0;
+  return BADGE_COLORS[hash % BADGE_COLORS.length];
+}
 
 interface Form {
   name: string;
   title: string;
-  category: FelicitationEntry["category"];
+  category: string;
   year: string;
   image_url: string;
   note: string;
@@ -33,7 +44,7 @@ interface Form {
 const empty: Form = {
   name: "",
   title: "",
-  category: "achiever",
+  category: DEFAULT_CATEGORY,
   year: String(new Date().getFullYear()),
   image_url: "",
   note: "",
@@ -50,6 +61,11 @@ export function FelicitationSection() {
   const [confirm, confirmEl] = useConfirm();
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
+
+  const categories = useMemo(
+    () => Array.from(new Set(items.map((it) => it.category).filter(Boolean))).sort(),
+    [items],
+  );
 
   function startNew() {
     setEditId(null);
@@ -71,12 +87,13 @@ export function FelicitationSection() {
 
   async function save() {
     if (!form.name.trim()) return toast.error("Name is required");
+    if (!form.category.trim()) return toast.error("Category is required");
     setSaving(true);
     try {
       const payload = {
         name: form.name,
         title: form.title,
-        category: form.category,
+        category: form.category.trim(),
         year: Number(form.year),
         image_url: form.image_url,
         note: form.note,
@@ -128,8 +145,7 @@ export function FelicitationSection() {
           onChange={setCatFilter}
           options={[
             { value: "all", label: "All" },
-            { value: "achiever", label: "Achievers" },
-            { value: "fresher", label: "Freshers" },
+            ...categories.map((c) => ({ value: c, label: c })),
           ]}
         />
       </Toolbar>
@@ -140,42 +156,40 @@ export function FelicitationSection() {
         <EmptyState label={items.length === 0 ? "No entries yet." : "No matches."} />
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
-          {filtered.map((it, idx) => (
-            <div
-              key={it.id}
-              className={"group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)] " + (idx > 0 ? "border-t border-border" : "")}
-            >
-              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl" style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}>
-                {it.image_url ? (
-                  <img src={it.image_url} alt={it.name} className="h-full w-full object-cover" />
-                ) : (
-                  <span className="grid h-full w-full place-items-center text-xs font-bold text-white">
-                    {it.name.slice(0, 2).toUpperCase()}
-                  </span>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="truncate text-sm font-semibold leading-tight">{it.name}</span>
-                  <span
-                    className={
-                      "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide " +
-                      (it.category === "achiever"
-                        ? "bg-[color-mix(in_oklab,var(--color-accent-1)_14%,transparent)] text-[var(--color-accent-1)]"
-                        : "bg-[color-mix(in_oklab,var(--color-accent-3)_16%,transparent)] text-[var(--color-accent-3)]")
-                    }
-                  >
-                    {CAT_LABEL[it.category]}
-                  </span>
+          {filtered.map((it, idx) => {
+            const badge = badgeStyle(it.category);
+            return (
+              <div
+                key={it.id}
+                className={"group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)] " + (idx > 0 ? "border-t border-border" : "")}
+              >
+                <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl" style={{ background: "linear-gradient(135deg,var(--color-accent-1),var(--color-accent-2))" }}>
+                  {it.image_url ? (
+                    <img src={it.image_url} alt={it.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="grid h-full w-full place-items-center text-xs font-bold text-white">
+                      {it.name.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
                 </div>
-                <div className="mt-0.5 truncate text-xs text-muted-foreground">
-                  {it.year}
-                  {it.title && <span> · {it.title}</span>}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-sm font-semibold leading-tight">{it.name}</span>
+                    <span
+                      className={"shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide " + badge.bg + " " + badge.text}
+                    >
+                      {it.category}
+                    </span>
+                  </div>
+                  <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                    {it.year}
+                    {it.title && <span> · {it.title}</span>}
+                  </div>
                 </div>
+                <CardActions onEdit={() => startEdit(it)} onDelete={() => remove(it)} />
               </div>
-              <CardActions onEdit={() => startEdit(it)} onDelete={() => remove(it)} />
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -200,15 +214,19 @@ export function FelicitationSection() {
             className={inputCls}
           />
         </Field>
-        <Field label="Category">
-          <select
+        <Field label="Category" hint="Type any category — e.g. Achiever, Fresher, or your own">
+          <input
             value={form.category}
-            onChange={(e) => set("category", e.target.value as Form["category"])}
+            onChange={(e) => set("category", e.target.value)}
+            list="felicitation-categories"
+            placeholder="Achiever"
             className={inputCls}
-          >
-            <option value="achiever">Achiever (felicitated)</option>
-            <option value="fresher">Fresher (welcomed)</option>
-          </select>
+          />
+          <datalist id="felicitation-categories">
+            {categories.map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
         </Field>
         <Field label="Achievement / institution">
           <input value={form.title} onChange={(e) => set("title", e.target.value)} className={inputCls} />
