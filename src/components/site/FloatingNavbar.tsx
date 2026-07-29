@@ -311,7 +311,7 @@ export function FloatingNavbar() {
         initial={false}
         animate={{
           paddingInline: scrolled ? 16 : 24,
-          paddingTop: scrolled ? 14 : 22,
+          paddingTop: scrolled ? 8 : 12,
         }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         id="floating-navbar"
@@ -333,7 +333,15 @@ export function FloatingNavbar() {
           }}
         >
           {/* Logo */}
-          <Link to="/" className="group flex items-center gap-2.5 pr-3">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              sessionStorage.setItem("pusab:scrollTopOnLoad", "1");
+              window.location.href = "/";
+            }}
+            className="group flex items-center gap-2.5 pr-3"
+          >
             <img
               src={logoPusab}
               alt="PUSAB logo"
@@ -347,7 +355,7 @@ export function FloatingNavbar() {
                 est. 2014
               </span>
             </div>
-          </Link>
+          </a>
 
           {/* Desktop links */}
           <ul className="hidden lg:flex items-center gap-1 mx-auto">
@@ -544,10 +552,15 @@ export function FloatingNavbar() {
             <div className="relative flex h-full flex-col">
               {/* Header row inside menu */}
               <div className="flex items-center justify-between border-b border-border px-5 py-4">
-                <Link
-                  to="/"
+                <a
+                  href="/"
                   className="flex items-center gap-2.5"
-                  onClick={() => setMobileOpen(false)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setMobileOpen(false);
+                    sessionStorage.setItem("pusab:scrollTopOnLoad", "1");
+                    window.location.href = "/";
+                  }}
                 >
                   <img src={logoPusab} alt="PUSAB" className="h-10 w-10 object-contain" />
                   <div className="flex flex-col leading-none">
@@ -558,7 +571,7 @@ export function FloatingNavbar() {
                       est. 2014
                     </span>
                   </div>
-                </Link>
+                </a>
                 <button
                   onClick={() => setMobileOpen(false)}
                   className="grid h-10 w-10 place-items-center rounded-full border border-border text-foreground"

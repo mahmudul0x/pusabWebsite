@@ -19,6 +19,7 @@ import { FloatingNavbar } from "../components/site/FloatingNavbar";
 import { FlipbookContext } from "../lib/flipbook-context";
 import { SiteFooter } from "../components/site/SiteFooter";
 import { BackToTop } from "../components/site/BackToTop";
+import { LaunchCelebrationModal } from "../components/site/LaunchCelebrationModal";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
@@ -177,6 +178,25 @@ function RootComponent() {
   const bare = ["/dashboard"].some((p) => pathname.startsWith(p));
   const [flipbookOpen, setFlipbookOpen] = useState(false);
 
+  // Logo click forces a full reload to "/" and flags this so we land at the
+  // very top, overriding both the browser's scroll-position restoration and
+  // the layout shift from the anniversary ribbon/modal mounting in.
+  useEffect(() => {
+    if (sessionStorage.getItem("pusab:scrollTopOnLoad") !== "1") return;
+    sessionStorage.removeItem("pusab:scrollTopOnLoad");
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
+    const pin = () => window.scrollTo(0, 0);
+    const interval = setInterval(pin, 50);
+    const timeout = setTimeout(() => clearInterval(interval), 2000);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, []);
+
   // Prefetch all committee data on first load so every page gets it from cache.
   // Also wakes up the Render backend immediately (free tier cold start).
   useEffect(() => {
@@ -218,6 +238,7 @@ function RootComponent() {
         {!bare && <SiteFooter />}
         {!bare && <BackToTop />}
       </div>
+      {!bare && <LaunchCelebrationModal />}
       <Toaster
         theme="dark"
         position="bottom-right"
