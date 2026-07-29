@@ -241,7 +241,7 @@ export function IftarMahfilPage({
                 <h2 className="font-display text-2xl md:text-3xl font-bold tracking-tight">Iftar Highlights</h2>
                 <div className="mx-auto mt-2 h-1 w-14 rounded-full" style={{ background: GRADIENT }} />
               </div>
-              <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+              <div className="mt-10 flex flex-wrap justify-center gap-4">
                 {highlights.map((item, idx) => {
                   const ItemIcon = FEATURE_ICONS[item.icon] ?? Sparkles;
                   return (
@@ -251,7 +251,7 @@ export function IftarMahfilPage({
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true, margin: "-40px" }}
                       transition={{ duration: 0.45, delay: (idx % 6) * 0.06, ease: "easeOut" }}
-                      className="group relative overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                      className="group relative w-[calc(50%-0.5rem)] overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:w-[calc(33.333%-0.67rem)] lg:w-[calc(20%-0.8rem)]"
                     >
                       <span
                         className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"

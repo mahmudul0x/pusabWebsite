@@ -164,84 +164,89 @@ export function PageHeroesSection() {
 
   return (
     <div>
-      <div className="mb-7">
-        <h2 className="font-display text-2xl font-extrabold tracking-tight">Page heroes</h2>
-        <p className="mt-1.5 text-sm text-muted-foreground max-w-2xl">
-          The banner image and heading shown at the top of each page. Leave a field empty to keep
-          the site's default.
-        </p>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 className="font-display text-2xl font-extrabold tracking-tight">Page heroes</h2>
+          <p className="mt-1.5 text-sm text-muted-foreground max-w-2xl">
+            The banner image and heading shown at the top of each page. Leave a field empty to
+            keep the site's default.
+          </p>
+        </div>
+        {dirty && (
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+            Unsaved changes on {meta.label}
+          </span>
+        )}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-        {/* Page picker */}
-        <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] lg:h-fit">
-          <div className="border-b border-border px-4 py-3">
-            <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
-              Pages ({PAGES.length})
-            </span>
-          </div>
-          <div className="flex gap-2 overflow-x-auto p-2 lg:flex-col lg:overflow-visible">
-            {PAGES.map((p) => {
-              const f = forms[p.key];
-              const active = page === p.key;
-              const isDirtyHere = f && !sameForm(f, saved[p.key] ?? emptyForm);
-              const at = updatedAt[p.key];
-              return (
-                <button
-                  key={p.key}
-                  type="button"
-                  onClick={() => setPage(p.key)}
-                  className={
-                    "group relative flex shrink-0 items-center gap-3 rounded-xl p-2 text-left transition-all lg:shrink " +
-                    (active
-                      ? "bg-[color-mix(in_oklab,var(--color-accent-1)_8%,var(--color-surface))]"
-                      : "hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)]")
-                  }
-                >
-                  {/* Active indicator bar */}
-                  <span
-                    className={
-                      "absolute left-0 top-1/2 hidden h-6 w-[3px] -translate-y-1/2 rounded-r-full transition-opacity lg:block " +
-                      (active ? "opacity-100 bg-[var(--color-accent-1)]" : "opacity-0")
-                    }
-                  />
-                  <div className="relative h-11 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-[var(--color-background)]">
-                    {f?.images[0]?.image_url ? (
-                      <img
-                        src={optimizeImage(f.images[0].image_url, 160)}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="grid h-full w-full place-items-center">
-                        <ImageIcon size={13} className="text-muted-foreground/30" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className={"truncate text-[13px] font-semibold " + (active ? "text-foreground" : "text-foreground/80")}>
-                      {p.label}
-                    </p>
-                    <span className="mt-0.5 flex items-center gap-1 text-[10.5px] text-muted-foreground/70">
-                      {isDirtyHere ? (
-                        <span className="font-medium text-amber-600">Unsaved edits</span>
-                      ) : at ? (
-                        <>
-                          <Clock size={10} className="shrink-0" />
-                          Updated {relativeTime(at)}
-                        </>
-                      ) : (
-                        "Not edited yet"
-                      )}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+      {/* Page picker — horizontal strip up top */}
+      <div className="mb-6 overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
+        <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
+            Choose a page to edit
+          </span>
+          <span className="text-[11px] text-muted-foreground/60">{PAGES.length} pages</span>
         </div>
+        <div className="flex gap-2 overflow-x-auto p-2.5">
+          {PAGES.map((p) => {
+            const f = forms[p.key];
+            const active = page === p.key;
+            const isDirtyHere = f && !sameForm(f, saved[p.key] ?? emptyForm);
+            const at = updatedAt[p.key];
+            return (
+              <button
+                key={p.key}
+                type="button"
+                onClick={() => setPage(p.key)}
+                className={
+                  "group relative flex shrink-0 items-center gap-2.5 rounded-xl border p-2 pr-3.5 text-left transition-all " +
+                  (active
+                    ? "border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] bg-[color-mix(in_oklab,var(--color-accent-1)_7%,var(--color-surface))] shadow-sm"
+                    : "border-transparent hover:border-border hover:bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)]")
+                }
+              >
+                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border bg-[var(--color-background)]">
+                  {f?.images[0]?.image_url ? (
+                    <img
+                      src={optimizeImage(f.images[0].image_url, 120)}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="grid h-full w-full place-items-center">
+                      <ImageIcon size={12} className="text-muted-foreground/30" />
+                    </div>
+                  )}
+                  {isDirtyHere && (
+                    <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--color-surface)] bg-amber-500" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className={"whitespace-nowrap text-[13px] font-semibold " + (active ? "text-foreground" : "text-foreground/75")}>
+                    {p.label}
+                  </p>
+                  <span className="flex items-center gap-1 whitespace-nowrap text-[10.5px] text-muted-foreground/70">
+                    {isDirtyHere ? (
+                      <span className="font-medium text-amber-600">Unsaved edits</span>
+                    ) : at ? (
+                      <>
+                        <Clock size={9} className="shrink-0" />
+                        {relativeTime(at)}
+                      </>
+                    ) : (
+                      "Not edited yet"
+                    )}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-        {/* Editor + preview */}
+      {/* Editor + preview */}
+      <div className="max-w-3xl">
         <div className="min-w-0 space-y-5">
           {/* Live preview */}
           <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
@@ -380,18 +385,14 @@ export function PageHeroesSection() {
               </div>
             </div>
 
-            {/* Sticky save bar — only surfaces once there's something to save */}
-            <div
-              className={
-                "sticky bottom-0 -mx-6 -mb-6 flex items-center justify-between gap-3 border-t px-6 py-3.5 transition-all " +
-                (dirty
-                  ? "border-border bg-[color-mix(in_oklab,var(--color-surface)_92%,var(--color-accent-1))]"
-                  : "border-transparent")
-              }
-            >
-              <span className="text-xs text-muted-foreground">
+            {/* Save bar — always in-flow at the end of the form, never overlaps content */}
+            <div className="-mx-6 -mb-6 flex flex-wrap items-center justify-between gap-3 border-t border-border bg-[color-mix(in_oklab,var(--color-background)_60%,var(--color-surface))] px-6 py-4">
+              <span className="text-xs">
                 {dirty ? (
-                  "You have unsaved changes"
+                  <span className="inline-flex items-center gap-1.5 font-medium text-amber-600">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    Unsaved changes
+                  </span>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 text-emerald-600">
                     <Check size={13} /> All changes saved
@@ -403,7 +404,7 @@ export function PageHeroesSection() {
                   <button
                     type="button"
                     onClick={discard}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-[var(--color-background)] hover:text-foreground"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-[var(--color-surface)] px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-[var(--color-background)] hover:text-foreground"
                   >
                     <RotateCcw size={13} /> Discard
                   </button>
@@ -414,7 +415,8 @@ export function PageHeroesSection() {
                   className="inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40 active:scale-[0.98]"
                   style={{ background: "linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))" }}
                 >
-                  <Save size={14} /> {saving ? "Saving…" : "Save hero"}
+                  {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  {saving ? "Saving…" : "Save hero"}
                 </button>
               </div>
             </div>
