@@ -84,16 +84,18 @@ function SupportPage() {
       {/* ── Hero ── */}
       <section className="relative h-[72vh] min-h-[520px] max-h-[820px] w-full overflow-hidden bg-background">
         <img src={heroSupport} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        {/* Minimal scrim — a soft fade at the very bottom edge so the headline
-            stays readable; the photo is otherwise left alone. */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/12 via-30% to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/25 via-transparent to-transparent" />
+        {/* Local scrim only where the copy sits (bottom-left), so the photo on
+            the right stays clear while the text keeps its contrast. */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/10 via-40% to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/45 via-35% to-transparent md:via-30%" />
 
         {/* Breadcrumb */}
         <div className="absolute top-32 md:top-36 left-0 right-0 z-10">
           <div className="container-page">
-            <nav className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+            <nav className="flex items-center gap-2 text-xs font-medium text-foreground/75">
+              <Link to="/" className="transition-colors hover:text-foreground">
+                Home
+              </Link>
               <ChevronRight size={12} />
               <span className="text-foreground">Donation</span>
             </nav>
@@ -115,7 +117,7 @@ function SupportPage() {
               <h1 className="font-display text-4xl md:text-7xl font-extrabold tracking-tight leading-[1.05]">
                 Donate to PUSAB
               </h1>
-              <p className="mt-5 text-base md:text-lg text-muted-foreground max-w-xl">
+              <p className="mt-5 max-w-xl text-base font-medium text-foreground md:text-lg">
                 Your contribution directly funds scholarships, medical camps and education drives
                 for public university students from Bishwambarpur.
               </p>

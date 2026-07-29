@@ -167,14 +167,18 @@ function JoinPage() {
       {/* Hero */}
       <section className="relative h-[50vh] min-h-[400px] max-h-[580px] w-full overflow-hidden bg-background">
         <img src={heroLeadership} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/20 to-transparent" />
+        {/* Local scrim only where the copy sits (bottom-left), so the artwork
+            on the right stays clear while the text keeps its contrast. */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/10 via-40% to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/45 via-35% to-transparent md:via-30%" />
 
         {/* Breadcrumbs */}
         <div className="absolute top-32 md:top-36 left-0 right-0 z-10">
           <div className="container-page">
-            <nav className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Link to="/" className="hover:text-foreground">Home</Link>
+            <nav className="flex items-center gap-2 text-xs font-medium text-foreground/75">
+              <Link to="/" className="transition-colors hover:text-foreground">
+                Home
+              </Link>
               <ChevronRight size={12} />
               <span className="text-foreground">Join PUSAB</span>
             </nav>
@@ -198,8 +202,9 @@ function JoinPage() {
               <h1 className="font-display text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05]">
                 Join PUSAB
               </h1>
-              <p className="mt-4 text-base text-muted-foreground max-w-xl">
-                Got admitted to a public university from Bishwambarpur? Fill in the form below and we will welcome you into the PUSAB family.
+              <p className="mt-4 max-w-xl text-base font-medium text-foreground/90">
+                Got admitted to a public university from Bishwambarpur? Fill in the form below and
+                we will welcome you into the PUSAB family.
               </p>
             </motion.div>
           </div>
