@@ -207,49 +207,8 @@ export function PageHeroesSection() {
       </div>
 
       {/* Editor + preview */}
-      <div className="max-w-3xl">
-        <div className="min-w-0 space-y-5">
-          {/* Live preview */}
-          <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
-            <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-              <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
-                Live preview
-              </span>
-              <a
-                href={meta.path}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-[var(--color-accent-1)]"
-              >
-                View {meta.label} page <ExternalLink size={10} />
-              </a>
-            </div>
-            <div className="relative flex min-h-[180px] items-end overflow-hidden p-6">
-              {previewImage ? (
-                <>
-                  <img src={optimizeImage(previewImage, 800)} alt="" className="absolute inset-0 h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-b from-slate-950/55 via-slate-950/55 to-slate-950/85" />
-                </>
-              ) : (
-                <div className="absolute inset-0 overflow-hidden" aria-hidden>
-                  <div className="absolute -top-16 -left-10 h-40 w-40 rounded-full bg-[var(--color-accent-1)] opacity-[0.18] blur-[60px]" />
-                  <div className="absolute top-1/3 -right-10 h-40 w-40 rounded-full bg-[var(--color-accent-2)] opacity-[0.14] blur-[60px]" />
-                </div>
-              )}
-              <div className={"relative z-10 " + (previewImage ? "text-white" : "text-foreground")}>
-                <div className="mb-2.5 h-1 w-10 rounded-full bg-[linear-gradient(90deg,var(--color-accent-1),var(--color-accent-2))]" />
-                <p className="font-display text-xl font-extrabold tracking-tight leading-tight sm:text-2xl">
-                  {form.title || <span className="opacity-50">Using site default title</span>}
-                </p>
-                {(form.lede || !form.title) && (
-                  <p className={"mt-2 max-w-md text-xs leading-relaxed sm:text-sm " + (previewImage ? "text-white/75" : "text-muted-foreground")}>
-                    {form.lede || "Using site default subtitle"}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
+      <div className="grid gap-6 xl:grid-cols-[1fr_360px] xl:items-start">
+        <div className="min-w-0">
           {/* Form */}
           <form key={page} onSubmit={save} className="space-y-5 rounded-2xl border border-border bg-[var(--color-surface)] p-6">
             <Field label="Title" hint="Leave empty to use the site's default heading for this page.">
@@ -382,6 +341,60 @@ export function PageHeroesSection() {
               </div>
             </div>
           </form>
+        </div>
+
+        {/* Right rail — sticky live preview + guidance */}
+        <div className="space-y-5 xl:sticky xl:top-5">
+          <div className="overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)]">
+            <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+              <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
+                Live preview
+              </span>
+              <a
+                href={meta.path}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-[var(--color-accent-1)]"
+              >
+                View <ExternalLink size={10} />
+              </a>
+            </div>
+            <div className="relative flex min-h-[220px] items-end overflow-hidden p-5">
+              {previewImage ? (
+                <>
+                  <img src={optimizeImage(previewImage, 640)} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-slate-950/55 via-slate-950/55 to-slate-950/85" />
+                </>
+              ) : (
+                <div className="absolute inset-0 overflow-hidden" aria-hidden>
+                  <div className="absolute -top-16 -left-10 h-40 w-40 rounded-full bg-[var(--color-accent-1)] opacity-[0.18] blur-[60px]" />
+                  <div className="absolute top-1/3 -right-10 h-40 w-40 rounded-full bg-[var(--color-accent-2)] opacity-[0.14] blur-[60px]" />
+                </div>
+              )}
+              <div className={"relative z-10 " + (previewImage ? "text-white" : "text-foreground")}>
+                <div className="mb-2.5 h-1 w-10 rounded-full bg-[linear-gradient(90deg,var(--color-accent-1),var(--color-accent-2))]" />
+                <p className="font-display text-lg font-extrabold tracking-tight leading-tight">
+                  {form.title || <span className="opacity-50">Using site default title</span>}
+                </p>
+                {(form.lede || !form.title) && (
+                  <p className={"mt-2 text-xs leading-relaxed " + (previewImage ? "text-white/75" : "text-muted-foreground")}>
+                    {form.lede || "Using site default subtitle"}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-dashed border-border p-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/70">
+              Tips
+            </p>
+            <ul className="mt-2.5 space-y-2 text-xs leading-relaxed text-muted-foreground">
+              <li>Leave title or subtitle empty to keep the site's default copy for this page.</li>
+              <li>Use a landscape photo, at least 1600px wide, so it stays sharp on large screens.</li>
+              {meta.multiImage && <li>Drag slides by the handle to change the order they rotate in.</li>}
+            </ul>
+          </div>
         </div>
       </div>
     </div>

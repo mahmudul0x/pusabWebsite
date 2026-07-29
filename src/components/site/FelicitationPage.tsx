@@ -333,7 +333,7 @@ export function FelicitationPage({
                     className="inline-flex items-center gap-2 rounded-full border px-6 py-2.5 text-sm font-bold text-foreground/85 transition-colors hover:text-foreground"
                     style={{ borderColor: `color-mix(in oklab, ${ACCENT} 35%, var(--color-border))` }}
                   >
-                    {galleryAllShown ? "Show less" : `Show more (${gallery.length - galleryVisible} more)`}
+                    {galleryAllShown ? "Show less" : "Show more"}
                     <ChevronDown
                       size={15}
                       className={"transition-transform duration-300 " + (galleryAllShown ? "rotate-180" : "")}

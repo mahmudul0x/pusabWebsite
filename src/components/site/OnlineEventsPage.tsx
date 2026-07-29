@@ -18,6 +18,7 @@ import {
   Facebook,
   Image as ImageIcon,
   X,
+  Wifi,
   type LucideIcon,
 } from "lucide-react";
 import { optimizeImage, type ProgramPage } from "@/lib/api";
@@ -88,12 +89,19 @@ export function OnlineEventsPage({
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
+  const titleParts = title.split(" ");
+  const splitAt = Math.ceil(titleParts.length / 2);
+
   return (
     <>
-      {/* Hero — dark banner with laptop image on the right */}
-      <section className="relative overflow-hidden pt-28 pb-10 md:pt-32 md:pb-14" style={{ background: `linear-gradient(120deg, ${BLUE_2}, ${BLUE})` }}>
-        <div className="container-page relative z-10">
-          <nav className="mb-6 flex items-center gap-2 text-xs text-white/60">
+      {/* Hero — full-cover photo header (site's standard full-photo hero pattern) */}
+      <section className="relative flex h-[380px] items-end overflow-hidden pt-28 pb-10 md:h-[460px] md:pt-32 md:pb-14">
+        <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/55 to-slate-950/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+
+        <div className="container-page relative z-10 [text-shadow:0_2px_30px_rgba(2,6,23,0.5)]">
+          <nav className="mb-4 flex items-center gap-2 text-xs text-white/70">
             <Link to="/" className="transition-colors hover:text-white">
               Home
             </Link>
@@ -105,35 +113,30 @@ export function OnlineEventsPage({
             <span className="text-white">{title}</span>
           </nav>
 
-          <div className="grid gap-8 md:grid-cols-2 md:items-center">
-            <div>
-              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white/70">Connect. Learn. Grow.</p>
-              <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] text-white md:text-5xl">{title}</h1>
-              {tagline && <p className="mt-5 max-w-md text-sm leading-relaxed text-white/75 md:text-base">{tagline}</p>}
-              <div className="mt-4 h-0.5 w-14 rounded-full" style={{ background: "color-mix(in oklab, var(--color-accent-1) 60%, white)" }} />
-
-              {facts.length > 0 && (
-                <div className="mt-7 grid grid-cols-2 gap-5 sm:grid-cols-4">
-                  {facts.map((f) => {
-                    const FactIcon = ICONS[f.icon] ?? Sparkles;
-                    return (
-                      <div key={f.id}>
-                        <div className="grid h-10 w-10 place-items-center rounded-full bg-white/10">
-                          <FactIcon size={17} className="text-white" />
-                        </div>
-                        <p className="mt-2.5 text-xs font-bold leading-tight text-white">{f.title}</p>
-                        {f.description && <p className="mt-1 text-[11px] leading-snug text-white/60">{f.description}</p>}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl md:aspect-auto md:h-full md:min-h-[300px]">
-              <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
-            </div>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur">
+            <Wifi size={13} style={{ color: BLUE }} />
+            Connect. Learn. Grow.
           </div>
+
+          <h1 className="max-w-2xl font-display text-3xl font-extrabold leading-[1.04] tracking-[-0.03em] text-white md:text-5xl">
+            {titleParts.slice(0, splitAt).join(" ")}{" "}
+            <span style={{ color: BLUE }}>{titleParts.slice(splitAt).join(" ")}</span>
+          </h1>
+          {tagline && <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/80 md:text-base">{tagline}</p>}
+
+          {facts.length > 0 && (
+            <div className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3 text-xs text-white/85 md:text-sm">
+              {facts.slice(0, 4).map((f) => {
+                const FactIcon = ICONS[f.icon] ?? Sparkles;
+                return (
+                  <span key={f.id} className="inline-flex items-center gap-2">
+                    <FactIcon size={14} style={{ color: BLUE }} />
+                    {f.title}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
