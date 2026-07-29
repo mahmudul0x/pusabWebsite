@@ -36,19 +36,8 @@ export function SiteFooter() {
                 Public University Students' Association of Bishwambarpur — a non-profit,
                 non-political association of 300+ students.
               </p>
-              <p className="mt-4 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                Est. {SITE.founded}
-              </p>
-              <p className="mt-4 text-xs text-muted-foreground">
-                Developed by{" "}
-                <a
-                  href="https://www.facebook.com/abin0x"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-foreground/80 transition-colors hover:text-[var(--color-accent-1)]"
-                >
-                  Mahmudul Hasan Abin
-                </a>
+              <p className="mt-4 text-xs font-semibold text-foreground/70">
+                Non-political · Non-profit · Educational.
               </p>
             </div>
 
@@ -156,7 +145,17 @@ export function SiteFooter() {
             <p>
               © {new Date().getFullYear()} {SITE.fullName}. All rights reserved.
             </p>
-            <p>Non-political · Non-profit · Educational.</p>
+            <p>
+              Developed by{" "}
+              <a
+                href="https://www.facebook.com/abin0x"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-foreground/80 transition-colors hover:text-[var(--color-accent-1)]"
+              >
+                Mahmudul Hasan Abin
+              </a>
+            </p>
           </div>
         </div>
       </div>
