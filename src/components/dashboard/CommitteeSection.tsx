@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { committeeApi, optimizeImage, type EcMember } from "@/lib/api";
 import { ecSessionLabel, sessionLabel } from "@/lib/session";
+import { byDesignation } from "@/lib/designation";
 import { useResource, errMessage } from "./useResource";
 import {
   Field,
@@ -210,6 +211,7 @@ function ExecutiveCommitteeView({
     list.push(m);
     byYear.set(m.year, list);
   }
+  for (const list of byYear.values()) list.sort(byDesignation);
   const allFilteredYears = [...byYear.keys()].sort((a, b) => b - a);
 
   // Paginate sessions when showing all (single session = show all members)
@@ -253,24 +255,56 @@ function ExecutiveCommitteeView({
                     {byYear.get(year)!.length} members
                   </span>
                 </div>
-                <div className="overflow-hidden rounded-xl border border-border bg-(--color-surface)">
-                  {byYear.get(year)!.map((it, idx) => (
-                    <div
-                      key={it.id}
-                      className={"flex items-center gap-3 px-4 py-3.5 " + (idx > 0 ? "border-t border-border" : "")}
-                    >
-                      <Avatar m={it} />
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate font-medium leading-tight">{it.name}</div>
-                        <div className="truncate text-xs text-muted-foreground">
-                          <span className="text-(--color-accent-1)">{it.role}</span>
-                          {it.university && <span> · {it.university}</span>}
+                {(() => {
+                  const members = byYear.get(year)!;
+                  const lead = members.filter((m) => isPresident(m) || isGS(m));
+                  const rest = members.filter((m) => !isPresident(m) && !isGS(m));
+                  return (
+                    <div className="space-y-3">
+                      {lead.length > 0 && (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {lead.map((it) => (
+                            <div
+                              key={it.id}
+                              className="flex items-center gap-3 rounded-xl border border-border bg-(--color-surface) p-4"
+                            >
+                              <Avatar m={it} size="lg" />
+                              <div className="min-w-0 flex-1">
+                                <div className="truncate font-display text-base font-bold leading-tight">{it.name}</div>
+                                <div className="truncate text-xs text-muted-foreground">
+                                  <span className="font-semibold text-(--color-accent-1)">{it.role}</span>
+                                  {it.university && <span> · {it.university}</span>}
+                                </div>
+                              </div>
+                              <CardActions onEdit={() => onEdit(it)} onDelete={() => onDelete(it)} />
+                            </div>
+                          ))}
                         </div>
-                      </div>
-                      <CardActions onEdit={() => onEdit(it)} onDelete={() => onDelete(it)} />
+                      )}
+                      {rest.length > 0 && (
+                        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                          {rest.map((it) => (
+                            <div
+                              key={it.id}
+                              className="group flex items-center gap-2.5 rounded-xl border border-border bg-(--color-surface) p-3.5"
+                            >
+                              <Avatar m={it} />
+                              <div className="min-w-0 flex-1">
+                                <div className="truncate text-sm font-medium leading-tight">{it.name}</div>
+                                <div className="truncate text-[11px] text-muted-foreground">
+                                  <span className="text-(--color-accent-1)">{it.role}</span>
+                                </div>
+                              </div>
+                              <div className="opacity-0 transition-opacity group-hover:opacity-100">
+                                <CardActions onEdit={() => onEdit(it)} onDelete={() => onDelete(it)} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
               </div>
             ))}
           </div>
@@ -321,7 +355,7 @@ function ExecutiveCommitteeView({
 // ── Honor Board view ─────────────────────────────────────────────────────────
 const ecLabel = ecSessionLabel;
 
-const HONOR_SESSIONS_PER_PAGE = 5;
+const HONOR_SESSIONS_PER_PAGE = 8;
 
 function HonorBoardView({
   items,
@@ -396,7 +430,7 @@ function HonorBoardView({
         <EmptyState label="No matches." />
       ) : (
         <>
-          <div className="space-y-5">
+          <div className="grid gap-4 sm:grid-cols-2">
             {years.map((year) => {
               const list = byYear.get(year)!;
               const president = list.find(isPresident);
@@ -404,12 +438,9 @@ function HonorBoardView({
               return (
                 <div key={year} className="overflow-hidden rounded-xl border border-border bg-(--color-surface)">
                   {/* Session header */}
-                  <div className="flex items-center gap-2.5 border-b border-border bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)] px-4 py-3">
-                    <Crown size={15} className="text-(--color-accent-1) shrink-0" />
-                    <span className="font-display font-bold">{ecLabel(year)}</span>
-                    <span className="ml-auto text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                      President &amp; GS
-                    </span>
+                  <div className="flex items-center gap-2 border-b border-border bg-[color-mix(in_oklab,var(--color-accent-1)_4%,transparent)] px-3.5 py-2.5">
+                    <Crown size={13} className="text-(--color-accent-1) shrink-0" />
+                    <span className="truncate font-display text-sm font-bold">{ecLabel(year)}</span>
                   </div>
 
                   {/* President + GS */}
@@ -419,38 +450,40 @@ function HonorBoardView({
                   ].map(({ member, label, Icon }, idx) => (
                     <div
                       key={label}
-                      className={"flex items-center gap-3 px-4 py-3.5 " + (idx > 0 ? "border-t border-border" : "")}
+                      className={"group flex items-start gap-2.5 px-3.5 py-3 " + (idx > 0 ? "border-t border-border" : "")}
                     >
                       {member ? (
                         <>
-                          <Avatar m={member} size="lg" />
+                          <Avatar m={member} />
                           <div className="min-w-0 flex-1">
-                            <div className="mb-0.5 flex items-center gap-1.5">
-                              <Icon size={12} className="text-(--color-accent-1) shrink-0" />
-                              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-(--color-accent-1)">
+                            <div className="mb-0.5 flex items-center gap-1">
+                              <Icon size={10} className="text-(--color-accent-1) shrink-0" />
+                              <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-(--color-accent-1)">
                                 {label}
                               </span>
                             </div>
-                            <div className="font-semibold leading-tight">{member.name}</div>
+                            <div className="truncate text-sm font-semibold leading-tight">{member.name}</div>
                             {member.university && (
-                              <div className="truncate text-xs text-muted-foreground">{member.university}</div>
+                              <div className="truncate text-[11px] text-muted-foreground">{member.university}</div>
                             )}
                           </div>
-                          <CardActions onEdit={() => onEdit(member)} onDelete={() => onDelete(member)} />
+                          <div className="opacity-0 transition-opacity group-hover:opacity-100">
+                            <CardActions onEdit={() => onEdit(member)} onDelete={() => onDelete(member)} />
+                          </div>
                         </>
                       ) : (
                         <>
-                          <div className="grid h-16 w-16 shrink-0 place-items-center rounded-xl border border-dashed border-border/70">
-                            <Icon size={18} className="opacity-25 text-(--color-accent-1)" />
+                          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-dashed border-border/70">
+                            <Icon size={14} className="opacity-25 text-(--color-accent-1)" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="mb-0.5 flex items-center gap-1.5">
-                              <Icon size={12} className="text-muted-foreground shrink-0" />
-                              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                            <div className="mb-0.5 flex items-center gap-1">
+                              <Icon size={10} className="text-muted-foreground shrink-0" />
+                              <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                                 {label}
                               </span>
                             </div>
-                            <div className="text-sm italic text-muted-foreground">Not recorded</div>
+                            <div className="text-xs italic text-muted-foreground">Not recorded</div>
                           </div>
                         </>
                       )}
@@ -532,35 +565,37 @@ function ConveningView({
   });
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-(--color-surface)">
-      <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
+    <div>
+      <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-border bg-(--color-surface) px-4 py-3">
         <Star size={15} className="text-(--color-accent-2)" />
         <span className="font-display font-bold">Convening Committee 2014</span>
         <span className="ml-auto text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           30 Jul – 27 Sep 2014
         </span>
       </div>
-      {sorted.map((member, idx) => (
-        <div
-          key={member.id}
-          className={"flex items-center gap-3 px-4 py-3.5 " + (idx > 0 ? "border-t border-border" : "")}
-        >
-          <Avatar m={member} />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <Star size={11} className="text-(--color-accent-2) shrink-0" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-(--color-accent-2)">
-                {member.role}
-              </span>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {sorted.map((member) => (
+          <div
+            key={member.id}
+            className="flex items-center gap-3 rounded-xl border border-border bg-(--color-surface) p-4"
+          >
+            <Avatar m={member} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Star size={11} className="text-(--color-accent-2) shrink-0" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-(--color-accent-2)">
+                  {member.role}
+                </span>
+              </div>
+              <div className="font-semibold leading-tight">{member.name}</div>
+              {member.university && (
+                <div className="truncate text-xs text-muted-foreground">{member.university}</div>
+              )}
             </div>
-            <div className="font-semibold leading-tight">{member.name}</div>
-            {member.university && (
-              <div className="truncate text-xs text-muted-foreground">{member.university}</div>
-            )}
+            <CardActions onEdit={() => onEdit(member)} onDelete={() => onDelete(member)} />
           </div>
-          <CardActions onEdit={() => onEdit(member)} onDelete={() => onDelete(member)} />
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

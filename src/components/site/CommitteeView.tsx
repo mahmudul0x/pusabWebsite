@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { optimizeImage } from "@/lib/api";
 import { useCurrentMembers, useMembersByYear } from "@/lib/useCommittee";
 import { sessionSpan } from "@/lib/session";
+import { byDesignation } from "@/lib/designation";
 import { Crown, Gavel, GraduationCap, Users, Building2 } from "lucide-react";
 
 type Member = {
@@ -150,7 +151,7 @@ export function CommitteeView({
   const gs = sessionMembers.find(isGS) ?? null;
   const roster = sessionMembers
     .filter((m) => !isPresident(m) && !isGS(m))
-    .sort((a, b) => a.role.localeCompare(b.role));
+    .sort(byDesignation);
 
   return (
     <section className="py-16 md:py-24">
