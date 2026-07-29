@@ -595,6 +595,8 @@ export function FloatingNavbar() {
                     const children = "children" in link ? link.children : undefined;
                     const isActive =
                       link.to === "/" ? pathname === "/" : pathname.startsWith(link.to);
+                    const topKey = "top:" + link.to;
+                    const topExpanded = mobileExpanded.includes(topKey);
                     return (
                       <motion.li
                         key={link.to}
@@ -607,19 +609,42 @@ export function FloatingNavbar() {
                           },
                         }}
                       >
-                        <Link
-                          to={link.to}
-                          onClick={() => setMobileOpen(false)}
-                          className={
-                            "block rounded-xl px-4 py-3 font-display text-lg font-bold tracking-tight transition-colors " +
-                            (isActive
-                              ? "bg-[var(--color-surface-2)] text-foreground"
-                              : "text-foreground/85 hover:bg-[var(--color-surface-2)]")
-                          }
-                        >
-                          {link.label}
-                        </Link>
-                        {children && (
+                        {children ? (
+                          <button
+                            type="button"
+                            onClick={() => toggleMobile(topKey)}
+                            aria-expanded={topExpanded}
+                            className={
+                              "flex w-full items-center justify-between rounded-xl px-4 py-3 font-display text-lg font-bold tracking-tight transition-colors " +
+                              (isActive
+                                ? "bg-[var(--color-surface-2)] text-foreground"
+                                : "text-foreground/85 hover:bg-[var(--color-surface-2)]")
+                            }
+                          >
+                            {link.label}
+                            <ChevronDown
+                              size={16}
+                              className={
+                                "opacity-50 transition-transform duration-200 " +
+                                (topExpanded ? "rotate-180" : "")
+                              }
+                            />
+                          </button>
+                        ) : (
+                          <Link
+                            to={link.to}
+                            onClick={() => setMobileOpen(false)}
+                            className={
+                              "block rounded-xl px-4 py-3 font-display text-lg font-bold tracking-tight transition-colors " +
+                              (isActive
+                                ? "bg-[var(--color-surface-2)] text-foreground"
+                                : "text-foreground/85 hover:bg-[var(--color-surface-2)]")
+                            }
+                          >
+                            {link.label}
+                          </Link>
+                        )}
+                        {children && topExpanded && (
                           <ul className="mb-1 ml-3 mt-0.5 space-y-0.5 border-l border-border pl-4">
                             {children.map((c) => {
                               const grandchildren = "children" in c ? c.children : undefined;
@@ -770,7 +795,7 @@ export function FloatingNavbar() {
                     <span>Join PUSAB</span>
                   </Link>
                 </div>
-                <div className="mt-4 flex flex-col gap-0.5 text-xs text-muted-foreground">
+                <div className="mt-4 flex flex-col items-center gap-0.5 text-center text-xs text-muted-foreground">
                   <p>{SITE.email}</p>
                   <p>{SITE.phone}</p>
                 </div>
