@@ -42,11 +42,28 @@ function LeadCard({
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="group flex min-w-0 flex-1 items-center gap-5 rounded-2xl border border-border bg-[color-mix(in_oklab,var(--color-surface)_60%,transparent)] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] hover:shadow-[0_24px_56px_-36px_rgba(29,78,216,0.45)] sm:p-5"
+      initial={{ opacity: 0, y: 28, scale: 0.97 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.65, delay, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative flex min-w-0 flex-1 items-center gap-5 overflow-hidden rounded-2xl border border-border bg-[color-mix(in_oklab,var(--color-surface)_60%,transparent)] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] hover:shadow-[0_24px_56px_-36px_rgba(29,78,216,0.45)] sm:p-5"
     >
+      {/* Announcement sweep — a light beam crosses the card once as it's unveiled. */}
+      <motion.div
+        aria-hidden
+        initial={{ x: "-120%" }}
+        whileInView={{ x: "220%" }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 1.1, delay: delay + 0.25, ease: "easeInOut" }}
+        className="pointer-events-none absolute inset-y-0 z-10 w-1/3 skew-x-[-18deg]"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, color-mix(in oklab, " +
+            c1 +
+            " 35%, transparent), transparent)",
+        }}
+      />
+
       <div
         className="relative aspect-[3/4] w-24 shrink-0 overflow-hidden rounded-xl sm:w-32"
         style={{ background: "linear-gradient(135deg, " + c1 + ", " + c2 + ")" }}
@@ -64,12 +81,16 @@ function LeadCard({
         )}
       </div>
       <div className="min-w-0">
-        <span
+        <motion.span
+          initial={{ opacity: 0, y: 6 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.4, delay: delay + 0.15 }}
           className="inline-flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white"
           style={{ background: "linear-gradient(120deg, " + c1 + ", " + c2 + ")" }}
         >
           <Icon size={11} /> {label}
-        </span>
+        </motion.span>
         <p className="mt-2.5 truncate font-display text-xl font-bold leading-tight tracking-tight text-foreground sm:text-2xl">
           {m.name}
         </p>
@@ -86,23 +107,28 @@ function LeadCard({
 
 /* ── Roster row ── */
 function MemberRow({ m, index }: { m: Member; index: number }) {
+  const delay = Math.min(index, 12) * 0.05;
   return (
     <motion.li
-      initial={{ opacity: 0, y: 8 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, x: -14 }}
+      whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-20px" }}
-      transition={{ duration: 0.3, delay: Math.min(index, 12) * 0.03 }}
+      transition={{ duration: 0.35, delay, ease: [0.16, 1, 0.3, 1] }}
       className="group flex flex-col gap-3 rounded-2xl border border-transparent p-4 transition-all duration-200 hover:border-[color-mix(in_oklab,var(--color-accent-1)_20%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-accent-1)_5%,transparent)] hover:shadow-[0_16px_36px_-28px_rgba(29,78,216,0.5)] sm:flex-row sm:items-center"
     >
       <div className="flex min-w-0 flex-1 items-center gap-3.5">
-        <span
+        <motion.span
+          initial={{ scale: 0 }}
+          whileInView={{ scale: 1 }}
+          viewport={{ once: true, margin: "-20px" }}
+          transition={{ duration: 0.4, delay: delay + 0.12, type: "spring", stiffness: 260, damping: 16 }}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm"
           style={{
             background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
           }}
         >
           {index + 1}
-        </span>
+        </motion.span>
         <div className="min-w-0 flex-1">
           <p className="truncate font-display font-bold leading-tight text-foreground">{m.name}</p>
           {m.university && (
