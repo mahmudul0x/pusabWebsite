@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { CalendarDays, Facebook, Mail, MapPin, PhoneCall, Youtube } from "lucide-react";
+import { CalendarDays, Facebook, Mail, MapPin, PhoneCall, Share2, Youtube } from "lucide-react";
 import { NAV_LINKS, PROGRAMS, SITE } from "@/lib/site-content";
+import { ShareCard } from "@/components/site/ShareCard";
 import logoPusab from "@/assets/logo-pusab.png";
 
 // Most programs live at /programs/<key>, but a couple have their own top-level
@@ -15,6 +17,7 @@ function programHref(key: string) {
 }
 
 export function SiteFooter() {
+  const [shareOpen, setShareOpen] = useState(false);
   return (
     <footer className="relative mt-24 border-t border-border bg-[var(--color-surface)]">
       <div className="hairline-gradient absolute inset-x-0 top-0" />
@@ -132,12 +135,21 @@ export function SiteFooter() {
                   >
                     <Youtube size={16} />
                   </a>
+                  <button
+                    onClick={() => setShareOpen(true)}
+                    aria-label="Share PUSAB's website"
+                    className="grid h-9 w-9 place-items-center rounded-full border border-border text-foreground/70 transition-colors hover:border-[color-mix(in_oklab,var(--color-accent-1)_45%,transparent)] hover:text-[var(--color-accent-1)]"
+                  >
+                    <Share2 size={16} />
+                  </button>
                 </li>
               </ul>
             </div>
           </div>
         </div>
       </div>
+
+      <ShareCard open={shareOpen} onClose={() => setShareOpen(false)} />
 
       <div className="border-t border-border">
         <div className="px-4">
