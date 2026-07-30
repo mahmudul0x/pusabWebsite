@@ -7,6 +7,7 @@ import {
   Radio,
   Award,
   Moon,
+  Trophy,
   type LucideIcon,
 } from "lucide-react";
 
@@ -93,6 +94,13 @@ export const PROGRAM_THEMES: Record<string, ProgramTheme> = {
     colorB: SITE_COLOR_B,
     layout: "gallery-first",
     mood: "Togetherness",
+  },
+  sports: {
+    Icon: Trophy,
+    colorA: SITE_COLOR_A,
+    colorB: SITE_COLOR_B,
+    layout: "gallery-first",
+    mood: "Spirit",
   },
   online: {
     Icon: Radio,

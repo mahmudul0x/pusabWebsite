@@ -23,7 +23,7 @@ import { ScholarshipPage } from "@/components/site/ScholarshipPage";
 import { PicnicPage } from "@/components/site/PicnicPage";
 import { OnlineEventsPage } from "@/components/site/OnlineEventsPage";
 import { IftarMahfilPage } from "@/components/site/IftarMahfilPage";
-import heroPrograms from "@/assets/hero-programs.jpg";
+import { SportsPage } from "@/components/site/SportsPage";
 
 const STATUS_META: Record<Status, { label: string; Icon: typeof CalendarClock; chip: string }> = {
   upcoming: {
@@ -475,7 +475,6 @@ function ProgramDetailPage() {
         page={page}
         fallbackTitle={fallback.title}
         fallbackDesc={fallback.desc}
-        heroImageFallback={heroPrograms}
         years={years}
         currentYear={page?.year ?? new Date().getFullYear()}
         loadingYear={loadingYear}
@@ -493,7 +492,6 @@ function ProgramDetailPage() {
         page={page}
         fallbackTitle={fallback.title}
         fallbackDesc={fallback.desc}
-        heroImageFallback={heroPrograms}
         years={years}
         currentYear={page?.year ?? new Date().getFullYear()}
         loadingYear={loadingYear}
@@ -512,7 +510,6 @@ function ProgramDetailPage() {
         page={page}
         fallbackTitle={fallback.title}
         fallbackDesc={fallback.desc}
-        heroImageFallback={heroPrograms}
         years={years}
         currentYear={page?.year ?? new Date().getFullYear()}
         loadingYear={loadingYear}
@@ -531,7 +528,6 @@ function ProgramDetailPage() {
         page={page}
         fallbackTitle={fallback.title}
         fallbackDesc={fallback.desc}
-        heroImageFallback={heroPrograms}
         years={years}
         currentYear={page?.year ?? new Date().getFullYear()}
         loadingYear={loadingYear}
@@ -550,7 +546,22 @@ function ProgramDetailPage() {
         page={page}
         fallbackTitle={fallback.title}
         fallbackDesc={fallback.desc}
-        heroImageFallback={heroPrograms}
+        years={years}
+        currentYear={page?.year ?? new Date().getFullYear()}
+        loadingYear={loadingYear}
+        onSwitchYear={switchYear}
+      />
+    );
+  }
+
+  // Sports has its own design: a floodlit dark hero, a scoreboard stat strip
+  // that overlaps it, jersey-numbered highlight cards, gallery and a dark CTA.
+  if (fallback.key === "sports") {
+    return (
+      <SportsPage
+        page={page}
+        fallbackTitle={fallback.title}
+        fallbackDesc={fallback.desc}
         years={years}
         currentYear={page?.year ?? new Date().getFullYear()}
         loadingYear={loadingYear}
@@ -570,7 +581,6 @@ function ProgramDetailPage() {
         page={page}
         fallbackTitle={fallback.title}
         fallbackDesc={fallback.desc}
-        heroImageFallback={heroPrograms}
         years={years}
         currentYear={page?.year ?? new Date().getFullYear()}
         loadingYear={loadingYear}
@@ -590,7 +600,6 @@ function ProgramDetailPage() {
         page={page}
         fallbackTitle={fallback.title}
         fallbackDesc={fallback.desc}
-        heroImageFallback={heroPrograms}
         years={years}
         currentYear={page?.year ?? new Date().getFullYear()}
         loadingYear={loadingYear}
@@ -602,7 +611,7 @@ function ProgramDetailPage() {
   const title = page?.title || fallback.title;
   const tagline = page?.tagline || fallback.desc;
   const overview = page?.overview || fallback.desc;
-  const heroImage = page?.hero_image_url ? optimizeImage(page.hero_image_url, 1600) : heroPrograms;
+  const heroImage = page?.hero_image_url ? optimizeImage(page.hero_image_url, 1600) : undefined;
 
   const related = fallback.category
     ? events.filter((e) => e.category.toLowerCase() === fallback.category.toLowerCase())

@@ -15,6 +15,7 @@ import {
   MoonStar,
   Radio,
   Trees,
+  Trophy,
   Users,
   GraduationCap,
   BookOpen,
@@ -44,6 +45,7 @@ const PROGRAM_ICONS: Record<string, LucideIcon> = {
   reunion: Users,
   scholarship: GraduationCap,
   schooling: BookOpen,
+  sports: Trophy,
 };
 
 type Objective = ProgramPage["objectives"][number];
