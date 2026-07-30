@@ -134,7 +134,7 @@ export function SportsPage({
           style={{ borderColor: `color-mix(in oklab, ${ACCENT} 30%, transparent)` }}
         />
 
-        <div className="container-page relative z-10 flex min-h-[62vh] flex-col justify-end pb-14 pt-36">
+        <div className="container-page relative z-10 flex min-h-[62vh] flex-col justify-end pb-14 pt-37">
           <nav className="mb-6 flex items-center gap-2 text-xs font-medium text-white/70">
             <Link to="/" className="transition-colors hover:text-white">
               Home

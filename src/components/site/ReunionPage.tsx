@@ -136,7 +136,7 @@ export function ReunionPage({
     <>
       {/* Hero — a compact, wide banner (not full-viewport): scrim concentrated
           on the left where the text sits, photo clearly visible on the right. */}
-      <section className="relative pt-36 pb-8 md:pt-44 md:pb-10 overflow-hidden h-85 md:h-105 flex items-end">
+      <section className="relative pt-37 pb-8 md:pb-10 overflow-hidden min-h-85 md:min-h-105 flex items-end">
         <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/55 to-slate-950/10" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />

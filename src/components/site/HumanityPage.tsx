@@ -80,7 +80,7 @@ export function HumanityPage({
   return (
     <>
       {/* Hero — full-cover photo header (site's standard full-photo hero pattern) */}
-      <section className="relative flex h-[400px] items-end overflow-hidden pt-28 pb-10 md:h-[480px] md:pt-32 md:pb-14">
+      <section className="relative flex min-h-[400px] items-end overflow-hidden pt-37 pb-10 md:min-h-[480px] md:pb-14">
         <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/55 to-slate-950/10" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />

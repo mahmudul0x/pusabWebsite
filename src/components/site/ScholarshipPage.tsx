@@ -160,7 +160,7 @@ export function ScholarshipPage({
   return (
     <>
       {/* Hero */}
-      <section className="relative pt-[148px] pb-10 md:pb-14 overflow-hidden min-h-[340px] md:min-h-[420px] flex items-end">
+      <section className="relative pt-37 pb-10 md:pb-14 overflow-hidden min-h-[340px] md:min-h-[420px] flex items-end">
         <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/55 to-slate-950/10" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
