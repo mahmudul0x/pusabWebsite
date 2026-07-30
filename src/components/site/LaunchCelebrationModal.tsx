@@ -16,7 +16,7 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 function isAnniversary() {
   const d = new Date();
-  return d.getMonth() === 6 && (d.getDate() === 29 || d.getDate() === 30); // July is month 6 (0-indexed)
+  return d.getMonth() === 6 && (d.getDate() === 30 || d.getDate() === 31); // July is month 6 (0-indexed)
 }
 
 type ConfettiShape = "bar" | "dot" | "ring";
