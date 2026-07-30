@@ -1,12 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState, useCallback, useRef, useLayoutEffect } from "react";
-import { BookOpen, ArrowUpRight, ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
+import { BookOpen, ArrowUpRight, ChevronLeft, ChevronRight, Clock, Loader2, X } from "lucide-react";
 import { GradientButton } from "@/components/site/GradientButton";
 import { useFlipbook } from "@/lib/flipbook-context";
-import { SAYOR_ISSUES } from "@/lib/sayorIssues";
+import { SAYOR_ISSUES, SAYOR_ISSUE_COUNT } from "@/lib/sayorIssues";
 
 const ISSUE_ITEMS = SAYOR_ISSUES;
+
+// Announced but not yet published; they close out the shelf as placeholders.
+// Move an id into sayorIssues.ts once its cover and content land.
+const UPCOMING_ISSUES = [1, 2].map((n) => {
+  const id = SAYOR_ISSUE_COUNT + n;
+  return { id, title: `SAYOR Issue ${String(id).padStart(2, "0")}` };
+});
 
 type SayorChapter = { title: string; author: string; bio: string; paragraphs: string[] };
 type SayorDoc = { id: number; editor: string; chapters: SayorChapter[] };
@@ -842,7 +849,6 @@ function SayorPage() {
       <section className="pt-32 pb-10 overflow-hidden md:pt-40">
         <div className="container-page text-center">
           <h2 className="font-display font-extrabold tracking-tighter gradient-text leading-none text-[clamp(4rem,18vw,16rem)]">SAYOR</h2>
-          <p className="-mt-2 text-label">Annual · Bilingual · Bishwambarpur</p>
         </div>
       </section>
 
@@ -853,7 +859,9 @@ function SayorPage() {
               <p className="text-label mb-2">Archive</p>
               <h2 className="font-display text-2xl md:text-4xl font-bold tracking-tight">Browse all SAYOR editions</h2>
             </div>
-            <span className="hidden sm:block text-xs uppercase tracking-[0.2em] text-muted-foreground">11 issues</span>
+            <span className="hidden sm:block text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              {ISSUE_ITEMS.length} issues · {UPCOMING_ISSUES.length} on the way
+            </span>
           </div>
 
           <p className="mb-10 max-w-2xl text-sm text-muted-foreground">
@@ -889,6 +897,41 @@ function SayorPage() {
                   <p className="mt-0.5 text-[11px] uppercase tracking-[0.2em] text-muted-foreground opacity-0 transition-opacity duration-300 group-hover:opacity-100">Read now →</p>
                 </div>
               </motion.button>
+            ))}
+
+            {/* Issues 12 and 13 are on the way — shown as unreleased spines so
+                the shelf reads as continuing rather than ending at 11. */}
+            {UPCOMING_ISSUES.map((issue, i) => (
+              <motion.div
+                key={issue.id}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.45, delay: ((ISSUE_ITEMS.length + i) % 5) * 0.05 }}
+                className="flex flex-col items-center"
+                aria-label={`${issue.title} — coming soon`}
+              >
+                <div className="relative aspect-3/4 w-full max-w-50">
+                  <div className="absolute right-0 top-[2%] h-[96%] w-3 translate-x-px rounded-r-sm bg-[repeating-linear-gradient(to_right,#e7e2d6_0px,#e7e2d6_1px,#cfc9ba_2px,#cfc9ba_3px)] opacity-60" />
+                  <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-l-sm rounded-r-md border border-dashed border-border bg-[var(--color-surface-2)] px-4 text-center">
+                    <span className="absolute left-3 top-3 rounded-full border border-border bg-[var(--color-surface)] px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      No. {String(issue.id).padStart(2, "0")}
+                    </span>
+                    <Clock size={22} className="text-[var(--color-accent-1)]" />
+                    <p className="mt-3 font-display text-sm font-bold leading-snug text-foreground">
+                      Coming soon
+                    </p>
+                    <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                      Arriving shortly
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-5 text-center">
+                  <h3 className="font-display text-base font-semibold tracking-tight text-muted-foreground">
+                    {issue.title}
+                  </h3>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
