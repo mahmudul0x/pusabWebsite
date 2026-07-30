@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { GradientButton } from "@/components/site/GradientButton";
 import { SITE } from "@/lib/site-content";
-import aboutMission from "@/assets/aboutPageSquareImg.jpg";
+import aboutMission from "@/assets/aboutCommitte.jpg";
 
 const QUICK_FACTS = [
   { value: SITE.members, label: "Active members" },
@@ -22,10 +22,10 @@ export function AboutPreview() {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="relative order-last lg:order-first"
         >
-          <div className="relative overflow-hidden rounded-3xl border border-border aspect-square shadow-[0_40px_90px_-50px_rgba(15,23,42,0.55)]">
+          <div className="relative overflow-hidden rounded-3xl border border-border aspect-4/3 shadow-[0_40px_90px_-50px_rgba(15,23,42,0.55)]">
             <img
               src={aboutMission}
-              alt="PUSAB students studying together"
+              alt="PUSAB members gathered for a group photograph"
               loading="lazy"
               className="absolute inset-0 w-full h-full object-cover"
             />
