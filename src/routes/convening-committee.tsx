@@ -86,54 +86,47 @@ function LeadCard({ m, index }: { m: Member; index: number }) {
   );
 }
 
-/* ── Regular member card ── */
+/* ── Regular member card — no photo, larger presence ── */
 function MemberRow({ m, index }: { m: Member; index: number }) {
   return (
-    <motion.article
+    <motion.li
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-30px" }}
       transition={{ duration: 0.4, delay: Math.min(index, 12) * 0.05, ease: [0.16, 1, 0.3, 1] }}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-2)_30%,transparent)] hover:shadow-[0_18px_44px_-30px_rgba(29,78,216,0.4)]"
+      className="group relative flex items-center gap-3.5 overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--color-accent-1)_30%,transparent)] hover:shadow-[0_18px_44px_-30px_rgba(29,78,216,0.4)]"
     >
-      {/* Photo — square */}
-      <div
-        className="relative aspect-square w-full overflow-hidden"
-        style={{ background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))" }}
+      <span
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm"
+        style={{
+          background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
+        }}
       >
-        {m.photo_url ? (
-          <img
-            src={optimizeImage(m.photo_url, 280)}
-            alt={m.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-          />
-        ) : (
-          <span className="grid h-full w-full place-items-center text-3xl font-bold text-white select-none">
-            {initials(m.name)}
-          </span>
+        {initials(m.name)}
+      </span>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-display text-base font-bold leading-tight tracking-tight text-foreground">
+          {m.name}
+        </p>
+        {m.university && (
+          <p className="mt-1 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+            <GraduationCap size={12} className="shrink-0" />
+            <span className="truncate">{m.university}</span>
+          </p>
         )}
-        {/* Role badge — floating on photo */}
         <span
-          className="absolute left-2.5 top-2.5 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-white backdrop-blur"
+          className="mt-1.5 inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest"
           style={{
-            background: "linear-gradient(120deg, var(--color-accent-1), var(--color-accent-2))",
+            background: "color-mix(in oklab, var(--color-accent-1) 10%, transparent)",
+            color: "var(--color-accent-1)",
+            border: "1px solid color-mix(in oklab, var(--color-accent-1) 25%, transparent)",
           }}
         >
           {m.role}
         </span>
       </div>
-
-      {/* Info */}
-      <div className="p-3 text-center">
-        <p className="font-display text-sm font-bold leading-tight text-foreground truncate">{m.name}</p>
-        {m.university && (
-          <p className="mt-1 flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
-            <GraduationCap size={10} className="shrink-0" />
-            <span className="truncate">{m.university}</span>
-          </p>
-        )}
-      </div>
-    </motion.article>
+    </motion.li>
   );
 }
 
@@ -217,11 +210,7 @@ function ConveningCommitteePage() {
                   <div key={i} className="h-40 animate-pulse rounded-2xl bg-[var(--color-surface)]" />
                 ))}
               </div>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {[0, 1, 2, 3].map((i) => (
-                  <div key={i} className="aspect-[3/4] animate-pulse rounded-2xl bg-[var(--color-surface)]" />
-                ))}
-              </div>
+              <div className="h-72 animate-pulse rounded-3xl bg-[var(--color-surface)]" />
             </div>
           ) : list.length === 0 ? (
             <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-border bg-[var(--color-surface)] py-24 text-center">
@@ -241,13 +230,55 @@ function ConveningCommitteePage() {
                 </div>
               )}
 
-              {/* Remaining founders — square photo grid */}
+              {/* Remaining founders — roster list, no photos */}
               {rest.length > 0 && (
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                  {rest.map((m, i) => (
-                    <MemberRow key={m.id} m={m} index={i} />
-                  ))}
-                </div>
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  className="overflow-hidden rounded-3xl border border-border shadow-[0_32px_64px_-48px_rgba(29,78,216,0.35)]"
+                  style={{ background: "var(--color-surface)" }}
+                >
+                  <div
+                    className="flex items-center justify-between gap-4 border-b border-border px-7 py-5"
+                    style={{
+                      background: "color-mix(in oklab, var(--color-accent-1) 5%, var(--color-surface))",
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="grid h-10 w-10 place-items-center rounded-xl text-white shadow"
+                        style={{
+                          background: "linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2))",
+                        }}
+                      >
+                        <Users size={17} />
+                      </div>
+                      <div>
+                        <p
+                          className="text-[10px] font-bold uppercase tracking-[0.2em]"
+                          style={{ color: "var(--color-accent-1)" }}
+                        >
+                          Founding Members
+                        </p>
+                        <p className="font-display text-lg font-bold tracking-tight text-foreground">
+                          Full Roster
+                        </p>
+                      </div>
+                    </div>
+                    <span className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground">
+                      {rest.length} {rest.length === 1 ? "member" : "members"}
+                    </span>
+                  </div>
+                  <div className="p-5 sm:p-7">
+                    <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                      {rest.map((m, i) => (
+                        <MemberRow key={m.id} m={m} index={i} />
+                      ))}
+                    </ul>
+                  </div>
+                </motion.div>
               )}
             </div>
           )}
