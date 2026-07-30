@@ -57,8 +57,10 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: "/" },
-      // Start the hero download with the document rather than after React
-      // mounts — it is the largest contentful paint on this page.
+      // Start a hero download with the document rather than after React
+      // mounts — it is the largest contentful paint on this page. This is the
+      // bundled slide, which only leads when no dashboard hero is set; when
+      // one is, it still gets fetched a moment later as a following slide.
       { rel: "preload", as: "image", href: homeHero1, fetchpriority: "high" },
     ],
   }),
@@ -218,11 +220,13 @@ function Index() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const hero = usePageHero("home");
   const heroImageUrls = hero.images.map((img) => img.image_url).join("|");
+  // Dashboard images lead, then the bundled slides — so the carousel keeps
+  // rotating even when only one hero has been uploaded.
   // Keep the same array reference across re-renders when the underlying
   // images haven't changed, so HeroSlideshow's index-reset effect doesn't
   // fire on every render and stomp on prev/next clicks.
   const slides = useMemo(
-    () => (heroImageUrls ? heroImageUrls.split("|") : HERO_SLIDES),
+    () => (heroImageUrls ? [...heroImageUrls.split("|"), ...HERO_SLIDES] : HERO_SLIDES),
     [heroImageUrls],
   );
 
