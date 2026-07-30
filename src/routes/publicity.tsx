@@ -17,7 +17,6 @@ import {
   LayoutGrid,
   PenLine,
 } from "lucide-react";
-import heroPublicity from "@/assets/hero-publicity.jpg";
 
 export const Route = createFileRoute("/publicity")({
   head: () => ({
@@ -184,7 +183,7 @@ function PublicityPage() {
           "News, press releases and upcoming events — straight from PUSAB. Tap any story to read the full coverage."
         }
         crumbs={[{ label: "Home", to: "/" }, { label: "Publicity" }]}
-        image={hero.image ?? heroPublicity}
+        image={hero.image}
         imageAlt={hero.imageAlt ?? "PUSAB press conference"}
       />
 

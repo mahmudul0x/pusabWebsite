@@ -22,7 +22,6 @@ import { PageHero } from "@/components/site/PageHero";
 import { GlowCard } from "@/components/site/GlowCard";
 import { OBJECTIVES, SITE } from "@/lib/site-content";
 import { usePageHero } from "@/lib/usePageHero";
-import heroAbout from "@/assets/hero-about.jpg";
 import aboutMission from "@/assets/aboutPageSquareImg.jpg";
 
 // One icon per aim, matched to the OBJECTIVES order in site-content.
@@ -83,7 +82,7 @@ function AboutPage() {
           "Public University Students' Association of Bishwambarpur is a non-political, non-profit student body representing students from public universities, medical and engineering colleges."
         }
         crumbs={[{ label: "Home", to: "/" }, { label: "About" }]}
-        image={hero.image ?? heroAbout}
+        image={hero.image}
         imageAlt={hero.imageAlt ?? "PUSAB members gathered in Bishwambarpur"}
       />
 

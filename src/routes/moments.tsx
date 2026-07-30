@@ -17,7 +17,6 @@ import {
   Sparkles,
   Tag,
 } from "lucide-react";
-import heroMoments from "@/assets/hero-moments.jpg";
 
 export const Route = createFileRoute("/moments")({
   head: () => ({
@@ -149,7 +148,7 @@ function MomentsPage() {
           "A photo journey through PUSAB's events, achievements, community service and reunions."
         }
         crumbs={[{ label: "Home", to: "/" }, { label: "Moments" }]}
-        image={hero.image ?? heroMoments}
+        image={hero.image}
         imageAlt={hero.imageAlt ?? "PUSAB reunion moments collage"}
       />
 

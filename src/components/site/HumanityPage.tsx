@@ -53,7 +53,7 @@ export function HumanityPage({
   page: ProgramPage | null;
   fallbackTitle: string;
   fallbackDesc: string;
-  heroImageFallback: string;
+  heroImageFallback?: string;
   years: number[];
   currentYear: number;
   loadingYear: boolean;

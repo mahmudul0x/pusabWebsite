@@ -68,7 +68,7 @@ export function FelicitationPage({
   entries?: FelicitationEntry[];
   fallbackTitle: string;
   fallbackDesc: string;
-  heroImageFallback: string;
+  heroImageFallback?: string;
   years: number[];
   currentYear: number;
   loadingYear: boolean;

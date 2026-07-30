@@ -6,7 +6,6 @@ import { GradientButton } from "@/components/site/GradientButton";
 import { useProgramEvents, statusOf, type IconType, type Status } from "@/lib/usePrograms";
 import { usePageHero } from "@/lib/usePageHero";
 import { ArrowUpRight, CalendarClock, CheckCircle2, Clock, MapPin } from "lucide-react";
-import heroPrograms from "@/assets/hero-programs.jpg";
 
 // Drop a photo named by the event id into src/assets/programs (e.g.
 // reunion-2026.jpg) and it shows up automatically — no code change needed.
@@ -132,7 +131,7 @@ function ProgramsPage() {
           "From annual reunions to scholarships, medical camps to humanitarian response — here's what PUSAB has delivered, what's running now, and what's next."
         }
         crumbs={[{ label: "Home", to: "/" }, { label: "Programs" }]}
-        image={hero.image ?? heroPrograms}
+        image={hero.image}
         imageAlt={hero.imageAlt ?? "PUSAB scholarship handover ceremony"}
       />
 
