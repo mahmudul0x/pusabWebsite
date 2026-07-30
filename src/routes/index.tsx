@@ -335,11 +335,13 @@ function Index() {
           </div>
         </div>
 
+        {/* Scroll cue. Sits higher on small screens so it clears the
+            slideshow dots, which are centred there before moving right at md. */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
+          className="absolute bottom-14 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 md:bottom-8"
         >
           <ChevronDown className="animate-float-bounce text-white/70" size={18} />
           <div className="h-12 w-px bg-gradient-to-b from-white/50 to-transparent" />
@@ -537,7 +539,8 @@ function HeroSlideshow({ slides }: { slides: string[] }) {
             <ChevronRight size={20} />
           </button>
 
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5">
+          {/* Sits clear of the centred scroll cue, which shares this corner. */}
+          <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1.5 md:bottom-8 md:left-auto md:right-8 md:translate-x-0">
             {slides.map((_, idx) => (
               <button
                 key={idx}
