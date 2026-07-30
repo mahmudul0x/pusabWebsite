@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, ArrowRight, Sparkles } from "lucide-react";
 import logoPusab from "@/assets/logo-pusab.png";
 import celebrateBanner from "@/assets/celebrate-modal.png";
+import { CanvasConfetti } from "./CanvasConfetti";
 
 const CONFETTI_COLORS = [
   "var(--color-accent-1)",
@@ -222,7 +223,10 @@ function BalloonField({ active }: { active: boolean }) {
         >
           {/* Horizontal sway is its own layer so it can loop independently of the rise. */}
           <motion.div
-            animate={{ x: [-b.sway / 2, b.sway / 2, -b.sway / 2], rotate: [-b.tilt, b.tilt, -b.tilt] }}
+            animate={{
+              x: [-b.sway / 2, b.sway / 2, -b.sway / 2],
+              rotate: [-b.tilt, b.tilt, -b.tilt],
+            }}
             transition={{ duration: b.swayPeriod, repeat: Infinity, ease: "easeInOut" }}
           >
             <svg viewBox="0 0 100 138" width={b.size} height={b.size * 1.38} fill="none">
@@ -371,155 +375,163 @@ export function LaunchCelebrationModal() {
   const close = () => setPhase("idle");
 
   return (
-    <AnimatePresence mode="wait">
-      {phase === "intro" && <IntroBurst key="intro" onDone={() => setPhase("card")} />}
+    <>
+      {/* Sits above the page but below the modal overlay, so the burst covers the
+          whole screen while framing the card. Tied to the card phase — closing
+          the modal unmounts it, which cancels the rAF loop and its listeners. */}
+      <CanvasConfetti active={phase === "card"} zIndex={9998} />
 
-      {phase === "card" && (
-        <motion.div
-          key="card"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.4 }}
-          className="fixed inset-0 z-[10001] flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4"
-          onClick={close}
-          role="dialog"
-          aria-modal="true"
-          aria-label="12th anniversary announcement"
-        >
-          <BalloonField active={phase === "card"} />
-          <FallingCelebration active={phase === "card"} />
+      <AnimatePresence mode="wait">
+        {phase === "intro" && <IntroBurst key="intro" onDone={() => setPhase("card")} />}
 
+        {phase === "card" && (
           <motion.div
-            initial={{ opacity: 0, y: 32, scale: 0.9, rotateX: 8 }}
-            animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-            exit={{ opacity: 0, y: 16, scale: 0.94 }}
-            transition={{ duration: 0.65, ease: EASE }}
-            style={{ perspective: 1200 }}
-            onClick={(e) => e.stopPropagation()}
-            className="relative z-[10002] flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-[30px] bg-[var(--color-surface)] text-center shadow-[0_60px_150px_-30px_rgba(2,6,23,0.9),0_0_0_1px_rgba(255,255,255,0.08)]"
+            key="card"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="fixed inset-0 z-[10001] flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4"
+            onClick={close}
+            role="dialog"
+            aria-modal="true"
+            aria-label="12th anniversary announcement"
           >
-            {/* Gradient halo hugging the card edge. */}
+            <BalloonField active={phase === "card"} />
+            <FallingCelebration active={phase === "card"} />
+
             <motion.div
-              aria-hidden
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-              className="pointer-events-none absolute inset-0 rounded-[30px] p-[1.5px]"
-              style={{
-                background:
-                  "linear-gradient(140deg, var(--color-accent-1), transparent 35%, transparent 65%, var(--color-accent-3))",
-                maskImage: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                WebkitMaskImage: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                maskComposite: "exclude",
-                WebkitMaskComposite: "xor",
-              }}
-            />
-
-            <AmbientGlow />
-            <ConfettiField active={phase === "card"} />
-
-            {/* Top ribbon accent */}
-            <div className="sticky top-0 z-10 h-[3px] shrink-0 bg-[linear-gradient(90deg,var(--color-accent-1),var(--color-accent-2),var(--color-accent-3))]" />
-
-            <button
-              onClick={close}
-              aria-label="Close"
-              className="absolute right-3 top-4 z-20 grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-foreground/60 backdrop-blur-sm transition-colors hover:bg-white/10 hover:text-foreground"
+              initial={{ opacity: 0, y: 32, scale: 0.9, rotateX: 8 }}
+              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              exit={{ opacity: 0, y: 16, scale: 0.94 }}
+              transition={{ duration: 0.65, ease: EASE }}
+              style={{ perspective: 1200 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative z-[10002] flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-[30px] bg-[var(--color-surface)] text-center shadow-[0_60px_150px_-30px_rgba(2,6,23,0.9),0_0_0_1px_rgba(255,255,255,0.08)]"
             >
-              <X size={15} />
-            </button>
-
-            <div className="relative min-h-0 shrink px-5 pt-8 sm:px-8 sm:pt-9">
+              {/* Gradient halo hugging the card edge. */}
               <motion.div
-                initial={{ opacity: 0, y: 18, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: 0.12, duration: 0.7, ease: EASE }}
-                className="relative overflow-hidden rounded-2xl border border-black/[0.06] shadow-[0_18px_50px_-18px_rgba(2,6,23,0.35)]"
-              >
-                <img
-                  src={celebrateBanner}
-                  alt="PUSAB's 12th anniversary and official website inauguration"
-                  className="max-h-[42vh] w-full object-contain"
-                />
-                {/* Sheen that sweeps across the banner once it lands. */}
-                <motion.div
-                  initial={{ x: "-120%" }}
-                  animate={{ x: "120%" }}
-                  transition={{ delay: 0.9, duration: 1.1, ease: "easeInOut" }}
-                  className="pointer-events-none absolute inset-y-0 w-1/3 skew-x-[-18deg] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.55),transparent)]"
-                />
-              </motion.div>
-            </div>
-
-            <div className="relative shrink-0 px-6 pb-6 pt-5 sm:px-9">
-              {/* Ornamental divider */}
-              <motion.div
-                initial={{ opacity: 0, scaleX: 0 }}
-                animate={{ opacity: 1, scaleX: 1 }}
-                transition={{ delay: 0.34, duration: 0.7, ease: EASE }}
-                className="mx-auto flex w-full max-w-xs items-center gap-3"
-              >
-                <span className="h-px flex-1 bg-[linear-gradient(90deg,transparent,color-mix(in_oklab,var(--color-accent-1)_45%,transparent))]" />
-                <Sparkles size={13} className="shrink-0 text-[var(--color-accent-1)]" />
-                <span className="h-px flex-1 bg-[linear-gradient(90deg,color-mix(in_oklab,var(--color-accent-3)_45%,transparent),transparent)]" />
-              </motion.div>
-
-              <motion.p
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.44, duration: 0.55 }}
-                className="mx-auto mt-4 max-w-md text-[13px] leading-relaxed text-muted-foreground sm:text-sm"
-              >
-                On 30 July, PUSAB turns 12. To mark it, we're unveiling a brand new website —
-                built to carry our story forward.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.62, duration: 0.5 }}
-                className="mt-5 flex flex-wrap items-center justify-center gap-3"
-              >
-                <button
-                  onClick={close}
-                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-7 py-3 text-sm font-semibold text-white shadow-[0_18px_44px_-14px_color-mix(in_oklab,var(--color-accent-1)_75%,transparent)] transition-transform hover:scale-[1.03]"
-                >
-                  <span className="relative z-10">Explore the new site</span>
-                  <ArrowRight
-                    size={15}
-                    className="relative z-10 transition-transform group-hover:translate-x-1"
-                  />
-                  {/* Light sweep across the button */}
-                  <motion.span
-                    aria-hidden
-                    initial={{ x: "-150%" }}
-                    animate={{ x: "150%" }}
-                    transition={{ delay: 1.3, duration: 1.4, repeat: Infinity, repeatDelay: 1.6 }}
-                    className="absolute inset-y-0 w-1/2 skew-x-[-20deg] bg-white/25"
-                  />
-                </button>
-              </motion.div>
-
-              {/* Auto-dismiss progress — quietly signals the modal will step aside. */}
-              <motion.div
+                aria-hidden
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.9, duration: 0.4 }}
-                className="mx-auto mt-5 h-[3px] w-32 overflow-hidden rounded-full bg-foreground/10"
+                transition={{ delay: 0.3, duration: 0.8 }}
+                className="pointer-events-none absolute inset-0 rounded-[30px] p-[1.5px]"
+                style={{
+                  background:
+                    "linear-gradient(140deg, var(--color-accent-1), transparent 35%, transparent 65%, var(--color-accent-3))",
+                  maskImage: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                  WebkitMaskImage:
+                    "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                  maskComposite: "exclude",
+                  WebkitMaskComposite: "xor",
+                }}
+              />
+
+              <AmbientGlow />
+              <ConfettiField active={phase === "card"} />
+
+              {/* Top ribbon accent */}
+              <div className="sticky top-0 z-10 h-[3px] shrink-0 bg-[linear-gradient(90deg,var(--color-accent-1),var(--color-accent-2),var(--color-accent-3))]" />
+
+              <button
+                onClick={close}
+                aria-label="Close"
+                className="absolute right-3 top-4 z-20 grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-foreground/60 backdrop-blur-sm transition-colors hover:bg-white/10 hover:text-foreground"
               >
+                <X size={15} />
+              </button>
+
+              <div className="relative min-h-0 shrink px-5 pt-8 sm:px-8 sm:pt-9">
                 <motion.div
-                  initial={{ scaleX: 1 }}
-                  animate={{ scaleX: 0 }}
-                  transition={{ duration: 10, ease: "linear" }}
-                  style={{ transformOrigin: "left" }}
-                  className="h-full w-full rounded-full bg-[linear-gradient(90deg,var(--color-accent-1),var(--color-accent-3))]"
-                />
-              </motion.div>
-            </div>
+                  initial={{ opacity: 0, y: 18, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.12, duration: 0.7, ease: EASE }}
+                  className="relative overflow-hidden rounded-2xl border border-black/[0.06] shadow-[0_18px_50px_-18px_rgba(2,6,23,0.35)]"
+                >
+                  <img
+                    src={celebrateBanner}
+                    alt="PUSAB's 12th anniversary and official website inauguration"
+                    className="max-h-[42vh] w-full object-contain"
+                  />
+                  {/* Sheen that sweeps across the banner once it lands. */}
+                  <motion.div
+                    initial={{ x: "-120%" }}
+                    animate={{ x: "120%" }}
+                    transition={{ delay: 0.9, duration: 1.1, ease: "easeInOut" }}
+                    className="pointer-events-none absolute inset-y-0 w-1/3 skew-x-[-18deg] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.55),transparent)]"
+                  />
+                </motion.div>
+              </div>
+
+              <div className="relative shrink-0 px-6 pb-6 pt-5 sm:px-9">
+                {/* Ornamental divider */}
+                <motion.div
+                  initial={{ opacity: 0, scaleX: 0 }}
+                  animate={{ opacity: 1, scaleX: 1 }}
+                  transition={{ delay: 0.34, duration: 0.7, ease: EASE }}
+                  className="mx-auto flex w-full max-w-xs items-center gap-3"
+                >
+                  <span className="h-px flex-1 bg-[linear-gradient(90deg,transparent,color-mix(in_oklab,var(--color-accent-1)_45%,transparent))]" />
+                  <Sparkles size={13} className="shrink-0 text-[var(--color-accent-1)]" />
+                  <span className="h-px flex-1 bg-[linear-gradient(90deg,color-mix(in_oklab,var(--color-accent-3)_45%,transparent),transparent)]" />
+                </motion.div>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.44, duration: 0.55 }}
+                  className="mx-auto mt-4 max-w-md text-[13px] leading-relaxed text-muted-foreground sm:text-sm"
+                >
+                  On 30 July, PUSAB turns 12. To mark it, we're unveiling a brand new website —
+                  built to carry our story forward.
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.62, duration: 0.5 }}
+                  className="mt-5 flex flex-wrap items-center justify-center gap-3"
+                >
+                  <button
+                    onClick={close}
+                    className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-[linear-gradient(120deg,var(--color-accent-1),var(--color-accent-2))] px-7 py-3 text-sm font-semibold text-white shadow-[0_18px_44px_-14px_color-mix(in_oklab,var(--color-accent-1)_75%,transparent)] transition-transform hover:scale-[1.03]"
+                  >
+                    <span className="relative z-10">Explore the new site</span>
+                    <ArrowRight
+                      size={15}
+                      className="relative z-10 transition-transform group-hover:translate-x-1"
+                    />
+                    {/* Light sweep across the button */}
+                    <motion.span
+                      aria-hidden
+                      initial={{ x: "-150%" }}
+                      animate={{ x: "150%" }}
+                      transition={{ delay: 1.3, duration: 1.4, repeat: Infinity, repeatDelay: 1.6 }}
+                      className="absolute inset-y-0 w-1/2 skew-x-[-20deg] bg-white/25"
+                    />
+                  </button>
+                </motion.div>
+
+                {/* Auto-dismiss progress — quietly signals the modal will step aside. */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.9, duration: 0.4 }}
+                  className="mx-auto mt-5 h-[3px] w-32 overflow-hidden rounded-full bg-foreground/10"
+                >
+                  <motion.div
+                    initial={{ scaleX: 1 }}
+                    animate={{ scaleX: 0 }}
+                    transition={{ duration: 10, ease: "linear" }}
+                    style={{ transformOrigin: "left" }}
+                    className="h-full w-full rounded-full bg-[linear-gradient(90deg,var(--color-accent-1),var(--color-accent-3))]"
+                  />
+                </motion.div>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
