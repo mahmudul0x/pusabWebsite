@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { GradientButton } from "@/components/site/GradientButton";
 import { SITE } from "@/lib/site-content";
-import aboutMission from "@/assets/aboutCommitte.jpg";
+import aboutMission from "@/assets/aboutCommitte.webp";
 
 const QUICK_FACTS = [
   { value: SITE.members, label: "Active members" },

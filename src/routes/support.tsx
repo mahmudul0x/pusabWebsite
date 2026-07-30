@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { SITE } from "@/lib/site-content";
-import heroSupport from "@/assets/support.jpeg";
+import heroSupport from "@/assets/support.webp";
 
 export const Route = createFileRoute("/support")({
   head: () => ({

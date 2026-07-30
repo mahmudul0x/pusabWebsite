@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ArrowRight, Sparkles } from "lucide-react";
 import logoPusab from "@/assets/logo-pusab.png";
-import celebrateBanner from "@/assets/celebrate-modal.png";
+import celebrateBanner from "@/assets/celebrate-modal.webp";
 import { CanvasConfetti } from "./CanvasConfetti";
 
 const CONFETTI_COLORS = [

@@ -4,7 +4,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { optimizeImage } from "@/lib/api";
 import { useAllMembers } from "@/lib/useCommittee";
 import { Crown, Gavel, Award, GraduationCap } from "lucide-react";
-import heroLeadership from "@/assets/hero-pages.jpeg";
+import heroLeadership from "@/assets/hero-pages.webp";
 import { ecSessionLabel } from "@/lib/session";
 import { usePageHero } from "@/lib/usePageHero";
 

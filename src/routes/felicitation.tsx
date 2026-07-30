@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { programPagesApi, felicitationApi, type ProgramPage, type FelicitationEntry } from "@/lib/api";
 import { FelicitationPage } from "@/components/site/FelicitationPage";
-import heroLeadership from "@/assets/hero-pages.jpeg";
+import heroLeadership from "@/assets/hero-pages.webp";
 
 const FALLBACK_TITLE = "Felicitation & Freshers Reception";
 const FALLBACK_DESC =

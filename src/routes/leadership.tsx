@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageHero } from "@/components/site/PageHero";
 import { CommitteeView } from "@/components/site/CommitteeView";
 import { usePageHero } from "@/lib/usePageHero";
-import heroLeadership from "@/assets/hero-pages.jpeg";
+import heroLeadership from "@/assets/hero-pages.webp";
 
 export const Route = createFileRoute("/leadership")({
   head: () => ({

@@ -22,7 +22,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { GlowCard } from "@/components/site/GlowCard";
 import { OBJECTIVES, SITE } from "@/lib/site-content";
 import { usePageHero } from "@/lib/usePageHero";
-import aboutMission from "@/assets/aboutPageSquareImg.jpg";
+import aboutMission from "@/assets/aboutPageSquareImg.webp";
 
 // One icon per aim, matched to the OBJECTIVES order in site-content.
 const AIM_ICONS = [

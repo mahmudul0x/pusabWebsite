@@ -18,7 +18,7 @@ import {
   Navigation,
 } from "lucide-react";
 import { SITE } from "@/lib/site-content";
-import contactHero from "@/assets/contact-hero.jpeg";
+import contactHero from "@/assets/contact-hero.webp";
 
 const COORDS = { lat: 25.1639, lng: 91.2533 };
 const LATLNG = `${COORDS.lat},${COORDS.lng}`;

@@ -32,9 +32,9 @@ import { SITE, buildStats } from "@/lib/site-content";
 import { settingsApi, type SiteSettings } from "@/lib/api";
 import { usePageHero } from "@/lib/usePageHero";
 import { SAYOR_ISSUES } from "@/lib/sayorIssues";
-import homeHero1 from "@/assets/home-hero-1.png";
-import homeHero2 from "@/assets/home-hero-2.png";
-import sayorHome from "@/assets/sayor-home.png";
+import homeHero1 from "@/assets/home-hero-1.webp";
+import homeHero2 from "@/assets/home-hero-2.webp";
+import sayorHome from "@/assets/sayor-home.webp";
 
 const HERO_SLIDES = [homeHero1, homeHero2];
 
@@ -55,7 +55,12 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:url", content: "/" },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [
+      { rel: "canonical", href: "/" },
+      // Start the hero download with the document rather than after React
+      // mounts — it is the largest contentful paint on this page.
+      { rel: "preload", as: "image", href: homeHero1, fetchpriority: "high" },
+    ],
   }),
   component: Index,
 });
@@ -473,6 +478,11 @@ function HeroSlideshow({ slides }: { slides: string[] }) {
             key={i}
             src={slides[i]}
             alt=""
+            // The hero is the largest paint above the fold, so it must not wait
+            // on lazy-loading or on the decode queue behind other images.
+            fetchPriority={i === 0 ? "high" : "auto"}
+            loading="eager"
+            decoding="async"
             initial={{ opacity: 0, scale: 1.08 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
@@ -483,6 +493,19 @@ function HeroSlideshow({ slides }: { slides: string[] }) {
             className="absolute inset-0 w-full h-full object-cover"
           />
         </AnimatePresence>
+
+        {/* Warm the next slide while the current one is showing, so the
+            crossfade never lands on a half-loaded image. */}
+        {slides.length > 1 && (
+          <img
+            src={slides[(i + 1) % slides.length]}
+            alt=""
+            aria-hidden
+            loading="eager"
+            decoding="async"
+            className="pointer-events-none absolute h-px w-px opacity-0"
+          />
+        )}
         {/* Cinematic scrim — darkens just enough for crisp white text, lets the photo read elsewhere. */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/25 via-slate-950/35 to-slate-950/70" />
         {/* Center focus + faint brand tint. */}
